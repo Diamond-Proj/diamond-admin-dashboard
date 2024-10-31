@@ -111,6 +111,7 @@ export function ImageBuilderStepper() {
         base_image: data.baseImage,  // Changed from baseImage to base_image
         dependencies: data.dependencies,
         environment: data.environment,
+        location: data.location,
         commands: data.commands,
         // name: data.name,  // Uncomment if you want to send a name
       }
