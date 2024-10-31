@@ -38,7 +38,8 @@ const dependenciesSchema = z.object({
 })
 
 const environmentSchema = z.object({
-  environment: z.string().optional()
+  environment: z.string().optional(),
+  location: z.string().optional()
 })
 
 const commandsSchema = z.object({
@@ -52,11 +53,12 @@ const endpointSchema = z.object({
   name: z.string().min(1, 'Container name is required')
 })
 
+
 const { Scoped, useStepper } = defineStepper(
   { id: 'endpoint', title: 'Select Endpoint', schema: endpointSchema },
   { id: 'base-image', title: 'Base Image', schema: baseImageSchema},
   { id: 'dependencies', title: 'Dependencies', schema: dependenciesSchema },
-  { id: 'environment', title: 'Environment Variables', schema: environmentSchema },
+  { id: 'environment', title: 'Environment', schema: environmentSchema },
   { id: 'commands', title: 'Build Commands', schema: commandsSchema },
   { id: 'review', title: 'Review', schema: reviewSchema }
 )
@@ -328,10 +330,25 @@ function EnvironmentStep() {
   } = useFormContext<EnvironmentFormValues>();
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-4">Environment Variables</h2>
-      <label htmlFor={register('environment').name}>Dependencies</label>
-      <Input placeholder="e.g., DEBUG=1&#10;API_KEY=your_api_key" {...register('environment')} />
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-2xl font-bold mb-4">Environment</h2>
+        <label htmlFor={register('environment').name}>Environment Variables</label>
+        <Textarea 
+          placeholder="e.g., DEBUG=1&#10;API_KEY=your_api_key" 
+          {...register('environment')}
+          className="min-h-[100px]"
+        />
+      </div>
+
+      <div>
+        <h2 className="text-2xl font-bold mb-4">Location</h2>
+        <label htmlFor={register('location').name}>Build Location</label>
+        <Input 
+          placeholder="e.g., /home/user/builds" 
+          {...register('location')}
+        />
+      </div>
     </div>
   )
 }
@@ -346,7 +363,14 @@ function CommandsStep() {
     <div>
       <h2 className="text-2xl font-bold mb-4">Build Commands</h2>
       <label htmlFor={register('commands').name}>Insert your build commands here</label>
-      <Input placeholder="e.g., pip install -r requirements.txt&#10;python setup.py install" {...register('commands')} />
+      <Textarea 
+        placeholder={`Enter commands, one per line. For example:
+pip install -r requirements.txt
+python setup.py install
+python -m pytest`}
+        className="min-h-[100px]"
+        {...register('commands')} 
+      />
     </div>
   )
 }
@@ -375,7 +399,7 @@ function ReviewStep({ onSubmit, isLoading }: { onSubmit: (data: FullFormValues) 
           <pre className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.dependencies}</pre>
         </div>
         <div>
-          <h3 className="font-semibold text-foreground">Environment Variables:</h3>
+          <h3 className="font-semibold text-foreground">Environment:</h3>
           <pre className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.environment}</pre>
         </div>
         <div>

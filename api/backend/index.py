@@ -157,8 +157,8 @@ def diamond_endpoint_image_builder():
     environment = request.json.get("environment")
     commands = request.json.get("commands")
     # description = request.json.get("description")
-    # location = request.json.get("location")
-    location = "/home/ubuntu"
+    location = request.json.get("location")
+    # location = "/home/ubuntu"
     logging.info(function_id)
     logging.info(f"endpoint: {endpoint_id}")
     logging.info(f"name: {name}")
