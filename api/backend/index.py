@@ -71,6 +71,29 @@ def diamond_list_active_endpoints():
     logging.info(active_endpoints)
     return active_endpoints
 
+def cowsay_apptainer_def_file():
+    cowsay_def_file_content = f"""
+    BootStrap: docker
+    From: ubuntu:20.04
+    # https://apptainer.org/docs/user/main/build_a_container.html
+    %post
+        apt-get update -y
+        apt-get -y install cowsay lolcat
+
+    %environment
+        export LC_ALL=C
+        export PATH=/usr/games:$PATH
+
+    %runscript
+        date | cowsay | lolcat
+        exec "$@"
+
+    %labels
+        Author Alice
+    """
+
+    return cowsay_def_file_content
+
 
 def apptainer_builder_wrapper(base_image, location, name, dependencies, environment, commands):
     import os
@@ -96,8 +119,12 @@ def apptainer_builder_wrapper(base_image, location, name, dependencies, environm
         {location}/commands.sh
     """
     def_file_path = os.path.join(location, f"{name}.def")
+
+    cowsay_def_file_content = cowsay_apptainer_def_file()  # for testing purposes
+
     with open(def_file_path, "w") as def_file:
-        def_file.write(textwrap.dedent(def_file_content.strip()))
+        def_file.write(textwrap.dedent(cowsay_def_file_content.strip()))  # for testing
+
 
     # Build the container
     build_command = f"apptainer build {os.path.join(location, name)}.sif {def_file_path}"
@@ -105,7 +132,7 @@ def apptainer_builder_wrapper(base_image, location, name, dependencies, environm
 
     return
 
-## TODO for testing in non-HPC systems
+## Testing in non-HPC systems using docker
 def container_builder_wrapper(base_image, location, name, dependencies, environment, commands):
     import os
     import textwrap
@@ -149,8 +176,7 @@ def diamond_endpoint_image_builder():
 
     endpoint_id = request.json.get("endpoint")
     function_id = globus_compute_client.register_function(apptainer_builder_wrapper)
-
-    # name = request.json.get("name")
+    # name = request.json.get("name")  ## TODO have a container name in the image builder UI
     name = f"image-{endpoint_id}-v{datetime.now().strftime('%Y%m%d%H%M%S')}"
     base_image = request.json.get("base_image")
     dependencies = request.json.get("dependencies")
