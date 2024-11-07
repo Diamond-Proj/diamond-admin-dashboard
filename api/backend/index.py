@@ -83,8 +83,11 @@ From: {base_image}
 %post
     apt-get -y update
     apt-get -y install python3-pip
+    mkdir -p /app
+    cd /app
     echo "{dependencies}" > requirements.txt
-    echo "{commands}" > commands.sh
+    echo "cd /app
+    {commands}" > commands.sh
     chmod +x commands.sh
     /bin/bash commands.sh
 
