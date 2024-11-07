@@ -99,31 +99,47 @@ def apptainer_builder_wrapper(base_image, location, name, dependencies, environm
     import os
     import textwrap
 
-    # Create a definition file for the container
-    def_file_content = f"""
-    Bootstrap: docker
-    From: {base_image}
+    # Create a definition file for the apptainer
+    def_file_content = f"""Bootstrap: docker
+From: {base_image}
 
-    %post
-        apt-get -y update
-        apt-get -y install python3-pip
-        echo "{dependencies}" > {location}/requirements.txt
-        echo "{commands}" > {location}/commands.sh
-        chmod +x {location}/commands.sh
-        {location}/commands.sh
+%post
+    apt-get -y update
+    apt-get -y install python3-pip
+    echo "{dependencies}" > requirements.txt
+    echo "{commands}" > commands.sh
+    chmod +x commands.sh
+    /bin/bash commands.sh
 
-    %environment
-        {environment}
+%environment
+    {environment}
 
-    %runscript
-        {location}/commands.sh
-    """
+%runscript
+    /bin/bash commands.sh"""
+
+    # for testing
+    cowsay_def_file_content = f"""BootStrap: docker
+From: ubuntu:20.04
+# https://apptainer.org/docs/user/main/build_a_container.html
+%post
+    apt-get update -y
+    apt-get -y install cowsay lolcat
+
+%environment
+    export LC_ALL=C
+    export PATH=/usr/games:$PATH
+
+%runscript
+    date | cowsay | lolcat
+    exec "$@"
+
+%labels
+    Author Alice"""
+
     def_file_path = os.path.join(location, f"{name}.def")
 
-    cowsay_def_file_content = cowsay_apptainer_def_file()  # for testing purposes
-
     with open(def_file_path, "w") as def_file:
-        def_file.write(textwrap.dedent(cowsay_def_file_content.strip()))  # for testing
+        def_file.write(textwrap.dedent(def_file_content.strip()))  # for testing
 
 
     # Build the container
@@ -131,6 +147,7 @@ def apptainer_builder_wrapper(base_image, location, name, dependencies, environm
     os.system(f"({build_command}) 2>&1 | tee {location}/{name}_log.txt")
 
     return
+
 
 ## Testing in non-HPC systems using docker
 def container_builder_wrapper(base_image, location, name, dependencies, environment, commands):
@@ -171,7 +188,6 @@ def container_builder_wrapper(base_image, location, name, dependencies, environm
 @app.route("/api/image_builder", methods=["POST"])
 @authenticated
 def diamond_endpoint_image_builder():
-    # logging.info(f"request.json: {request.json}")
     globus_compute_client = initialize_globus_compute_client()
 
     endpoint_id = request.json.get("endpoint")
@@ -272,7 +288,7 @@ def task_wrapper(task_command, log_path, container_path):
         load_apptainer = textwrap.dedent(load_apptainer.strip())
         command = f"apptainer run --nv {container_path} {task_command}"
         command = textwrap.dedent(command.strip())
-        os.system(f"({load_apptainer}) 2>&1 | tee {log_path}")
+        # os.system(f"({load_apptainer}) 2>&1 | tee {log_path}")
         os.system(f"({command}) 2>&1 | tee {log_path}")
         return log_path
 
