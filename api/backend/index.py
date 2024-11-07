@@ -71,29 +71,6 @@ def diamond_list_active_endpoints():
     logging.info(active_endpoints)
     return active_endpoints
 
-def cowsay_apptainer_def_file():
-    cowsay_def_file_content = f"""
-    BootStrap: docker
-    From: ubuntu:20.04
-    # https://apptainer.org/docs/user/main/build_a_container.html
-    %post
-        apt-get update -y
-        apt-get -y install cowsay lolcat
-
-    %environment
-        export LC_ALL=C
-        export PATH=/usr/games:$PATH
-
-    %runscript
-        date | cowsay | lolcat
-        exec "$@"
-
-    %labels
-        Author Alice
-    """
-
-    return cowsay_def_file_content
-
 
 def apptainer_builder_wrapper(base_image, location, name, dependencies, environment, commands):
     import os
@@ -115,7 +92,7 @@ From: {base_image}
     {environment}
 
 %runscript
-    /bin/bash commands.sh"""
+    /bin/bash /app/commands.sh"""
 
     # for testing
     cowsay_def_file_content = f"""BootStrap: docker
