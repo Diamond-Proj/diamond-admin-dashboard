@@ -28,6 +28,15 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
+const endpointSchema = z.object({
+  endpoint: z.string().min(1, 'Endpoint selection is required'),
+  // endpoint_uuid: z.string().min(1, 'Endpoint selection is required'),
+  // endpoint_name: z.string().min(1, 'Endpoint name is required')
+})
+
+const containerNameSchema = z.object({
+  containerName: z.string().min(1, 'Container name is required')
+})
 
 const baseImageSchema = z.object({
   baseImage: z.string().min(1, 'Base image is required')
@@ -48,14 +57,10 @@ const commandsSchema = z.object({
 
 const reviewSchema = z.object({})
 
-const endpointSchema = z.object({
-  endpoint: z.string().min(1, 'Endpoint selection is required'),
-  name: z.string().min(1, 'Container name is required')
-})
-
 
 const { Scoped, useStepper } = defineStepper(
   { id: 'endpoint', title: 'Select Endpoint', schema: endpointSchema },
+  { id: 'container-name', title: 'Container Name', schema: containerNameSchema },
   { id: 'base-image', title: 'Base Image', schema: baseImageSchema},
   { id: 'dependencies', title: 'Dependencies', schema: dependenciesSchema },
   { id: 'environment', title: 'Environment', schema: environmentSchema },
@@ -64,18 +69,21 @@ const { Scoped, useStepper } = defineStepper(
 )
 
 type FormData = z.infer<typeof endpointSchema> &
+  z.infer<typeof containerNameSchema> &
   z.infer<typeof baseImageSchema> &
   z.infer<typeof dependenciesSchema> &
   z.infer<typeof environmentSchema> &
   z.infer<typeof commandsSchema>
 
 type EndpointFormValues = z.infer<typeof endpointSchema>
+type ContainerNameFormValues = z.infer<typeof containerNameSchema>
 type BaseImageFormValues = z.infer<typeof baseImageSchema>
 type DependenciesFormValues = z.infer<typeof dependenciesSchema>
 type EnvironmentFormValues = z.infer<typeof environmentSchema>
 type CommandsFormValues = z.infer<typeof commandsSchema>
 
 type FullFormValues = EndpointFormValues &
+  ContainerNameFormValues &
   BaseImageFormValues &
   DependenciesFormValues &
   EnvironmentFormValues &
@@ -108,12 +116,13 @@ export function ImageBuilderStepper() {
     try {
       const payload = {
         endpoint: data.endpoint,
+        container_name: data.containerName,  // Uncomment if you want to send a name
         base_image: data.baseImage,  // Changed from baseImage to base_image
         dependencies: data.dependencies,
         environment: data.environment,
         location: data.location,
         commands: data.commands,
-        // name: data.name,  // Uncomment if you want to send a name
+        
       }
 
       const response = await fetch('/api/image_builder', {
@@ -216,6 +225,7 @@ function StepperContent({
         <form onSubmit={form.handleSubmit(onStepSubmit)}>
           {stepper.switch({
             endpoint: () => <EndpointStep control={control} endpoints={endpoints} />,
+            'container-name': () => <ContainerNameStep />,
             'base-image': () => <BaseImageStep />,
             dependencies: () => <DependenciesStep />,
             environment: () => <EnvironmentStep />,
@@ -292,6 +302,21 @@ function StepIndicator() {
       ))}
     </div>
   )
+}
+
+function ContainerNameStep() {
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext<ContainerNameFormValues>();
+  
+  return (
+    <div>
+      <h2 className="text-2xl font-bold mb-4">Container Name</h2>
+      <label htmlFor={register('containerName').name}>Container Name</label>
+      <Input placeholder="myContainer" {...register('containerName')} />
+    </div>
+  );
 }
 
 function BaseImageStep() {
@@ -392,6 +417,10 @@ function ReviewStep({ onSubmit, isLoading }: { onSubmit: (data: FullFormValues) 
           <p className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.endpoint}</p>
         </div>
         <div>
+          <h3 className="font-semibold text-foreground">Container name:</h3>
+          <p className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.containerName}</p>
+        </div>
+        <div>
           <h3 className="font-semibold text-foreground">Base Image:</h3>
           <p className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.baseImage}</p>
         </div>
@@ -402,6 +431,10 @@ function ReviewStep({ onSubmit, isLoading }: { onSubmit: (data: FullFormValues) 
         <div>
           <h3 className="font-semibold text-foreground">Environment:</h3>
           <pre className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.environment}</pre>
+        </div>
+        <div>
+          <h3 className="font-semibold text-foreground">Location:</h3>
+          <pre className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.location}</pre>
         </div>
         <div>
           <h3 className="font-semibold text-foreground">Build Commands:</h3>
