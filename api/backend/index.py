@@ -1,6 +1,7 @@
 import logging
 import os
 from datetime import datetime
+import time
 
 import requests
 from flask import flash, jsonify, make_response, redirect, request, session, url_for
@@ -194,11 +195,12 @@ def diamond_endpoint_image_builder():
     # logging.info(f"{name}\n{base_image}\n{description}\n{location}".format(name, base_image, description, location))
     
     container_task_id = globus_compute_client.run(
+        endpoint_id=endpoint_id,
+        function_id=function_id,
+        # apptainer_builder_wrapper args
         base_image=base_image,
         location=location,
         name=name,
-        endpoint_id=endpoint_id,
-        function_id=function_id,
         dependencies=dependencies,
         environment=environment,
         commands=commands,
@@ -216,7 +218,110 @@ def diamond_endpoint_image_builder():
         commands=commands,
         # description=description,
     )
-    return jsonify(container_task_id)
+    return jsonify({"task_id": container_task_id, "name": name})
+
+def log_reader_wrapper(log_file_path):
+    """Wrapper function to read log file content"""
+    try:
+        with open(log_file_path, 'r') as f:
+            content = f.read()
+            # Check if build is complete
+            is_complete = 'INFO:    Build complete:' in content
+            return {
+                'content': content,
+                'is_complete': is_complete
+            }
+    except Exception as e:
+        return {
+            'content': f"Error reading log file: {str(e)}",
+            'is_complete': False,
+            'error': str(e)
+        }
+
+@app.route("/api/get_build_log", methods=["GET"])
+@authenticated
+def get_build_log():
+    """Get the content of a container build log file."""
+    globus_compute_client = initialize_globus_compute_client()
+    
+    # Get parameters from request
+    log_file_path = request.args.get("log_path")
+    endpoint_id = request.args.get("endpoint_id")
+    build_task_id = request.args.get("task_id")  # Original build task ID
+    log_task_id = request.args.get("log_task_id")  # Previous log reader task ID
+    
+    if not log_file_path or not endpoint_id:
+        return jsonify({"error": "Missing required parameters"}), 400
+    
+    try:
+        # Register function only once and store its ID
+        if not hasattr(get_build_log, 'log_reader_function_id'):
+            get_build_log.log_reader_function_id = globus_compute_client.register_function(log_reader_wrapper)
+            print(f'Registered log reader function: {get_build_log.log_reader_function_id}')
+
+        # Create new log reader task if no log_task_id
+        if not log_task_id:
+            log_task_id = globus_compute_client.run(
+                endpoint_id=endpoint_id,
+                function_id=get_build_log.log_reader_function_id,
+                log_file_path=log_file_path
+            )
+            print(f'Created new log reader task: {log_task_id}')
+        
+        # Get status of current log reader task
+        log_task_status = globus_compute_client.get_task(log_task_id)
+        print(f'Log task status: {log_task_status}')
+        
+        # Get log content if task completed
+        log_result = None
+        if log_task_status.get('status') == 'success':
+            try:
+                log_result = globus_compute_client.get_result(log_task_id)
+                print(f"Log result: {log_result}")
+                
+                # Create new task using the same function ID
+                new_log_task_id = globus_compute_client.run(
+                    endpoint_id=endpoint_id,
+                    function_id=get_build_log.log_reader_function_id,
+                    log_file_path=log_file_path
+                )
+            except Exception as e:
+                print(f"Error getting log result: {e}")
+                log_result = {'content': '', 'is_complete': False}
+                new_log_task_id = log_task_id
+        else:
+            new_log_task_id = log_task_id
+
+        # Check build task status if available
+        build_status = "running"
+        if build_task_id:
+            try:
+                build_task_status = globus_compute_client.get_task(build_task_id)
+                build_status = build_task_status.get('status', 'running')
+            except:
+                pass
+
+        # Determine overall status
+        if log_result and log_result.get('is_complete'):
+            status = "completed"
+        elif build_status in ['failed', 'error']:
+            status = build_status
+        else:
+            status = "running"
+
+        return jsonify({
+            "status": status,
+            "log_content": log_result.get('content', '') if log_result else '',
+            "build_task_id": build_task_id,
+            "log_task_id": new_log_task_id
+        })
+        
+    except Exception as e:
+        logging.error(f"Error getting build log: {str(e)}")
+        return jsonify({
+            "status": "error",
+            "error": str(e)
+        }), 500
 
 
 @app.route("/api/get_containers", methods=["GET"])

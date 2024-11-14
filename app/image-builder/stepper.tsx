@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { defineStepper } from '@stepperize/react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Control, useForm, useFormContext, UseFormReturn } from 'react-hook-form'
@@ -93,9 +93,16 @@ export function ImageBuilderStepper() {
   const [formData, setFormData] = useState<Partial<FormData>>({})
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
+  const [buildLogs, setBuildLogs] = useState<string>('')
   const [endpoints, setEndpoints] = useState<
     { endpoint_uuid: string; endpoint_name: string }[]
   >([])
+  const [isPolling, setIsPolling] = useState(false)
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const currentEndpointRef = useRef<string | null>(null)
+  const currentLogPathRef = useRef<string | null>(null)
+  const currentTaskIdRef = useRef<string | null>(null)
+  const currentLogTaskIdRef = useRef<string | null>(null)
 
   const form = useForm<FormData>({
     resolver: zodResolver(z.object({})),
@@ -111,8 +118,105 @@ export function ImageBuilderStepper() {
 
   // const onSubmit = (values: z.infer<typeof stepper))
 
+  const fetchBuildLogs = useCallback(async (endpoint_id: string, log_path: string, build_task_id?: string, log_task_id?: string) => {
+    try {
+        const url = new URL('/api/get_build_log', window.location.origin)
+        url.searchParams.append('endpoint_id', endpoint_id)
+        url.searchParams.append('log_path', log_path)
+        if (build_task_id) {
+            url.searchParams.append('task_id', build_task_id)
+        }
+        if (log_task_id) {
+            url.searchParams.append('log_task_id', log_task_id)
+        }
+        
+        const response = await fetch(url)
+        if (!response.ok) throw new Error('Failed to fetch build logs')
+        
+        const data = await response.json()
+        
+        // Store the new log task ID for next poll
+        if (data.log_task_id) {
+            currentLogTaskIdRef.current = data.log_task_id
+        }
+        
+        // Update UI based on status
+        const logElement = document.getElementById('buildLogs')
+        const statusElement = document.getElementById('pollingStatus')
+        
+        if (logElement && statusElement) {
+            logElement.textContent = data.log_content || 'Waiting for logs...'
+            statusElement.textContent = `Build status: ${data.status}`
+            
+            // Return true to stop polling if build is complete or failed
+            return data.status === 'completed' || data.status === 'failed' || data.status === 'error'
+        }
+    } catch (error) {
+        console.error('Error fetching build logs:', error)
+        const statusElement = document.getElementById('pollingStatus')
+        if (statusElement) {
+            statusElement.textContent = 'Error fetching build logs'
+        }
+        return true // Stop polling on error
+    }
+    return false
+  }, [])
+
+  const startPolling = useCallback((endpoint_id: string, log_path: string, build_task_id: string) => {
+    if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current)
+    }
+
+    currentEndpointRef.current = endpoint_id
+    currentLogPathRef.current = log_path
+    currentTaskIdRef.current = build_task_id
+    currentLogTaskIdRef.current = null  // Reset log task ID
+
+    setIsPolling(true)
+    
+    // Initial fetch
+    fetchBuildLogs(endpoint_id, log_path, build_task_id)
+
+    // Start polling
+    pollIntervalRef.current = setInterval(async () => {
+        if (currentEndpointRef.current && currentLogPathRef.current && currentTaskIdRef.current) {
+            const shouldStop = await fetchBuildLogs(
+                currentEndpointRef.current,
+                currentLogPathRef.current,
+                currentTaskIdRef.current,
+                currentLogTaskIdRef.current as string
+            )
+            
+            if (shouldStop) {
+                setIsPolling(false)
+                if (pollIntervalRef.current) {
+                    clearInterval(pollIntervalRef.current)
+                }
+            }
+        }
+    }, 5000)
+
+    // Safety timeout after 5 minutes
+    setTimeout(() => {
+        setIsPolling(false)
+        if (pollIntervalRef.current) {
+            clearInterval(pollIntervalRef.current)
+        }
+    }, 300000)
+  }, [fetchBuildLogs])
+
   const handleFinalSubmit = async (data: FormData) => {
     setIsLoading(true)
+    // Clear existing logs
+    const logElement = document.getElementById('buildLogs')
+    const statusElement = document.getElementById('pollingStatus')
+    if (logElement) {
+        logElement.textContent = 'Starting new build...'
+    }
+    if (statusElement) {
+        statusElement.textContent = 'Preparing build...'
+    }
+
     try {
       const payload = {
         endpoint: data.endpoint,
@@ -125,32 +229,37 @@ export function ImageBuilderStepper() {
         
       }
 
-      const response = await fetch('/api/image_builder', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      })
+        const response = await fetch('/api/image_builder', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
 
-      if (!response.ok) throw new Error('Failed to submit image build configuration')
+        if (!response.ok) throw new Error('Failed to submit image build configuration')
 
-      const result = await response.json()
-      console.log('Submitted data:', result)
-      toast({
-        title: 'Success',
-        description: 'Image build configuration submitted successfully!',
-        className: 'bg-green-500 text-white'
-      })
+        const result = await response.json()
+        console.log('Submitted data:', result)
+        const { task_id, name } = result
+        const logPath = `${data.location}/${name}_log.txt`
+        
+        startPolling(data.endpoint, logPath, task_id)
+
+        toast({
+            title: 'Success',
+            description: 'Image build configuration submitted successfully! Fetching build logs...',
+            className: 'bg-green-500 text-white'
+        })
     } catch (error) {
-      console.error('Error submitting data:', error)
-      toast({
-        title: 'Error',
-        description: 'Failed to submit image build configuration. Please try again.',
-        variant: 'destructive'
-      })
+        console.error('Error submitting data:', error)
+        toast({
+            title: 'Error',
+            description: 'Failed to submit image build configuration. Please try again.',
+            variant: 'destructive'
+        })
     } finally {
-      setIsLoading(false)
+        setIsLoading(false)
     }
   }
 
@@ -165,6 +274,14 @@ export function ImageBuilderStepper() {
       }
     }
     fetchEndpoints()
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current)
+      }
+    }
   }, [])
 
   return (
