@@ -83,7 +83,7 @@ export function JobComposerForm() {
       if (partitionsCache[endpointValue]) {
         setPartitions(partitionsCache[endpointValue]);
       } else {
-        async function fetchPartitions() {
+        const fetchPartitions = async () => {
           setIsLoadingPartitions(true);
           try {
             const response = await fetch('/api/list_partitions', {
@@ -95,7 +95,7 @@ export function JobComposerForm() {
             });
             const data = await response.json();
             setPartitions(data);
-            setPartitionsCache(prevCache => ({
+            setPartitionsCache((prevCache) => ({
               ...prevCache,
               [endpointValue]: data,
             }));
@@ -104,13 +104,14 @@ export function JobComposerForm() {
           } finally {
             setIsLoadingPartitions(false);
           }
-        }
+        };
         fetchPartitions();
       }
     } else {
       setPartitions([]);
     }
   }, [endpointValue]);
+  
 
   useEffect(() => {
     async function fetchContainers() {
