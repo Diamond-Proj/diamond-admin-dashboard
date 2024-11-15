@@ -35,7 +35,9 @@ class Database:
 
     def save_profile(self, identity_id=None, name=None, email=None, institution=None):
         log.info(f"Saving profile: {name}, {email}, {institution}")
-        profile = Profile(identity_id=identity_id, name=name, email=email, institution=institution)
+        profile = Profile(
+            identity_id=identity_id, name=name, email=email, institution=institution
+        )
         db.session.merge(profile)
         db.session.commit()
 
@@ -43,9 +45,24 @@ class Database:
         log.info(f"Loading profile: {identity_id}")
         return Profile.query.filter_by(identity_id=identity_id).first()
 
-    def save_task(self, task_id=None, identity_id=None, task_status=None, task_create_time=None):
+    def save_task(
+        self,
+        task_id=None,
+        task_name=None,
+        identity_id=None,
+        task_status=None,
+        task_create_time=None,
+        log_path=None,
+    ):
         log.info(f"Saving task: {task_id}, {identity_id}")
-        task = Task(task_id=task_id, identity_id=identity_id, task_status=task_status, task_create_time=task_create_time)
+        task = Task(
+            task_id=task_id,
+            task_name=task_name,
+            identity_id=identity_id,
+            task_status=task_status,
+            task_create_time=task_create_time,
+            log_path=log_path,
+        )
         db.session.merge(task)
         db.session.commit()
 
@@ -58,7 +75,19 @@ class Database:
         Task.query.filter_by(task_id=task_id).delete()
         db.session.commit()
 
-    def save_container(self, container_task_id=None, identity_id=None, base_image=None, name=None, location=None, description=None, dependencies=None, environment=None, commands=None):
+    def save_container(
+        self,
+        container_task_id=None,
+        identity_id=None,
+        base_image=None,
+        name=None,
+        location=None,
+        description=None,
+        dependencies=None,
+        environment=None,
+        commands=None,
+        endpoint_id=None,
+    ):
         log.info(f"Saving container: {container_task_id}, {identity_id}")
         container = Container(
             container_task_id=container_task_id,
@@ -69,10 +98,15 @@ class Database:
             description=description,
             dependencies=dependencies,
             environment=environment,
-            commands=commands
+            commands=commands,
+            endpoint_id=endpoint_id,
         )
         db.session.merge(container)
         db.session.commit()
+
+    def get_container_path_by_name(self, container_name):
+        log.info(f"Getting container path by name: {container_name}")
+        return Container.query.filter_by(name=container_name).first().location
 
     def load_containers(self, identity_id):
         log.info(f"Loading container data for identity_id: {identity_id}")

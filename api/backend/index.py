@@ -1,10 +1,12 @@
 import logging
 import os
 from datetime import datetime
+from time import sleep
 
 import requests
 from flask import flash, jsonify, make_response, redirect, request, session, url_for
-from globus_compute_sdk import Executor as GlobusComputeExecutor
+from globus_compute_sdk import ShellFunction
+from globus_compute_sdk import Executor as ComputeExecutor
 
 from api.backend.utils.decorators import authenticated
 from api.backend.utils.login_flow import initialize_globus_compute_client
@@ -141,60 +143,67 @@ def container_builder_wrapper(base_image, location, name, dependencies, environm
 
     return
 
+
+container_builder_wrapper = ShellFunction(
+"""
+cat << EOF > test.submit
+#!/bin/bash
+
+#SBATCH --job-name={name}
+#SBATCH --output={location}/{name}.stdout
+#SBATCH --error={location}/{name}.stderr
+#SBATCH --nodes=1
+#SBATCH --time=01:00:00
+#SBATCH --ntasks-per-node=1
+#SBATCH --exclusive
+#SBATCH --partition=development
+#SBATCH --account=Deep-Learning-at-Sca
+
+module load tacc-apptainer
+apptainer pull {location}/{name}.sif {base_image}
+
+EOF
+
+sbatch $PWD/test.submit
+"""
+)
+
+
 @app.route("/api/image_builder", methods=["POST"])
 @authenticated
 def diamond_endpoint_image_builder():
-    # logging.info(f"request.json: {request.json}")
-    globus_compute_client = initialize_globus_compute_client()
-
     endpoint_id = request.json.get("endpoint")
-    function_id = globus_compute_client.register_function(apptainer_builder_wrapper)
-
-    # name = request.json.get("name")
     name = f"image-{endpoint_id}-v{datetime.now().strftime('%Y%m%d%H%M%S')}"
     base_image = request.json.get("base_image")
     dependencies = request.json.get("dependencies")
     environment = request.json.get("environment")
     commands = request.json.get("commands")
-    # description = request.json.get("description")
-    # location = request.json.get("location")
-    location = "/home/ubuntu"
-    logging.info(function_id)
-    logging.info(f"endpoint: {endpoint_id}")
-    logging.info(f"name: {name}")
-    logging.info(f"base_image: {base_image}")
-    logging.info(f"dependencies: {dependencies}")
-    logging.info(f"environment: {environment}")
-    logging.info(f"commands: {commands}")
-    # logging.info(f"description: {description}")
-    logging.info(f"location: {location}")
+    location = request.json.get("image_location")
 
-    # logging.info(f"{name}\n{base_image}\n{description}\n{location}".format(name, base_image, description, location))
+    globus_compute_client = initialize_globus_compute_client()
+
+    function_id = globus_compute_client.register_function(container_builder_wrapper)
     
-    container_task_id = globus_compute_client.run(
+    task_id = globus_compute_client.run(
+        name=name,
         base_image=base_image,
         location=location,
-        name=name,
         endpoint_id=endpoint_id,
         function_id=function_id,
+    )
+
+    database.save_container(
+        container_task_id=task_id,
+        identity_id=session["primary_identity"],
+        name=name,
+        base_image=base_image,
+        location=location,
         dependencies=dependencies,
         environment=environment,
         commands=commands,
     )
 
-    logging.info(f"container_task_id: {container_task_id}")
-    database.save_container(
-        container_task_id=container_task_id,
-        identity_id=session["primary_identity"],
-        base_image=base_image,
-        name=name,
-        location=location,
-        dependencies=dependencies,
-        environment=environment,
-        commands=commands,
-        # description=description,
-    )
-    return jsonify(container_task_id)
+    return jsonify(task_id)
 
 
 @app.route("/api/get_containers", methods=["GET"])
@@ -225,7 +234,7 @@ def get_containers():
 @authenticated
 def diamond_delete_container():
     container_id = request.json.get("containerId")
-    database.delete_container(container_id)
+    database.delete_container(container_id) 
     logging.info(f"container {container_id} deleted")
     return jsonify({"message": "Container deleted successfully"})
 
@@ -234,51 +243,99 @@ def diamond_delete_container():
 # 2. Run image - apptainer run - submit task -> Run image (command, container_path) from job composer form
 
 
-def task_wrapper(task_command, log_path, container_path):
-    import os
-    import textwrap
-    if not container_path:
-        command = textwrap.dedent(task_command.strip())
-        os.system(f"({command}) 2>&1 | tee {log_path}")
-        return log_path
-    else:
-        load_apptainer = "module load apptainer"
-        load_apptainer = textwrap.dedent(load_apptainer.strip())
-        command = f"apptainer run --nv {container_path} {task_command}"
-        command = textwrap.dedent(command.strip())
-        os.system(f"({load_apptainer}) 2>&1 | tee {log_path}")
-        os.system(f"({command}) 2>&1 | tee {log_path}")
-        return log_path
+# def task_wrapper(task_command, log_path, container_path):
+#     import os
+#     import textwrap
+#     if not container_path:
+#         command = textwrap.dedent(task_command.strip())
+#         os.system(f"({command}) 2>&1 | tee {log_path}")
+#         return log_path
+#     else:
+#         load_apptainer = "module load apptainer"
+#         load_apptainer = textwrap.dedent(load_apptainer.strip())
+#         command = f"apptainer run --nv {container_path} {task_command}"
+#         command = textwrap.dedent(command.strip())
+#         os.system(f"({load_apptainer}) 2>&1 | tee {log_path}")
+#         os.system(f"({command}) 2>&1 | tee {log_path}")
+#         return log_path
 
+get_partitions = ShellFunction('sinfo -h -o "%P"')
+
+@app.route("/api/list_partitions", methods=["POST"])
+@authenticated
+def diamond_get_partitions():
+    endpoint_id = request.json.get("endpoint")
+    globus_compute_client = initialize_globus_compute_client()
+    globus_compute_executer = ComputeExecutor(client=globus_compute_client, endpoint_id=endpoint_id)
+    fu = globus_compute_executer.submit(get_partitions)
+    partitions = fu.result().stdout
+    partition_list = partitions.split("\n")
+    for partition in partition_list:
+        if not partition:
+            partition_list.remove(partition)
+    logging.info(f"partitions: {partition_list}")
+    return jsonify(partition_list)
+
+
+submit_task = ShellFunction("""
+cat << EOF > test.submit
+#!/bin/bash
+
+#SBATCH --job-name={task_name}
+#SBATCH --output={log_path}/{task_name}.stdout
+#SBATCH --error={log_path}/{task_name}.stderr
+#SBATCH --nodes=1
+#SBATCH --time=01:00:00
+#SBATCH --ntasks-per-node=1
+#SBATCH --exclusive
+#SBATCH --partition={partition}
+#SBATCH --account=Deep-Learning-at-Sca
+                           
+module load tacc-apptainer
+apptainer run --nv {container} {task}
+
+EOF
+
+sbatch $PWD/test.submit
+cat $PWD/test.submit
+""")
 
 @app.route("/api/submit_task", methods=["POST"])
 @authenticated
 def diamond_endpoint_submit_job():
-    globus_compute_client = initialize_globus_compute_client()
-
     endpoint_id = request.json.get("endpoint")
-    function_id = globus_compute_client.register_function(task_wrapper)
-    task_command = request.json.get("task")
+    task_name = request.json.get("taskName")
+    partition = request.json.get("partition")
+    container = request.json.get("container")
     log_path = request.json.get("log_path")
-    container_path = request.json.get("container_path")
+    task = request.json.get("task")
 
+    container_path = database.get_container_path_by_name(container)
+
+    globus_compute_client=initialize_globus_compute_client()
+
+    function_id = globus_compute_client.register_function(submit_task)
+    
     task_id = globus_compute_client.run(
-        task_command=task_command,
+        partition=partition,
+        container=container_path + "/" + container + ".sif",
+        task=task,
         log_path=log_path,
-        container_path=container_path,
         endpoint_id=endpoint_id,
         function_id=function_id,
+        task_name=task_name,
     )
 
-    task_create_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     database.save_task(
         task_id=task_id,
+        task_name=task_name,
         identity_id=session["primary_identity"],
-        task_create_time=task_create_time,
+        task_status="submitted",
+        task_create_time=datetime.now(),
+        log_path=log_path,
     )
+    return jsonify("hello")
 
-    logging.info(f"task id is {task_id}")
-    return jsonify(task_id)
 
 
 @app.route("/api/get_task_status", methods=["GET"])
@@ -286,15 +343,48 @@ def diamond_endpoint_submit_job():
 def diamond_get_task_status():
     global_compute_client = initialize_globus_compute_client()
 
+    # Load tasks from the database for the authenticated user
     tasks = database.load_tasks(identity_id=session["primary_identity"])
-    tasks_data = {}
+
+    # Update each task's status in the database
     for task in tasks:
         task_id = task.task_id
-        logging.info(f"task id is {task_id}")
-        status = global_compute_client.get_task(task_id)
-        tasks_data[task_id] = status
-        
-    logging.info(f"task status is {tasks_data}")
+        logging.info(f"Updating status for task ID: {task_id}")
+
+        current_task = global_compute_client.get_task(task_id)
+
+        task.task_status = current_task["status"]
+        task.endpoint_id = current_task["details"]["endpoint_id"]
+
+        database.save_task(
+            task_id=task.task_id,
+            task_name=task.task_name,
+            identity_id=task.identity_id,
+            task_status=task.task_status,
+            task_create_time=task.task_create_time,
+            log_path=task.log_path
+        )
+
+    # Reload the updated tasks from the database
+    updated_tasks = database.load_tasks(identity_id=session["primary_identity"])
+
+    # Format tasks data for JSON response
+    tasks_data = {
+        task.task_id: {
+            "task_id": task.task_id,
+            "identity_id": task.identity_id,
+            "task_name": task.task_name,
+            "status": task.task_status,
+            "details": {
+                "endpoint_id": task.endpoint_id if hasattr(task, 'endpoint_id') else "N/A",
+                "task_create_time": task.task_create_time,
+            },
+            "result": task.log_path,
+        }
+        for task in updated_tasks
+    }
+
+    logging.info(f"Updated task status response: {tasks_data}")
     return jsonify(tasks_data)
 
 

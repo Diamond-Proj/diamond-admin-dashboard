@@ -2,6 +2,6 @@ flask
 flask-cors
 python-dotenv
 requests
-globus-compute-sdk
+globus-compute-sdk==2.30.1
 diamond-hpc
 gunicorn
