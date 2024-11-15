@@ -49,12 +49,13 @@ const reviewSchema = z.object({})
 
 const endpointSchema = z.object({
   endpoint: z.string().min(1, 'Endpoint selection is required'),
-  name: z.string().min(1, 'Container name is required')
+  name: z.string().min(1, 'Container name is required'),
+  imageLocation: z.string().min(1, 'Image location is required') // New validation rule
 })
 
 const { Scoped, useStepper } = defineStepper(
   { id: 'endpoint', title: 'Select Endpoint', schema: endpointSchema },
-  { id: 'base-image', title: 'Base Image', schema: baseImageSchema},
+  { id: 'base-image', title: 'Base Image', schema: baseImageSchema },
   { id: 'dependencies', title: 'Dependencies', schema: dependenciesSchema },
   { id: 'environment', title: 'Environment Variables', schema: environmentSchema },
   { id: 'commands', title: 'Build Commands', schema: commandsSchema },
@@ -99,17 +100,16 @@ export function ImageBuilderStepper() {
     setFormData((prev) => ({ ...prev, ...stepData }))
   }
 
-  // const onSubmit = (values: z.infer<typeof stepper))
-
   const handleFinalSubmit = async (data: FormData) => {
     setIsLoading(true)
     try {
       const payload = {
         endpoint: data.endpoint,
-        base_image: data.baseImage,  // Changed from baseImage to base_image
+        base_image: data.baseImage,
         dependencies: data.dependencies,
         environment: data.environment,
         commands: data.commands,
+        image_location: data.imageLocation,
         // name: data.name,  // Uncomment if you want to send a name
       }
 
@@ -193,12 +193,9 @@ function StepperContent({
   const onSubmit = (values: z.infer<typeof stepper.current.schema>) => {
     console.log(`Form values for step ${stepper.current.id}:`, values);
     if(stepper.isLast){
-      console.log("Last")
       onFinalSubmit(values as FormData);
       stepper.reset();
-    }
-    else{
-      console.log("Else");
+    } else {
       stepper.next();
     }
     onStepSubmit(values as FormData);
@@ -210,7 +207,7 @@ function StepperContent({
         <StepIndicator />
       </div>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onStepSubmit)}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
           {stepper.switch({
             endpoint: () => <EndpointStep control={control} endpoints={endpoints} />,
             'base-image': () => <BaseImageStep />,
@@ -397,6 +394,8 @@ function EndpointStep({ control, endpoints }: { control: Control<FormData>, endp
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4">Select Endpoint</h2>
+      
+      {/* Endpoint Selection */}
       <FormField
         control={control}
         name="endpoint"
@@ -433,6 +432,27 @@ function EndpointStep({ control, endpoints }: { control: Control<FormData>, endp
               </SelectContent>
             </Select>
             <FormMessage>{errors.endpoint?.message}</FormMessage>
+          </FormItem>
+        )}
+      />
+
+      {/* Image Location Text Box */}
+      <FormField
+        control={control}
+        name="imageLocation"
+        render={({ field }) => (
+          <FormItem className="w-[60%] md:w-[20%] mt-4">
+            <FormLabel>Image Location</FormLabel>
+            <FormControl>
+              <Input
+                placeholder="Enter image location"
+                {...register("imageLocation")}
+              />
+            </FormControl>
+            <FormDescription>
+              Provide the location of the image as a string.
+            </FormDescription>
+            <FormMessage>{errors.imageLocation?.message}</FormMessage>
           </FormItem>
         )}
       />
