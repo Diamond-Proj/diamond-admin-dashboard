@@ -20,7 +20,7 @@ export function TaskManagerForm() {
     }
   };
 
-  const deleteTask = async (taskId: string) => {
+  const deletetask = async (taskId: string) => {
     try {
       const response = await fetch('/api/delete_task', {
         method: 'POST',
@@ -31,10 +31,10 @@ export function TaskManagerForm() {
       });
 
       if (response.ok) {
-        // Remove the task from the state after successful deletion
-        setTasksData((prevTasksData) => {
-          const newTasksData = { ...prevTasksData };
-          delete newTasksData[taskId];
+        // If the delete request is successful, remove the task from the state
+        setTasksData((prevtasksData) => {
+          const newTasksData: { [key: string]: any }  = { ...prevtasksData };
+          delete newTasksData[taskId]; // Remove the deleted task
           return newTasksData;
         });
       } else {
@@ -57,7 +57,6 @@ export function TaskManagerForm() {
         <thead>
           <tr>
             <th className="border px-4 py-2">Task ID</th>
-            <th className="border px-4 py-2">Task Name</th>
             <th className="border px-4 py-2">Endpoint</th>
             <th className="border px-4 py-2">Task Status</th>
             <th className="border px-4 py-2">Log Path</th>
@@ -66,26 +65,22 @@ export function TaskManagerForm() {
         </thead>
         <tbody>
           {Object.keys(tasksData).length > 0 ? (
-            Object.keys(tasksData).map((taskId) => {
-              const task = tasksData[taskId];
-              return (
-                <tr key={taskId}>
-                  <td className="border px-4 py-2">{taskId}</td>
-                  <td className="border px-4 py-2">{task?.task_name || 'Unknown'}</td>
-                  <td className="border px-4 py-2">{task?.details?.endpoint_id || 'N/A'}</td>
-                  <td className="border px-4 py-2">{task?.status || 'Unknown'}</td>
-                  <td className="border px-4 py-2">{task?.result || 'No Log Path'}</td>
-                  <td className="border px-4 py-2">
-                    <button
-                      onClick={() => deleteTask(taskId)}
-                      className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-700"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              );
-            })
+            Object.keys(tasksData).map((taskId) => (
+              <tr key={taskId}>
+                <td className="border px-4 py-2">{taskId}</td>
+                <td className="border px-4 py-2">{tasksData[taskId]?.details?.endpoint_id || ''}</td>
+                <td className="border px-4 py-2">{tasksData[taskId]?.status || ''}</td>
+                <td className="border px-4 py-2">{tasksData[taskId]?.result || ''}</td>
+                <td className="border px-4 py-2">
+                  <button
+                    onClick={() => deletetask(taskId)}
+                    className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-700"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))
           ) : (
             <tr>
               <td className="border px-4 py-2" colSpan={5}>No tasks found.</td>

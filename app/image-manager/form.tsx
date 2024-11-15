@@ -58,7 +58,9 @@ export function ContainerManagerForm( { isAuthenticated }: { isAuthenticated: bo
           <tr>
             <th className="border px-4 py-2">Container Name</th>
             <th className="border px-4 py-2">Container Status</th>
+            <th className="border px-4 py-2">Base Image</th>
             <th className="border px-4 py-2">Location</th>
+            <th className="border px-4 py-2">Description</th>
             <th className="border px-4 py-2">Actions</th>
           </tr>
         </thead>
@@ -68,7 +70,9 @@ export function ContainerManagerForm( { isAuthenticated }: { isAuthenticated: bo
               <tr key={containerName}>
                 <td className="border px-4 py-2">{containerName}</td>
                 <td className="border px-4 py-2">{containersData[containerName]?.status || ''}</td>
+                <td className="border px-4 py-2">{containersData[containerName]?.base_image || ''}</td>
                 <td className="border px-4 py-2">{containersData[containerName]?.location || ''}</td>
+                <td className="border px-4 py-2">{containersData[containerName]?.description || ''}</td>
                 <td className="border px-4 py-2">
                   <button
                     onClick={() => deleteContainer(containersData[containerName]?.container_task_id)}
