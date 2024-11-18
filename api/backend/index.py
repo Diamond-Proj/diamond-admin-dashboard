@@ -284,7 +284,7 @@ cat << EOF > test.submit
 #SBATCH --job-name={task_name}
 #SBATCH --output={log_path}/{task_name}.stdout
 #SBATCH --error={log_path}/{task_name}.stderr
-#SBATCH --nodes=1
+#SBATCH --nodes={num_of_nodes}
 #SBATCH --time=01:00:00
 #SBATCH --ntasks-per-node=1
 #SBATCH --exclusive
@@ -308,6 +308,7 @@ def diamond_endpoint_submit_job():
     partition = request.json.get("partition")
     container = request.json.get("container")
     log_path = request.json.get("log_path")
+    num_of_nodes = request.json.get("num_of_nodes")
     task = request.json.get("task")
 
     container_path = database.get_container_path_by_name(container)
@@ -321,6 +322,7 @@ def diamond_endpoint_submit_job():
         container=container_path + "/" + container + ".sif",
         task=task,
         log_path=log_path,
+        num_of_nodes=num_of_nodes,
         endpoint_id=endpoint_id,
         function_id=function_id,
         task_name=task_name,

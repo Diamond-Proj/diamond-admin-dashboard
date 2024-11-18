@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
+import { number, z } from 'zod';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -36,6 +36,7 @@ const formSchema = z.object({
   }),
   endpoint: z.string().optional(),
   partition: z.string().optional(),
+  num_of_nodes: number().int().positive().optional(),
   log_path: z.string().optional(),
   task: z.string().optional(),
   container: z.string().optional(),
@@ -138,6 +139,7 @@ export function JobComposerForm() {
             endpoint: values.endpoint,
             partition: values.partition,
             log_path: values.log_path,
+            num_of_nodes: values.num_of_nodes,
             task: values.task,
             container: values.container,
             work_path: values.work_path,
@@ -292,6 +294,17 @@ export function JobComposerForm() {
                     Select a partition from the list.
                   </FormDescription>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="num_of_nodes"
+              render={({ field }) => (
+                <FormItem className="w-[60%] md:w-[20%]">
+                  <FormLabel>Number of Nodes</FormLabel>
+                  <Input placeholder="1" {...field} disabled={isLoadingPartitions || isLoadingContainers} />
                 </FormItem>
               )}
             />
