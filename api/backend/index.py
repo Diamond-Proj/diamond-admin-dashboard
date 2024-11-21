@@ -1,4 +1,5 @@
 import logging
+import time
 import os
 from datetime import datetime
 
@@ -98,25 +99,6 @@ From: {base_image}
 %runscript
     /bin/bash /app/commands.sh"""
 
-    # for testing
-    cowsay_def_file_content = f"""BootStrap: docker
-From: ubuntu:20.04
-# https://apptainer.org/docs/user/main/build_a_container.html
-%post
-    apt-get update -y
-    apt-get -y install cowsay lolcat
-
-%environment
-    export LC_ALL=C
-    export PATH=/usr/games:$PATH
-
-%runscript
-    date | cowsay | lolcat
-    exec "$@"
-
-%labels
-    Author Alice"""
-
     def_file_path = os.path.join(location, f"{name}.def")
 
     with open(def_file_path, "w") as def_file:
@@ -167,27 +149,49 @@ def container_builder_wrapper(base_image, location, name, dependencies, environm
     return
 
 
-container_builder_wrapper = ShellFunction(
+apptainer_def_file_creation = ShellFunction(
+"""
+cat << EOF > {location}/{base_image}.def
+Bootstrap: docker
+From: {base_image}
+
+%post
+    apt-get -y update
+    apt-get -y install python3-pip
+    mkdir -p /app
+    cd /app
+    echo "{dependencies}" > requirements.txt
+    echo "cd /app
+    {commands}" > commands.sh
+    chmod +x commands.sh
+    /bin/bash commands.sh
+
+%environment
+    {environment}
+
+%runscript
+    /bin/bash /app/commands.sh
+EOF
+"""
+)
+
+
+container_builder_wrapper_shell = ShellFunction(
 """
 cat << EOF > test.submit
 #!/bin/bash
 
-#SBATCH --job-name={name}
-#SBATCH --output={location}/{name}.stdout
-#SBATCH --error={location}/{name}.stderr
-#SBATCH --nodes=1
-#SBATCH --time=01:00:00
-#SBATCH --ntasks-per-node=1
-#SBATCH --exclusive
-#SBATCH --partition=development
-#SBATCH --account=Deep-Learning-at-Sca
-
-module load tacc-apptainer
-apptainer pull {location}/{name}.sif {base_image}
+#SBATCH --job-name={base_image}
+#SBATCH --output={location}/{base_image}_log.stdout
+#SBATCH --error={location}/{base_image}_log.stderr
+{slurm_commands}  
+echo $PWD
+srun apptainer build {location}/{base_image}.sif {location}/{base_image}.def
 
 EOF
 
 sbatch $PWD/test.submit
+echo "SHELL ECHO"
 """
 )
 
@@ -195,6 +199,7 @@ sbatch $PWD/test.submit
 @app.route("/api/image_builder", methods=["POST"])
 @authenticated
 def diamond_endpoint_image_builder():
+
     endpoint_id = request.json.get("endpoint")
     name = f"image-{endpoint_id}-v{datetime.now().strftime('%Y%m%d%H%M%S')}"
     base_image = request.json.get("base_image")
@@ -203,9 +208,36 @@ def diamond_endpoint_image_builder():
     commands = request.json.get("commands")
     location = request.json.get("image_location")
 
-    globus_compute_client = initialize_globus_compute_client()
+    slurm_commands = f"""
+#SBATCH --time=00:10:00
+#SBATCH --ntasks-per-node=1
+#SBATCH --exclusive
+#SBATCH --partition=cpu
+#SBATCH --account=bcqj-delta-cpu
+"""
 
-    function_id = globus_compute_client.register_function(container_builder_wrapper)
+
+    globus_compute_client = initialize_globus_compute_client()
+    def_file_creation_function_id = globus_compute_client.register_function(apptainer_def_file_creation)
+    def_file_creation_task_id = globus_compute_client.run(
+        endpoint_id=endpoint_id,
+        base_image=base_image,
+        location=location,
+        dependencies=dependencies,
+        commands=commands,
+        environment=environment,
+        function_id=def_file_creation_function_id,
+    )
+
+    def_file_creation_task_status = globus_compute_client.get_task(def_file_creation_task_id)
+    while (def_file_creation_task_status["pending"]):
+        print("def_file_creation_task_id", def_file_creation_task_status)
+        time.sleep(10)
+        def_file_creation_task_status = globus_compute_client.get_task(def_file_creation_task_id)
+        continue
+
+
+    function_id = globus_compute_client.register_function(container_builder_wrapper_shell)
     
     task_id = globus_compute_client.run(
         name=name,
@@ -213,8 +245,18 @@ def diamond_endpoint_image_builder():
         location=location,
         endpoint_id=endpoint_id,
         function_id=function_id,
+        slurm_commands=slurm_commands
     )
 
+    function_task_status = globus_compute_client.get_task(task_id)
+    print("container_builder_wrapper_shell" , function_task_status)
+    while (function_task_status["pending"]):
+        print("container_builder_wrapper_shell" , function_task_status)
+        time.sleep(10)
+        function_task_status = globus_compute_client.get_task(task_id)
+        continue
+
+    
     database.save_container(
         container_task_id=task_id,
         identity_id=session["primary_identity"],
@@ -226,7 +268,7 @@ def diamond_endpoint_image_builder():
         commands=commands,
     )
 
-    return jsonify(task_id)
+    return jsonify(def_file_creation_task_id)
 
 
 @app.route("/api/get_containers", methods=["GET"])

@@ -28,11 +28,11 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
-const endpointSchema = z.object({
-  endpoint: z.string().min(1, 'Endpoint selection is required'),
-  // endpoint_uuid: z.string().min(1, 'Endpoint selection is required'),
-  // endpoint_name: z.string().min(1, 'Endpoint name is required')
-})
+// const endpointSchema = z.object({
+//   endpoint: z.string().min(1, 'Endpoint selection is required'),
+//   // endpoint_uuid: z.string().min(1, 'Endpoint selection is required'),
+//   // endpoint_name: z.string().min(1, 'Endpoint name is required')
+// })
 
 const containerNameSchema = z.object({
   containerName: z.string().min(1, 'Container name is required')
@@ -224,7 +224,7 @@ function StepperContent({
         <form onSubmit={form.handleSubmit(onSubmit)}>
           {stepper.switch({
             endpoint: () => <EndpointStep control={control} endpoints={endpoints} />,
-            'container-name': () => <ContainerNameStep />,
+            // 'container-name': () => <ContainerNameStep />,
             'base-image': () => <BaseImageStep />,
             dependencies: () => <DependenciesStep />,
             environment: () => <EnvironmentStep />,
