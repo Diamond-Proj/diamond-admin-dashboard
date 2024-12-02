@@ -47,8 +47,8 @@ export function ContainerManagerForm( { isAuthenticated }: { isAuthenticated: bo
 
   useEffect(() => {
     fetchContainerStatus();
-    // const intervalId = setInterval(fetchContainerStatus, 5000);
-    // return () => clearInterval(intervalId);
+    const intervalId = setInterval(fetchContainerStatus, 3000);
+    return () => clearInterval(intervalId);
   }, [isAuthenticated]);
 
   return (
