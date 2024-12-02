@@ -78,6 +78,7 @@ class Database:
     def save_container(
         self,
         container_task_id=None,
+        container_status=None,
         identity_id=None,
         base_image=None,
         name=None,
@@ -91,6 +92,7 @@ class Database:
         log.info(f"Saving container: {container_task_id}, {identity_id}")
         container = Container(
             container_task_id=container_task_id,
+            container_status=container_status,
             identity_id=identity_id,
             base_image=base_image,
             name=name,
@@ -102,6 +104,12 @@ class Database:
             endpoint_id=endpoint_id,
         )
         db.session.merge(container)
+        db.session.commit()
+
+    def update_container_status(self, container_task_id, container_status):
+        log.info(f"Updating container status: {container_task_id}, {container_status}")
+        container = Container.query.filter_by(container_task_id=container_task_id).first()
+        container.container_status = container_status
         db.session.commit()
 
     def get_container_path_by_name(self, container_name):

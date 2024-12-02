@@ -47,7 +47,7 @@ export function TaskManagerForm() {
 
   useEffect(() => {
     fetchTaskStatus();
-    const intervalId = setInterval(fetchTaskStatus, 5000);
+    const intervalId = setInterval(fetchTaskStatus, 3000);
     return () => clearInterval(intervalId);
   }, []);
 
@@ -56,7 +56,6 @@ export function TaskManagerForm() {
       <table className="table-auto border-collapse w-full">
         <thead>
           <tr>
-            <th className="border px-4 py-2">Task ID</th>
             <th className="border px-4 py-2">Task Name</th>
             <th className="border px-4 py-2">Endpoint</th>
             <th className="border px-4 py-2">Task Status</th>
@@ -70,7 +69,6 @@ export function TaskManagerForm() {
               const task = tasksData[taskId];
               return (
                 <tr key={taskId}>
-                  <td className="border px-4 py-2">{taskId}</td>
                   <td className="border px-4 py-2">{task?.task_name || 'Unknown'}</td>
                   <td className="border px-4 py-2">{task?.details?.endpoint_id || 'N/A'}</td>
                   <td className="border px-4 py-2">{task?.status || 'Unknown'}</td>

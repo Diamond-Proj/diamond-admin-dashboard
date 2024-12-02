@@ -36,7 +36,10 @@ const formSchema = z.object({
   }),
   endpoint: z.string().optional(),
   partition: z.string().optional(),
-  num_of_nodes: number().int().positive().optional(),
+  num_of_nodes: z
+  .string()
+  .regex(/^\d+$/, { message: 'Must be a positive integer' })
+  .transform((value) => parseInt(value, 10)),
   log_path: z.string().optional(),
   task: z.string().optional(),
   container: z.string().optional(),
@@ -304,7 +307,12 @@ export function JobComposerForm() {
               render={({ field }) => (
                 <FormItem className="w-[60%] md:w-[20%]">
                   <FormLabel>Number of Nodes</FormLabel>
-                  <Input placeholder="1" {...field} disabled={isLoadingPartitions || isLoadingContainers} />
+                  <Input
+                    placeholder="1"
+                    {...field}
+                    disabled={isLoadingPartitions || isLoadingContainers}
+                  />
+                  <FormMessage />
                 </FormItem>
               )}
             />
