@@ -39,7 +39,10 @@ const formSchema = z.object({
   log_path: z.string().optional(),
   task: z.string().optional(),
   container: z.string().optional(),
-  work_path: z.string().optional()
+  work_path: z.string().optional(),
+  nodes: z.string().regex(/^\d+$/, {
+    message: 'Nodes must be a positive integer.'
+  })
 });
 
 export function JobComposerForm() {
@@ -49,6 +52,7 @@ export function JobComposerForm() {
     defaultValues: {
       taskType: 'submitTask',
       jobName: 'submitTask',
+      nodes: '1',
     }
   });
 
