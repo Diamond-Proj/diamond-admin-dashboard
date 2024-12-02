@@ -1,7 +1,9 @@
-globus-compute-sdk
+globus-compute-sdk==2.30.1
 flask
 diamond-hpc
 python-dotenv
 flask-cors
 bashlex
 flask-sqlalchemy
+gunicorn
+requests
