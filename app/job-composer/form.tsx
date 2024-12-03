@@ -308,7 +308,6 @@ export function JobComposerForm() {
                 <FormItem className="w-[60%] md:w-[20%]">
                   <FormLabel>Number of Nodes</FormLabel>
                   <Input
-                    placeholder="1"
                     {...field}
                     disabled={isLoadingPartitions || isLoadingContainers}
                   />

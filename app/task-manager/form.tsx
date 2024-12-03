@@ -73,7 +73,7 @@ export function TaskManagerForm() {
 
     // Set up intervals for fetching and updating tasks
     const fetchIntervalId = setInterval(fetchTaskStatus, 3000); // Refresh tasks every 3 seconds
-    const updateIntervalId = setInterval(updateTaskStatus, 15000); // Trigger update every 15 seconds
+    const updateIntervalId = setInterval(updateTaskStatus, 3000); // Trigger update every 15 seconds
 
     // Cleanup intervals on component unmount
     return () => {

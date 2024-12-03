@@ -383,7 +383,7 @@ def diamond_endpoint_submit_job():
     return jsonify("hello")
 
 
-get_task_status = ShellFunction('squeue --name={task_name} -h -o "%T"')
+get_task_status = ShellFunction('squeue --name={task_name} -u $USER -h -o "%T"')
 
 
 @app.route("/api/get_tasks", methods=["GET"])
@@ -444,6 +444,7 @@ def update_task_statuses_trigger():
             )
             fu = globus_compute_executor.submit(get_task_status, task_name=task.task_name)
             fu_stdout = fu.result().stdout
+            logging.info(f"=================={fu_stdout}")
 
             if fu_stdout:
                 new_status = fu_stdout
