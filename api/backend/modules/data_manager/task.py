@@ -10,3 +10,4 @@ class Task(db.Model):
     task_status = db.Column(db.String)
     task_create_time = db.Column(db.TIMESTAMP, default=func.now())
     log_path = db.Column(db.String)
+    endpoint = db.Column(db.String)

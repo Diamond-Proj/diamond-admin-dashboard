@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 
-export function ContainerManagerForm( { isAuthenticated }: { isAuthenticated: boolean } ) {
-  const [containersData, setContainersData] = useState<{ [key: string]: any }>({});;
+export function ContainerManagerForm({ isAuthenticated }: { isAuthenticated: boolean }) {
+  const [containersData, setContainersData] = useState<{ [key: string]: any }>({});
 
+  // Fetch container statuses from the server
   const fetchContainerStatus = async () => {
     try {
       const response = await fetch('/api/get_containers', {
@@ -20,6 +21,27 @@ export function ContainerManagerForm( { isAuthenticated }: { isAuthenticated: bo
     }
   };
 
+  // Trigger container update logic on the server
+  const updateContainerStatus = async () => {
+    try {
+      const response = await fetch('/api/update_containers_status', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        console.log('Container status update triggered successfully');
+      } else {
+        console.error('Failed to trigger container status update');
+      }
+    } catch (error) {
+      console.error('Error triggering container status update:', error);
+    }
+  };
+
+  // Delete a specific container and refresh container list
   const deleteContainer = async (containerId: string) => {
     try {
       const response = await fetch('/api/delete_container', {
@@ -31,12 +53,13 @@ export function ContainerManagerForm( { isAuthenticated }: { isAuthenticated: bo
       });
 
       if (response.ok) {
-        // If the delete request is successful, remove the container from the state
+        // Remove the deleted container from state
         setContainersData((prevContainersData) => {
           const newContainersData = { ...prevContainersData };
           delete newContainersData[containerId]; // Remove the deleted container
           return newContainersData;
         });
+        fetchContainerStatus(); // Refresh containers after deletion
       } else {
         console.error('Failed to delete container');
       }
@@ -46,9 +69,18 @@ export function ContainerManagerForm( { isAuthenticated }: { isAuthenticated: bo
   };
 
   useEffect(() => {
+    // Fetch container status when the component mounts
     fetchContainerStatus();
-    const intervalId = setInterval(fetchContainerStatus, 3000);
-    return () => clearInterval(intervalId);
+    const fetchIntervalId = setInterval(fetchContainerStatus, 3000); // Refresh containers every 3 seconds
+
+    // Trigger update container status periodically
+    const updateIntervalId = setInterval(updateContainerStatus, 3000); // Trigger update every 15 seconds
+
+    // Cleanup intervals on unmount
+    return () => {
+      clearInterval(fetchIntervalId);
+      clearInterval(updateIntervalId);
+    };
   }, [isAuthenticated]);
 
   return (
@@ -67,8 +99,8 @@ export function ContainerManagerForm( { isAuthenticated }: { isAuthenticated: bo
             Object.keys(containersData).map((containerName) => (
               <tr key={containerName}>
                 <td className="border px-4 py-2">{containerName}</td>
-                <td className="border px-4 py-2">{containersData[containerName]?.status || ''}</td>
-                <td className="border px-4 py-2">{containersData[containerName]?.location || ''}</td>
+                <td className="border px-4 py-2">{containersData[containerName]?.status || 'Unknown'}</td>
+                <td className="border px-4 py-2">{containersData[containerName]?.location || 'Unknown'}</td>
                 <td className="border px-4 py-2">
                   <button
                     onClick={() => deleteContainer(containersData[containerName]?.container_task_id)}
@@ -81,7 +113,9 @@ export function ContainerManagerForm( { isAuthenticated }: { isAuthenticated: bo
             ))
           ) : (
             <tr>
-              <td className="border px-4 py-2" colSpan={5}>No containers found.</td>
+              <td className="border px-4 py-2" colSpan={4}>
+                No containers found.
+              </td>
             </tr>
           )}
         </tbody>
