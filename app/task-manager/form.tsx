@@ -5,21 +5,43 @@ import { useEffect, useState } from 'react';
 export function TaskManagerForm() {
   const [tasksData, setTasksData] = useState<Record<string, any>>({});
 
+  // Fetch task statuses from the server
   const fetchTaskStatus = async () => {
     try {
-      const response = await fetch('/api/get_task_status', {
+      const response = await fetch('/api/get_tasks', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
       });
       const data = await response.json();
-      setTasksData(data);
+      setTasksData(data); // Use the entire response as tasksData
     } catch (error) {
       console.error('Error fetching task status:', error);
     }
   };
 
+  // Trigger task status updates on the server
+  const updateTaskStatus = async () => {
+    try {
+      const response = await fetch('/api/update_task_status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        console.log('Task status update triggered successfully');
+      } else {
+        console.error('Failed to trigger task status update');
+      }
+    } catch (error) {
+      console.error('Error triggering task status update:', error);
+    }
+  };
+
+  // Delete a specific task and refresh task list
   const deleteTask = async (taskId: string) => {
     try {
       const response = await fetch('/api/delete_task', {
@@ -31,12 +53,12 @@ export function TaskManagerForm() {
       });
 
       if (response.ok) {
-        // Remove the task from the state after successful deletion
         setTasksData((prevTasksData) => {
           const newTasksData = { ...prevTasksData };
           delete newTasksData[taskId];
           return newTasksData;
         });
+        fetchTaskStatus(); // Refresh task list after deletion
       } else {
         console.error('Failed to delete task');
       }
@@ -46,9 +68,18 @@ export function TaskManagerForm() {
   };
 
   useEffect(() => {
+    // Fetch task status when the component mounts
     fetchTaskStatus();
-    const intervalId = setInterval(fetchTaskStatus, 3000);
-    return () => clearInterval(intervalId);
+
+    // Set up intervals for fetching and updating tasks
+    const fetchIntervalId = setInterval(fetchTaskStatus, 3000); // Refresh tasks every 3 seconds
+    const updateIntervalId = setInterval(updateTaskStatus, 15000); // Trigger update every 15 seconds
+
+    // Cleanup intervals on component unmount
+    return () => {
+      clearInterval(fetchIntervalId);
+      clearInterval(updateIntervalId);
+    };
   }, []);
 
   return (
@@ -86,7 +117,9 @@ export function TaskManagerForm() {
             })
           ) : (
             <tr>
-              <td className="border px-4 py-2" colSpan={5}>No tasks found.</td>
+              <td className="border px-4 py-2" colSpan={5}>
+                No tasks found.
+              </td>
             </tr>
           )}
         </tbody>

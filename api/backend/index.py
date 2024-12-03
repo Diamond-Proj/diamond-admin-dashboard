@@ -1,6 +1,7 @@
 import logging
 import os
 from datetime import datetime
+from multiprocessing import Process
 
 import requests
 from flask import flash, jsonify, make_response, redirect, request, session, url_for
@@ -211,38 +212,63 @@ get_container_status = ShellFunction('squeue --name={name} -h -o "%T"')
 @app.route("/api/get_containers", methods=["GET"])
 @authenticated
 def get_containers():
-    globus_compute_client = initialize_globus_compute_client()
-
+    # Step 1: Load containers from the database
     containers = database.load_containers(identity_id=session["primary_identity"])
     containers_data = {}
+
     for container in containers:
-        logging.info(f"container: {container.container_task_id}")
         container_task_id = container.container_task_id
         name = container.name
 
-        endpoint_id = container.endpoint_id
-        globus_compute_executer = GlobusComputeExecutor(
-            client=globus_compute_client,endpoint_id=endpoint_id)
-        fu = globus_compute_executer.submit(get_container_status, name=name)
-        fu_stdout = fu.result().stdout
-        if fu_stdout == "":
-            container_status = container.container_status
-        else:
-            container_status = fu_stdout
-            database.update_container_status(container_task_id, container_status)
-        logging.info("***************************************")
-        logging.info(fu_stdout)
-
-
+        # Add container to the response data
         containers_data[name] = {
             "container_task_id": container_task_id,
-            "status": container_status,
+            "status": container.container_status,
             "base_image": container.base_image,
             "location": container.location,
         }
 
-    logging.info(f"container status is {containers_data}")
+    logging.info(f"Container data fetched: {containers_data}")
     return jsonify(containers_data)
+
+
+@app.route("/api/update_containers_status", methods=["GET"])
+@authenticated
+def update_container_statuses():
+    globus_compute_client = initialize_globus_compute_client()
+    containers = database.load_containers(identity_id=session["primary_identity"])
+
+    updated_containers = []
+    logging.info("$%^&*******************")
+    for container in containers:
+        try:
+            if container.container_status == "COMPLETING":
+                logging.info(f"Skipping container {container.container_task_id} with status COMPLETING")
+                continue
+
+            logging.info(f"Updating status for container: {container.container_task_id}")
+            endpoint_id = container.endpoint_id
+            globus_compute_executer = GlobusComputeExecutor(
+                client=globus_compute_client, endpoint_id=endpoint_id
+            )
+            fu = globus_compute_executer.submit(get_container_status, name=container.name)
+            result = fu.result()
+            fu_stdout = result.stdout
+            logging.info(f"Container {container.container_task_id} status: {fu_stdout}")
+
+            if fu_stdout:
+                new_status = fu_stdout
+                database.update_container_status(container.container_task_id, new_status)
+                logging.info(f"Updated container {container.container_task_id} status to {new_status}")
+                updated_containers.append({
+                    "container_id": container.container_task_id,
+                    "new_status": new_status,
+                })
+            else:
+                logging.info(f"No output from Globus for container {container.container_task_id}")
+        except Exception as e:
+            logging.error(f"Error updating container {container.container_task_id}: {e}")
+    return jsonify(updated_containers)
 
 
 @app.route("/api/delete_container", methods=["POST"])
@@ -346,21 +372,6 @@ def diamond_endpoint_submit_job():
         function_id=function_id,
     )
 
-    # fu = globus_compute_executor.submit(
-    #     submit_task,
-    #     partition=partition,
-    #     container=container_path + "/" + container + ".sif",
-    #     task=task,
-    #     log_path=log_path,
-    #     num_of_nodes=num_of_nodes,
-    #     task_name=task_name)
-    
-    # fu_stdout = fu.result().stdout
-    # logging.info("++++++++++++++++!!!???????????????????++++++++++")
-    # logging.info(fu_stdout)
-    # logging.info(fu.result().stderr)
-    # logging.info("++++++++++++++++!!!!!!!!!!!!!!!!+++++++++++++")
-
     database.save_task(
         task_id=task_id,
         task_name=task_name,
@@ -371,62 +382,88 @@ def diamond_endpoint_submit_job():
     )
     return jsonify("hello")
 
-get_task_stauts = ShellFunction('squeue --name={task_name} -h -o "%T"')
 
-@app.route("/api/get_task_status", methods=["GET"])
+get_task_status = ShellFunction('squeue --name={task_name} -h -o "%T"')
+
+
+@app.route("/api/get_tasks", methods=["GET"])
 @authenticated
-def diamond_get_task_status():
-    global_compute_client = initialize_globus_compute_client()
-
+def get_tasks():
     tasks = database.load_tasks(identity_id=session["primary_identity"])
+    tasks_data = {}
 
     for task in tasks:
         task_id = task.task_id
-        logging.info(f"Updating status for task ID: {task_id}")
 
-        current_task = global_compute_client.get_task(task_id)
-
-        task.endpoint_id = current_task["details"]["endpoint_id"]
-        globus_compute_executor = GlobusComputeExecutor(client=global_compute_client, endpoint_id=task.endpoint_id)
-        fu = globus_compute_executor.submit(get_task_stauts, task_name=task.task_name)
-        fu_stdout = fu.result().stdout
-        if fu_stdout == "":
-            task.task_status = task.task_status
-        else:
-            task.task_status = fu_stdout
-        logging.info("++++++++++++++++++++++++++++++++++++++++++")
-        logging.info(fu_stdout)
-
-        database.save_task(
-            task_id=task.task_id,
-            task_name=task.task_name,
-            identity_id=task.identity_id,
-            task_status=task.task_status,
-            task_create_time=task.task_create_time,
-            log_path=task.log_path
-        )
-
-    # Reload the updated tasks from the database
-    updated_tasks = database.load_tasks(identity_id=session["primary_identity"])
-
-    # Format tasks data for JSON response
-    tasks_data = {
-        task.task_id: {
+        # Prepare tasks data for immediate response
+        tasks_data[task_id] = {
             "task_id": task.task_id,
             "identity_id": task.identity_id,
             "task_name": task.task_name,
             "status": task.task_status,
             "details": {
-                "endpoint_id": task.endpoint_id if hasattr(task, 'endpoint_id') else "N/A",
+                "endpoint_id": task.endpoint if hasattr(task, 'endpoint') else "N/A",
                 "task_create_time": task.task_create_time,
             },
             "result": task.log_path,
         }
-        for task in updated_tasks
-    }
 
-    logging.info(f"Updated task status response: {tasks_data}")
+    logging.info(f"Current task data: {tasks_data}")
+
     return jsonify(tasks_data)
+
+
+@app.route("/api/update_task_status", methods=["POST"])
+@authenticated
+def update_task_statuses_trigger():
+    # Step 1: Initialize the Globus Compute Client
+    global_compute_client = initialize_globus_compute_client()
+
+    # Step 2: Load tasks from the database
+    tasks = database.load_tasks(identity_id=session["primary_identity"])
+    tasks_to_update = []
+
+    for task in tasks:
+        if task.task_status != "COMPLETING":
+            tasks_to_update.append(task)
+
+    logging.info(f"Tasks to update: {[t.task_id for t in tasks_to_update]}")
+
+    # Step 3: Perform updates for selected tasks
+    for task in tasks_to_update:
+        try:
+            task_id = task.task_id
+            logging.info(f"Updating status for task ID: {task_id}")
+
+            # Fetch task details and update status
+            current_task = global_compute_client.get_task(task_id)
+            task.endpoint_id = current_task["details"]["endpoint_id"]
+
+            globus_compute_executor = GlobusComputeExecutor(
+                client=global_compute_client, endpoint_id=task.endpoint_id
+            )
+            fu = globus_compute_executor.submit(get_task_status, task_name=task.task_name)
+            fu_stdout = fu.result().stdout
+
+            if fu_stdout:
+                new_status = fu_stdout
+                task.task_status = new_status
+                logging.info(f"Task ID {task_id} updated to status: {new_status}")
+
+                # Save updated task to database
+                database.save_task(
+                    task_id=task.task_id,
+                    task_name=task.task_name,
+                    identity_id=task.identity_id,
+                    task_status=task.task_status,
+                    task_create_time=task.task_create_time,
+                    log_path=task.log_path,
+                    endpoint=task.endpoint_id,
+                )
+        except Exception as e:
+            logging.error(f"Error updating task {task.task_id}: {e}")
+
+    return jsonify({"message": "Task statuses updated successfully"})
 
 
 @app.route("/api/delete_task", methods=["POST"])

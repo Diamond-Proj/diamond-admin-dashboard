@@ -53,6 +53,7 @@ class Database:
         task_status=None,
         task_create_time=None,
         log_path=None,
+        endpoint=None,
     ):
         log.info(f"Saving task: {task_id}, {identity_id}")
         task = Task(
@@ -62,6 +63,7 @@ class Database:
             task_status=task_status,
             task_create_time=task_create_time,
             log_path=log_path,
+            endpoint=endpoint,
         )
         db.session.merge(task)
         db.session.commit()
@@ -69,6 +71,12 @@ class Database:
     def load_tasks(self, identity_id):
         log.info(f"Loading task data for identity_id: {identity_id}")
         return Task.query.filter_by(identity_id=identity_id).all()
+    
+    def update_task_status(self, task_id, task_status):
+        log.info(f"Updating task status: {task_id}, {task_status}")
+        task = Task.query.filter_by(task_id=task_id).first()
+        task.task_status = task_status
+        db.session.commit()
 
     def delete_task(self, task_id):
         log.info(f"Deleting task: {task_id}")
