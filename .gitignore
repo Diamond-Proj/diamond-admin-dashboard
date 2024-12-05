@@ -16,18 +16,13 @@
 # production
 /build
 
-# certificates
-/certs
+# vercel
+.vercel
 
-# backend database
-/api/backend/data
-
-# letsencrypt
-/letsencrypt
-
-# misc
-.DS_Store
-*.pem
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+.env*.local
 
 # debug
 npm-debug.log*
@@ -42,23 +37,25 @@ yarn-error.log*
 !nginx/dev.conf
 !nginx/nginx.conf
 
+# misc
+.DS_Store
+*.pem
+
+# Pycharm
+.idea
+
+# certificates
+/certs
+
+# letsencrypt
+/letsencrypt
+
 # traefik
 certs/**
 **.crt
 **.key
 
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-.env*.local
-
-<<<<<<< HEAD
 # database
 /api/backend/data
-=======
-# Pycharm
-.idea
->>>>>>> origin/main
+
+
