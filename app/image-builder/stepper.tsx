@@ -28,17 +28,15 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
-// const endpointSchema = z.object({
-//   endpoint: z.string().min(1, 'Endpoint selection is required'),
-//   // endpoint_uuid: z.string().min(1, 'Endpoint selection is required'),
-//   // endpoint_name: z.string().min(1, 'Endpoint name is required')
-// })
 
-const containerNameSchema = z.object({
-  containerName: z.string().min(1, 'Container name is required')
+const endpointSchema = z.object({
+  endpoint: z.string().min(1, 'Endpoint selection is required'),
+  partition: z.string().min(1, 'Partition is required'),
 })
 
-const baseImageSchema = z.object({
+const containerSchema = z.object({
+  containerName: z.string().min(1, 'Container name is required'),
+  location: z.string().min(1, 'Image location is required'),
   baseImage: z.string().min(1, 'Base image is required')
 })
 
@@ -57,15 +55,10 @@ const commandsSchema = z.object({
 
 const reviewSchema = z.object({})
 
-const endpointSchema = z.object({
-  endpoint: z.string().min(1, 'Endpoint selection is required'),
-  name: z.string().min(1, 'Container name is required'),
-  imageLocation: z.string().min(1, 'Image location is required') // New validation rule
-})
 
 const { Scoped, useStepper } = defineStepper(
-  { id: 'endpoint', title: 'Select Endpoint', schema: endpointSchema },
-  { id: 'base-image', title: 'Base Image', schema: baseImageSchema },
+  { id: 'endpointinfo', title: 'Select Endpoint', schema: endpointSchema },
+  { id: 'containerinfo', title: 'Container Info', schema: containerSchema },
   { id: 'dependencies', title: 'Dependencies', schema: dependenciesSchema },
   { id: 'environment', title: 'Environment', schema: environmentSchema },
   { id: 'commands', title: 'Build Commands', schema: commandsSchema },
@@ -73,25 +66,23 @@ const { Scoped, useStepper } = defineStepper(
 )
 
 type FormData = z.infer<typeof endpointSchema> &
-  z.infer<typeof containerNameSchema> &
-  z.infer<typeof baseImageSchema> &
+  z.infer<typeof containerSchema> &
   z.infer<typeof dependenciesSchema> &
   z.infer<typeof environmentSchema> &
   z.infer<typeof commandsSchema>
 
 type EndpointFormValues = z.infer<typeof endpointSchema>
-type ContainerNameFormValues = z.infer<typeof containerNameSchema>
-type BaseImageFormValues = z.infer<typeof baseImageSchema>
+type ContainerFormValues = z.infer<typeof containerSchema>
 type DependenciesFormValues = z.infer<typeof dependenciesSchema>
 type EnvironmentFormValues = z.infer<typeof environmentSchema>
 type CommandsFormValues = z.infer<typeof commandsSchema>
 
 type FullFormValues = EndpointFormValues &
-  ContainerNameFormValues &
-  BaseImageFormValues &
+  ContainerFormValues &
   DependenciesFormValues &
   EnvironmentFormValues &
   CommandsFormValues
+
 
 export function ImageBuilderStepper() {
   const [formData, setFormData] = useState<Partial<FormData>>({})
@@ -100,11 +91,13 @@ export function ImageBuilderStepper() {
   const [endpoints, setEndpoints] = useState<
     { endpoint_uuid: string; endpoint_name: string }[]
   >([])
-
+  
   const form = useForm<FormData>({
     resolver: zodResolver(z.object({})),
     defaultValues: formData
   })
+
+  const endpointValue = form.watch('endpoint');
 
   const { control, register } = form;
 
@@ -118,13 +111,13 @@ export function ImageBuilderStepper() {
     try {
       const payload = {
         endpoint: data.endpoint,
+        partition: data.partition,
+        name: data.containerName,
         base_image: data.baseImage,
+        location: data.location,
         dependencies: data.dependencies,
         environment: data.environment,
-        location: data.location,
         commands: data.commands,
-        image_location: data.imageLocation,
-        // name: data.name,  // Uncomment if you want to send a name
       }
 
       const response = await fetch('/api/image_builder', {
@@ -166,8 +159,43 @@ export function ImageBuilderStepper() {
         console.error('Error fetching endpoints:', error)
       }
     }
-    fetchEndpoints()
+    const timeout = setTimeout(fetchEndpoints, 5000);
+    return () => clearTimeout(timeout);
   }, [])
+
+  // useEffect(() => {
+  //   if (endpoints) {
+  //     if (partitionsCache[endpointValue]) {
+  //       setPartitions(partitionsCache[endpointValue]);
+  //     } else {
+  //       const fetchPartitions = async () => {
+  //         setIsLoadingPartitions(true);
+  //         try {
+  //           const response = await fetch('/api/list_partitions', {
+  //             method: 'POST',
+  //             headers: {
+  //               'Content-Type': 'application/json',
+  //             },
+  //             body: JSON.stringify({ endpoint: endpointValue }),
+  //           });
+  //           const data = await response.json();
+  //           setPartitions(data);
+  //           setPartitionsCache((prevCache) => ({
+  //             ...prevCache,
+  //             [endpointValue]: data,
+  //           }));
+  //         } catch (error) {
+  //           console.error('Error fetching partitions:', error);
+  //         } finally {
+  //           setIsLoadingPartitions(false);
+  //         }
+  //       };
+  //       fetchPartitions();
+  //     }
+  //   } else {
+  //     setPartitions([]);
+  //   }
+  // }, [endpoints]);
 
   return (
     <Scoped>
@@ -223,9 +251,8 @@ function StepperContent({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           {stepper.switch({
-            endpoint: () => <EndpointStep control={control} endpoints={endpoints} />,
-            // 'container-name': () => <ContainerNameStep />,
-            'base-image': () => <BaseImageStep />,
+            endpointinfo: () => <EndpointStep control={control} endpoints={endpoints} />,
+            containerinfo: () => <ContainerStep />,
             dependencies: () => <DependenciesStep />,
             environment: () => <EnvironmentStep />,
             commands: () => <CommandsStep />,
@@ -303,33 +330,34 @@ function StepIndicator() {
   )
 }
 
-function ContainerNameStep() {
+function ContainerStep() {
   const {
     register,
     formState: { errors },
-  } = useFormContext<ContainerNameFormValues>();
+  } = useFormContext<ContainerFormValues>();
   
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-4">Container Name</h2>
-      <label htmlFor={register('containerName').name}>Container Name</label>
-      <Input placeholder="myContainer" {...register('containerName')} />
-    </div>
-  );
-}
-
-function BaseImageStep() {
-  const {
-    register,
-    formState: { errors },
-  } = useFormContext<BaseImageFormValues>();
-  
-  return (
-    <div>
-      <h2 className="text-2xl font-bold mb-4">Base Image</h2>
-      <label htmlFor={register('baseImage').name}>Base Image</label>
-      <Input placeholder="e.g., python:3.9-slim" {...register('baseImage')} />
-    </div>
+    <>
+      <div>
+        <h2 className="text-2xl font-bold mb-4">Container Name</h2>
+        <label htmlFor={register('containerName').name}>Container Name</label>
+        <Input placeholder="myContainer" {...register('containerName')} />
+      </div>
+      <div>
+        <h2 className="text-2xl font-bold mb-4">Location</h2>
+        <label htmlFor={register('location').name}>Build Location</label>
+        <Input 
+          placeholder="e.g., /home/user/builds" 
+          {...register('location')}
+        />
+      </div>
+      <div>
+        <h2 className="text-2xl font-bold mb-4">Container Name</h2>
+        <label htmlFor={register('baseImage').name}>Container Name</label>
+        <Input placeholder="python:3.9-slim" {...register('baseImage')} />
+      </div>
+    </>
+    
   );
 }
 
@@ -363,15 +391,6 @@ function EnvironmentStep() {
           placeholder="e.g., DEBUG=1&#10;API_KEY=your_api_key" 
           {...register('environment')}
           className="min-h-[100px]"
-        />
-      </div>
-
-      <div>
-        <h2 className="text-2xl font-bold mb-4">Location</h2>
-        <label htmlFor={register('location').name}>Build Location</label>
-        <Input 
-          placeholder="e.g., /home/user/builds" 
-          {...register('location')}
         />
       </div>
     </div>
@@ -496,8 +515,8 @@ function EndpointStep({ control, endpoints }: { control: Control<FormData>, endp
         )}
       />
 
-      {/* Image Location Text Box */}
-      <FormField
+      {/* Partition Selection Dropdown */}
+      {/* <FormField
         control={control}
         name="imageLocation"
         render={({ field }) => (
@@ -515,7 +534,7 @@ function EndpointStep({ control, endpoints }: { control: Control<FormData>, endp
             <FormMessage>{errors.imageLocation?.message}</FormMessage>
           </FormItem>
         )}
-      />
+      /> */}
     </div>
   )
 }
