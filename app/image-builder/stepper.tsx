@@ -91,7 +91,7 @@ export function ImageBuilderStepper() {
   const [endpoints, setEndpoints] = useState<
     { endpoint_uuid: string; endpoint_name: string }[]
   >([])
-  
+
   const form = useForm<FormData>({
     resolver: zodResolver(z.object({})),
     defaultValues: formData
@@ -163,74 +163,43 @@ export function ImageBuilderStepper() {
     return () => clearTimeout(timeout);
   }, [])
 
-  // useEffect(() => {
-  //   if (endpoints) {
-  //     if (partitionsCache[endpointValue]) {
-  //       setPartitions(partitionsCache[endpointValue]);
-  //     } else {
-  //       const fetchPartitions = async () => {
-  //         setIsLoadingPartitions(true);
-  //         try {
-  //           const response = await fetch('/api/list_partitions', {
-  //             method: 'POST',
-  //             headers: {
-  //               'Content-Type': 'application/json',
-  //             },
-  //             body: JSON.stringify({ endpoint: endpointValue }),
-  //           });
-  //           const data = await response.json();
-  //           setPartitions(data);
-  //           setPartitionsCache((prevCache) => ({
-  //             ...prevCache,
-  //             [endpointValue]: data,
-  //           }));
-  //         } catch (error) {
-  //           console.error('Error fetching partitions:', error);
-  //         } finally {
-  //           setIsLoadingPartitions(false);
-  //         }
-  //       };
-  //       fetchPartitions();
-  //     }
-  //   } else {
-  //     setPartitions([]);
-  //   }
-  // }, [endpoints]);
-
   return (
     <Scoped>
       <StepperContent
+        form={form}
         formData={formData}
         onStepSubmit={handleStepSubmit}
         onFinalSubmit={handleFinalSubmit}
         isLoading={isLoading}
         control={control}
         endpoints={endpoints}
+        endpointValue={endpointValue}
       />
     </Scoped>
   )
 }
 
 function StepperContent({
+  form,
   formData,
   onStepSubmit,
   onFinalSubmit,
   isLoading,
   control,
-  endpoints
+  endpoints,
+  endpointValue
 }: {
+  form: UseFormReturn<FormData, any, undefined>
   formData: Partial<FormData>
   onStepSubmit: (data: Partial<FormData>) => void
   onFinalSubmit: (data: FormData) => void
   isLoading: boolean
   control: Control<FormData>
   endpoints: { endpoint_uuid: string; endpoint_name: string }[]
+  endpointValue: string
 }) {
   const stepper = useStepper()
-  const form = useForm<FormData>({
-    resolver: zodResolver(z.object({})),
-    defaultValues: formData
-  })
+ 
 
   const onSubmit = (values: z.infer<typeof stepper.current.schema>) => {
     console.log(`Form values for step ${stepper.current.id}:`, values);
@@ -251,7 +220,7 @@ function StepperContent({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           {stepper.switch({
-            endpointinfo: () => <EndpointStep control={control} endpoints={endpoints} />,
+            endpointinfo: () => <EndpointStep control={control} endpoints={endpoints} endpointValue={endpointValue} />,
             containerinfo: () => <ContainerStep />,
             dependencies: () => <DependenciesStep />,
             environment: () => <EnvironmentStep />,
@@ -326,6 +295,145 @@ function StepIndicator() {
           <span className="text-sm">{step.title}</span>
         </div>
       ))}
+    </div>
+  )
+}
+
+function EndpointStep({ control, endpoints, endpointValue }: { control: Control<FormData>, endpoints: { endpoint_uuid: string; endpoint_name: string }[], endpointValue: string }) {
+  const {
+    register,
+    formState: { errors },
+    setValue,
+  } = useFormContext<EndpointFormValues>()
+  const [partitions, setPartitions] = useState<string[]>([]);
+  const [partitionsCache, setPartitionsCache] = useState<{ [key: string]: string[] }>({});
+  const [isLoadingPartitions, setIsLoadingPartitions] = useState(false);
+
+  useEffect(() => {
+    console.log(endpoints)
+    if (endpoints) {
+      if (partitionsCache[endpointValue]) {
+        setPartitions(partitionsCache[endpointValue]);
+      } else {
+        console.log("Endpoint value:", endpointValue)
+        const fetchPartitions = async () => {
+          setIsLoadingPartitions(true);
+          try {
+            const response = await fetch('/api/list_partitions', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ endpoint: endpointValue }),
+            });
+            const data = await response.json();
+            setPartitions(data);
+            setPartitionsCache((prevCache) => ({
+              ...prevCache,
+              [endpointValue]: data,
+            }));
+          } catch (error) {
+            console.error('Error fetching partitions:', error);
+          } finally {
+            setIsLoadingPartitions(false);
+          }
+        };
+        fetchPartitions();
+      }
+    } else {
+      setPartitions([]);
+    }
+  }, [endpoints]);
+
+
+
+
+  return (
+    <div>
+      <h2 className="text-2xl font-bold mb-4">Select Endpoint</h2>
+      
+      {/* Endpoint Selection */}
+      <FormField
+        control={control}
+        name="endpoint"
+        render={({ field }) => (
+          <FormItem className="w-[60%] md:w-[20%]">
+            <FormLabel>Endpoint</FormLabel>
+            <Select
+              onValueChange={(value) => {
+                setValue('endpoint', value)
+                field.onChange(value)
+              }}
+              defaultValue={field.value}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select endpoint" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {endpoints.length > 0 ? (
+                  endpoints.map((endpoint) => (
+                    <SelectItem
+                      key={endpoint.endpoint_uuid}
+                      value={endpoint.endpoint_uuid}
+                    >
+                      {endpoint.endpoint_name}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="none" disabled>
+                    No endpoints available
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+            <FormMessage>{errors.endpoint?.message}</FormMessage>
+          </FormItem>
+        )}
+      />
+
+      {/* Partition Selection Dropdown */}
+      <FormField
+        control={control}
+        name="partition"
+        render={({ field }) => (
+          <FormItem className="w-[60%] md:w-[20%]">
+            <FormLabel>Partition</FormLabel>
+            <Select
+              onValueChange={field.onChange}
+              value={field.value}
+              disabled={isLoadingPartitions || partitions.length === 0}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder={isLoadingPartitions ? "Loading..." : "Select partition"} />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {partitions.length > 0 ? (
+                  partitions.map((partition) => (
+                    <SelectItem
+                      key={partition}
+                      value={partition}
+                    >
+                      {partition}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="none" disabled>
+                    No partitions available
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+            <FormDescription>
+              Select a partition from the list.
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+        />
     </div>
   )
 }
@@ -463,78 +571,4 @@ function ReviewStep({ onSubmit, isLoading }: { onSubmit: (data: FullFormValues) 
   )
 }
 
-function EndpointStep({ control, endpoints }: { control: Control<FormData>, endpoints: { endpoint_uuid: string; endpoint_name: string }[] }) {
-  const {
-    register,
-    formState: { errors },
-    setValue,
-  } = useFormContext<EndpointFormValues>()
 
-  return (
-    <div>
-      <h2 className="text-2xl font-bold mb-4">Select Endpoint</h2>
-      
-      {/* Endpoint Selection */}
-      <FormField
-        control={control}
-        name="endpoint"
-        render={({ field }) => (
-          <FormItem className="w-[60%] md:w-[20%]">
-            <FormLabel>Endpoint</FormLabel>
-            <Select
-              onValueChange={(value) => {
-                setValue('endpoint', value)
-                field.onChange(value)
-              }}
-              defaultValue={field.value}
-            >
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select endpoint" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {endpoints.length > 0 ? (
-                  endpoints.map((endpoint) => (
-                    <SelectItem
-                      key={endpoint.endpoint_uuid}
-                      value={endpoint.endpoint_uuid}
-                    >
-                      {endpoint.endpoint_name}
-                    </SelectItem>
-                  ))
-                ) : (
-                  <SelectItem value="none" disabled>
-                    No endpoints available
-                  </SelectItem>
-                )}
-              </SelectContent>
-            </Select>
-            <FormMessage>{errors.endpoint?.message}</FormMessage>
-          </FormItem>
-        )}
-      />
-
-      {/* Partition Selection Dropdown */}
-      {/* <FormField
-        control={control}
-        name="imageLocation"
-        render={({ field }) => (
-          <FormItem className="w-[60%] md:w-[20%] mt-4">
-            <FormLabel>Image Location</FormLabel>
-            <FormControl>
-              <Input
-                placeholder="Enter image location"
-                {...register("imageLocation")}
-              />
-            </FormControl>
-            <FormDescription>
-              Provide the location of the image as a string.
-            </FormDescription>
-            <FormMessage>{errors.imageLocation?.message}</FormMessage>
-          </FormItem>
-        )}
-      /> */}
-    </div>
-  )
-}

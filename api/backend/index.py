@@ -207,14 +207,20 @@ def diamond_endpoint_image_builder():
     environment = request.json.get("environment")
     commands = request.json.get("commands")
     location = request.json.get("image_location")
+    accounts = request.json.get("accounts")
+    partitions = request.json.get("partitions")
 
     slurm_commands = f"""
 #SBATCH --time=00:10:00
 #SBATCH --ntasks-per-node=1
 #SBATCH --exclusive
-#SBATCH --partition=cpu
-#SBATCH --account=bcqj-delta-cpu
+#SBATCH --partition={partitions}  
+#SBATCH --account={accounts}
 """
+    
+    # use get_partitions Shell function. 
+    # Use a env to have the command to get user accounts in an hpc system . Eg "accounts" in Delta.
+    # We need user input text input for accounts now.
 
 
     globus_compute_client = initialize_globus_compute_client()
@@ -330,6 +336,7 @@ get_partitions = ShellFunction('sinfo -h -o "%P"')
 @authenticated
 def diamond_get_partitions():
     endpoint_id = request.json.get("endpoint")
+    logging.info(f"endpoint_id: {endpoint_id}")
     globus_compute_client = initialize_globus_compute_client()
     globus_compute_executer = GlobusComputeExecutor(
         client=globus_compute_client, endpoint_id=endpoint_id)
