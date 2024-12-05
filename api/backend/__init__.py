@@ -8,7 +8,7 @@ from flask import Flask
 from flask_cors import CORS
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from api.backend.utils.database import Database
+from api.backend.modules.data_manager.data_manager import Database
 
 # create and configure logger
 logging.basicConfig(
@@ -36,7 +36,9 @@ CORS(
 )
 config = dotenv_values()
 app.config.from_mapping(config)
-# app.secret_key = os.environ.get('SECRET_KEY', 'DEFAULT_SECRET_KEY')
+
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////' + os.path.join(basedir, 'data/app.db')
 
 with app.app_context():
     database = Database(app)

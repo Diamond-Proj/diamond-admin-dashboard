@@ -53,10 +53,12 @@ Diamond Admin Dashboard is a comprehensive admin interface built with Next.js an
 
    - Start the Flask backend:
      ```bash
+     nvm use 22
      pnpm run flask-dev
      ```
    - In a new terminal, start the Next.js frontend:
      ```bash
+     nvm use 22
      pnpm run next-dev
      ```
 

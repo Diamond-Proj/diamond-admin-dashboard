@@ -28,17 +28,15 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
+
 const endpointSchema = z.object({
   endpoint: z.string().min(1, 'Endpoint selection is required'),
-  // endpoint_uuid: z.string().min(1, 'Endpoint selection is required'),
-  // endpoint_name: z.string().min(1, 'Endpoint name is required')
+  partition: z.string().min(1, 'Partition is required'),
 })
 
-const containerNameSchema = z.object({
-  containerName: z.string().min(1, 'Container name is required')
-})
-
-const baseImageSchema = z.object({
+const containerSchema = z.object({
+  containerName: z.string().min(1, 'Container name is required'),
+  location: z.string().min(1, 'Image location is required'),
   baseImage: z.string().min(1, 'Base image is required')
 })
 
@@ -59,9 +57,8 @@ const reviewSchema = z.object({})
 
 
 const { Scoped, useStepper } = defineStepper(
-  { id: 'endpoint', title: 'Select Endpoint', schema: endpointSchema },
-  { id: 'container-name', title: 'Container Name', schema: containerNameSchema },
-  { id: 'base-image', title: 'Base Image', schema: baseImageSchema},
+  { id: 'endpointinfo', title: 'Select Endpoint', schema: endpointSchema },
+  { id: 'containerinfo', title: 'Container Info', schema: containerSchema },
   { id: 'dependencies', title: 'Dependencies', schema: dependenciesSchema },
   { id: 'environment', title: 'Environment', schema: environmentSchema },
   { id: 'commands', title: 'Build Commands', schema: commandsSchema },
@@ -69,25 +66,23 @@ const { Scoped, useStepper } = defineStepper(
 )
 
 type FormData = z.infer<typeof endpointSchema> &
-  z.infer<typeof containerNameSchema> &
-  z.infer<typeof baseImageSchema> &
+  z.infer<typeof containerSchema> &
   z.infer<typeof dependenciesSchema> &
   z.infer<typeof environmentSchema> &
   z.infer<typeof commandsSchema>
 
 type EndpointFormValues = z.infer<typeof endpointSchema>
-type ContainerNameFormValues = z.infer<typeof containerNameSchema>
-type BaseImageFormValues = z.infer<typeof baseImageSchema>
+type ContainerFormValues = z.infer<typeof containerSchema>
 type DependenciesFormValues = z.infer<typeof dependenciesSchema>
 type EnvironmentFormValues = z.infer<typeof environmentSchema>
 type CommandsFormValues = z.infer<typeof commandsSchema>
 
 type FullFormValues = EndpointFormValues &
-  ContainerNameFormValues &
-  BaseImageFormValues &
+  ContainerFormValues &
   DependenciesFormValues &
   EnvironmentFormValues &
   CommandsFormValues
+
 
 export function ImageBuilderStepper() {
   const [formData, setFormData] = useState<Partial<FormData>>({})
@@ -108,6 +103,8 @@ export function ImageBuilderStepper() {
     resolver: zodResolver(z.object({})),
     defaultValues: formData
   })
+
+  const endpointValue = form.watch('endpoint');
 
   const { control, register } = form;
 
@@ -220,13 +217,13 @@ export function ImageBuilderStepper() {
     try {
       const payload = {
         endpoint: data.endpoint,
-        container_name: data.containerName,  // Uncomment if you want to send a name
-        base_image: data.baseImage,  // Changed from baseImage to base_image
+        partition: data.partition,
+        name: data.containerName,
+        base_image: data.baseImage,
+        location: data.location,
         dependencies: data.dependencies,
         environment: data.environment,
-        location: data.location,
         commands: data.commands,
-        
       }
 
         const response = await fetch('/api/image_builder', {
@@ -273,7 +270,19 @@ export function ImageBuilderStepper() {
         console.error('Error fetching endpoints:', error)
       }
     }
-    fetchEndpoints()
+
+    fetchEndpoints();
+    //Fetch endpoints on the first call and then wait 5s after
+    const timeout = setTimeout(fetchEndpoints, 5000);
+    return () => clearTimeout(timeout);
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current)
+      }
+    }
   }, [])
 
   useEffect(() => {
@@ -287,47 +296,46 @@ export function ImageBuilderStepper() {
   return (
     <Scoped>
       <StepperContent
+        form={form}
         formData={formData}
         onStepSubmit={handleStepSubmit}
         onFinalSubmit={handleFinalSubmit}
         isLoading={isLoading}
         control={control}
         endpoints={endpoints}
+        endpointValue={endpointValue}
       />
     </Scoped>
   )
 }
 
 function StepperContent({
+  form,
   formData,
   onStepSubmit,
   onFinalSubmit,
   isLoading,
   control,
-  endpoints
+  endpoints,
+  endpointValue
 }: {
+  form: UseFormReturn<FormData, any, undefined>
   formData: Partial<FormData>
   onStepSubmit: (data: Partial<FormData>) => void
   onFinalSubmit: (data: FormData) => void
   isLoading: boolean
   control: Control<FormData>
   endpoints: { endpoint_uuid: string; endpoint_name: string }[]
+  endpointValue: string
 }) {
   const stepper = useStepper()
-  const form = useForm<FormData>({
-    resolver: zodResolver(z.object({})),
-    defaultValues: formData
-  })
 
   const onSubmit = (values: z.infer<typeof stepper.current.schema>) => {
     console.log(`Form values for step ${stepper.current.id}:`, values);
     if(stepper.isLast){
-      console.log("Last")
       onFinalSubmit(values as FormData);
       stepper.reset();
-    }
-    else{
-      console.log("Else");
+    } else {
       stepper.next();
     }
     onStepSubmit(values as FormData);
@@ -339,11 +347,10 @@ function StepperContent({
         <StepIndicator />
       </div>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onStepSubmit)}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
           {stepper.switch({
-            endpoint: () => <EndpointStep control={control} endpoints={endpoints} />,
-            'container-name': () => <ContainerNameStep />,
-            'base-image': () => <BaseImageStep />,
+            endpointinfo: () => <EndpointStep control={control} endpoints={endpoints} endpointValue={endpointValue} />,
+            containerinfo: () => <ContainerStep />,
             dependencies: () => <DependenciesStep />,
             environment: () => <EnvironmentStep />,
             commands: () => <CommandsStep />,
@@ -421,33 +428,169 @@ function StepIndicator() {
   )
 }
 
-function ContainerNameStep() {
+function EndpointStep({ control, endpoints, endpointValue }: { control: Control<FormData>, endpoints: { endpoint_uuid: string; endpoint_name: string }[], endpointValue: string }) {
   const {
     register,
     formState: { errors },
-  } = useFormContext<ContainerNameFormValues>();
-  
+    setValue,
+  } = useFormContext<EndpointFormValues>()
+  const [partitions, setPartitions] = useState<string[]>([]);
+  const [partitionsCache, setPartitionsCache] = useState<{ [key: string]: string[] }>({});
+  const [isLoadingPartitions, setIsLoadingPartitions] = useState(false);
+
+  useEffect(() => {
+    if (endpoints) {
+      if (partitionsCache[endpointValue]) {
+        setPartitions(partitionsCache[endpointValue]);
+      } else {
+        const fetchPartitions = async () => {
+          setIsLoadingPartitions(true);
+          try {
+            const response = await fetch('/api/list_partitions', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ endpoint: endpointValue }),
+            });
+            const data = await response.json();
+            setPartitions(data);
+            setPartitionsCache((prevCache) => ({
+              ...prevCache,
+              [endpointValue]: data,
+            }));
+          } catch (error) {
+            console.error('Error fetching partitions:', error);
+          } finally {
+            setIsLoadingPartitions(false);
+          }
+        };
+        fetchPartitions();
+      }
+    } else {
+      setPartitions([]);
+    }
+  }, [endpointValue]);
+
+
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-4">Container Name</h2>
-      <label htmlFor={register('containerName').name}>Container Name</label>
-      <Input placeholder="myContainer" {...register('containerName')} />
+      <h2 className="text-2xl font-bold mb-4">Select Endpoint</h2>
+      
+      {/* Endpoint Selection */}
+      <FormField
+        control={control}
+        name="endpoint"
+        render={({ field }) => (
+          <FormItem className="w-[60%] md:w-[20%]">
+            <FormLabel>Endpoint</FormLabel>
+            <Select
+              onValueChange={(value) => {
+                setValue('endpoint', value)
+                field.onChange(value)
+              }}
+              defaultValue={field.value}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select endpoint" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {endpoints.length > 0 ? (
+                  endpoints.map((endpoint) => (
+                    <SelectItem
+                      key={endpoint.endpoint_uuid}
+                      value={endpoint.endpoint_uuid}
+                    >
+                      {endpoint.endpoint_name}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="none" disabled>
+                    No endpoints available
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+            <FormMessage>{errors.endpoint?.message}</FormMessage>
+          </FormItem>
+        )}
+      />
+
+      {/* Partition Selection Dropdown */}
+      <FormField
+        control={control}
+        name="partition"
+        render={({ field }) => (
+          <FormItem className="w-[60%] md:w-[20%]">
+            <FormLabel>Partition</FormLabel>
+            <Select
+              onValueChange={field.onChange}
+              value={field.value}
+              disabled={isLoadingPartitions || partitions.length === 0}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder={isLoadingPartitions ? "Loading..." : "Select partition"} />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {partitions.length > 0 ? (
+                  partitions.map((partition) => (
+                    <SelectItem
+                      key={partition}
+                      value={partition}
+                    >
+                      {partition}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="none" disabled>
+                    No partitions available
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+            <FormDescription>
+              Select a partition from the list.
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+        />
     </div>
-  );
+  )
 }
 
-function BaseImageStep() {
+function ContainerStep() {
   const {
     register,
     formState: { errors },
-  } = useFormContext<BaseImageFormValues>();
+  } = useFormContext<ContainerFormValues>();
   
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-4">Base Image</h2>
-      <label htmlFor={register('baseImage').name}>Base Image</label>
-      <Input placeholder="e.g., python:3.9-slim" {...register('baseImage')} />
-    </div>
+    <>
+      <div>
+        <h2 className="text-2xl font-bold mb-4">Container Name</h2>
+        <label htmlFor={register('containerName').name}>Container Name</label>
+        <Input placeholder="myContainer" {...register('containerName')} />
+      </div>
+      <div>
+        <h2 className="text-2xl font-bold mb-4">Location</h2>
+        <label htmlFor={register('location').name}>Build Location</label>
+        <Input 
+          placeholder="e.g., /home/user/builds" 
+          {...register('location')}
+        />
+      </div>
+      <div>
+        <h2 className="text-2xl font-bold mb-4">Container Name</h2>
+        <label htmlFor={register('baseImage').name}>Container Name</label>
+        <Input placeholder="python:3.9-slim" {...register('baseImage')} />
+      </div>
+    </>
+    
   );
 }
 
@@ -481,15 +624,6 @@ function EnvironmentStep() {
           placeholder="e.g., DEBUG=1&#10;API_KEY=your_api_key" 
           {...register('environment')}
           className="min-h-[100px]"
-        />
-      </div>
-
-      <div>
-        <h2 className="text-2xl font-bold mb-4">Location</h2>
-        <label htmlFor={register('location').name}>Build Location</label>
-        <Input 
-          placeholder="e.g., /home/user/builds" 
-          {...register('location')}
         />
       </div>
     </div>
@@ -534,12 +668,20 @@ function ReviewStep({ onSubmit, isLoading }: { onSubmit: (data: FullFormValues) 
           <p className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.endpoint}</p>
         </div>
         <div>
+          <h3 className="font-semibold text-foreground">Selected Partition:</h3>
+          <p className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.partition}</p>
+        </div>
+        <div>
           <h3 className="font-semibold text-foreground">Container name:</h3>
           <p className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.containerName}</p>
         </div>
         <div>
           <h3 className="font-semibold text-foreground">Base Image:</h3>
           <p className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.baseImage}</p>
+        </div>
+        <div>
+          <h3 className="font-semibold text-foreground">Location:</h3>
+          <p className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.location}</p>
         </div>
         <div>
           <h3 className="font-semibold text-foreground">Dependencies:</h3>
@@ -550,10 +692,6 @@ function ReviewStep({ onSubmit, isLoading }: { onSubmit: (data: FullFormValues) 
           <pre className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.environment}</pre>
         </div>
         <div>
-          <h3 className="font-semibold text-foreground">Location:</h3>
-          <pre className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.location}</pre>
-        </div>
-        <div>
           <h3 className="font-semibold text-foreground">Build Commands:</h3>
           <pre className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.commands}</pre>
         </div>
@@ -562,55 +700,4 @@ function ReviewStep({ onSubmit, isLoading }: { onSubmit: (data: FullFormValues) 
   )
 }
 
-function EndpointStep({ control, endpoints }: { control: Control<FormData>, endpoints: { endpoint_uuid: string; endpoint_name: string }[] }) {
-  const {
-    register,
-    formState: { errors },
-    setValue,
-  } = useFormContext<EndpointFormValues>()
 
-  return (
-    <div>
-      <h2 className="text-2xl font-bold mb-4">Select Endpoint</h2>
-      <FormField
-        control={control}
-        name="endpoint"
-        render={({ field }) => (
-          <FormItem className="w-[60%] md:w-[20%]">
-            <FormLabel>Endpoint</FormLabel>
-            <Select
-              onValueChange={(value) => {
-                setValue('endpoint', value)
-                field.onChange(value)
-              }}
-              defaultValue={field.value}
-            >
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select endpoint" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {endpoints.length > 0 ? (
-                  endpoints.map((endpoint) => (
-                    <SelectItem
-                      key={endpoint.endpoint_uuid}
-                      value={endpoint.endpoint_uuid}
-                    >
-                      {endpoint.endpoint_name}
-                    </SelectItem>
-                  ))
-                ) : (
-                  <SelectItem value="none" disabled>
-                    No endpoints available
-                  </SelectItem>
-                )}
-              </SelectContent>
-            </Select>
-            <FormMessage>{errors.endpoint?.message}</FormMessage>
-          </FormItem>
-        )}
-      />
-    </div>
-  )
-}
