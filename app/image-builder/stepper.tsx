@@ -541,6 +541,10 @@ function ReviewStep({ onSubmit, isLoading }: { onSubmit: (data: FullFormValues) 
           <p className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.endpoint}</p>
         </div>
         <div>
+          <h3 className="font-semibold text-foreground">Selected Partition:</h3>
+          <p className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.partition}</p>
+        </div>
+        <div>
           <h3 className="font-semibold text-foreground">Container name:</h3>
           <p className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.containerName}</p>
         </div>
@@ -549,16 +553,16 @@ function ReviewStep({ onSubmit, isLoading }: { onSubmit: (data: FullFormValues) 
           <p className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.baseImage}</p>
         </div>
         <div>
+          <h3 className="font-semibold text-foreground">Location:</h3>
+          <p className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.location}</p>
+        </div>
+        <div>
           <h3 className="font-semibold text-foreground">Dependencies:</h3>
           <pre className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.dependencies}</pre>
         </div>
         <div>
           <h3 className="font-semibold text-foreground">Environment:</h3>
           <pre className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.environment}</pre>
-        </div>
-        <div>
-          <h3 className="font-semibold text-foreground">Location:</h3>
-          <pre className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.location}</pre>
         </div>
         <div>
           <h3 className="font-semibold text-foreground">Build Commands:</h3>
