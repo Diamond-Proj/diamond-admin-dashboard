@@ -159,6 +159,9 @@ export function ImageBuilderStepper() {
         console.error('Error fetching endpoints:', error)
       }
     }
+
+    fetchEndpoints();
+    //Fetch endpoints on the first call and then wait 5s after
     const timeout = setTimeout(fetchEndpoints, 5000);
     return () => clearTimeout(timeout);
   }, [])
@@ -199,7 +202,6 @@ function StepperContent({
   endpointValue: string
 }) {
   const stepper = useStepper()
- 
 
   const onSubmit = (values: z.infer<typeof stepper.current.schema>) => {
     console.log(`Form values for step ${stepper.current.id}:`, values);
@@ -310,12 +312,10 @@ function EndpointStep({ control, endpoints, endpointValue }: { control: Control<
   const [isLoadingPartitions, setIsLoadingPartitions] = useState(false);
 
   useEffect(() => {
-    console.log(endpoints)
     if (endpoints) {
       if (partitionsCache[endpointValue]) {
         setPartitions(partitionsCache[endpointValue]);
       } else {
-        console.log("Endpoint value:", endpointValue)
         const fetchPartitions = async () => {
           setIsLoadingPartitions(true);
           try {
@@ -343,9 +343,7 @@ function EndpointStep({ control, endpoints, endpointValue }: { control: Control<
     } else {
       setPartitions([]);
     }
-  }, [endpoints]);
-
-
+  }, [endpointValue]);
 
 
   return (
