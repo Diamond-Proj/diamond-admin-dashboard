@@ -89,15 +89,21 @@ export function ImageBuilderStepper() {
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [buildLogs, setBuildLogs] = useState<string>('')
+  const [stderrLogs, setStderrLogs] = useState<string>('')
   const [endpoints, setEndpoints] = useState<
     { endpoint_uuid: string; endpoint_name: string }[]
   >([])
   const [isPolling, setIsPolling] = useState(false)
+  const [isPollingStderr, setIsPollingStderr] = useState(false)
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const pollStderrIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const currentEndpointRef = useRef<string | null>(null)
   const currentLogPathRef = useRef<string | null>(null)
+  const currentStderrLogPathRef = useRef<string | null>(null)
   const currentTaskIdRef = useRef<string | null>(null)
   const currentLogTaskIdRef = useRef<string | null>(null)
+  const currentStderrLogTaskIdRef = useRef<string | null>(null)
+  const [isSubmitted, setIsSubmitted] = useState(false)
 
   const form = useForm<FormData>({
     resolver: zodResolver(z.object({})),
@@ -202,16 +208,110 @@ export function ImageBuilderStepper() {
     }, 300000)
   }, [fetchBuildLogs])
 
+  const fetchStderrLogs = useCallback(async (endpoint_id: string, log_path: string, build_task_id?: string, log_task_id?: string) => {
+    try {
+        const url = new URL('/api/get_build_log', window.location.origin)
+        url.searchParams.append('endpoint_id', endpoint_id)
+        url.searchParams.append('log_path', log_path)
+        if (build_task_id) {
+            url.searchParams.append('task_id', build_task_id)
+        }
+        if (log_task_id) {
+            url.searchParams.append('log_task_id', log_task_id)
+        }
+        
+        const response = await fetch(url)
+        if (!response.ok) throw new Error('Failed to fetch stderr logs')
+        
+        const data = await response.json()
+        
+        if (data.log_task_id) {
+            currentStderrLogTaskIdRef.current = data.log_task_id
+        }
+        
+        const stderrLogElement = document.getElementById('stderrLogs')
+        const stderrStatusElement = document.getElementById('stderrPollingStatus')
+        
+        if (stderrLogElement && stderrStatusElement) {
+            stderrLogElement.textContent = data.log_content || 'Waiting for stderr logs...'
+            stderrStatusElement.textContent = `Stderr status: ${data.status}`
+            
+            return data.status === 'completed' || data.status === 'failed' || data.status === 'error'
+        }
+    } catch (error) {
+        console.error('Error fetching stderr logs:', error)
+        const stderrStatusElement = document.getElementById('stderrPollingStatus')
+        if (stderrStatusElement) {
+            stderrStatusElement.textContent = 'Error fetching stderr logs'
+        }
+        return true
+    }
+    return false
+  }, [])
+
+  const startPollingStderr = useCallback((endpoint_id: string, log_path: string, build_task_id: string) => {
+    if (pollStderrIntervalRef.current) {
+        clearInterval(pollStderrIntervalRef.current)
+    }
+
+    currentEndpointRef.current = endpoint_id
+    currentStderrLogPathRef.current = log_path
+    currentTaskIdRef.current = build_task_id
+    currentStderrLogTaskIdRef.current = null
+
+    setIsPollingStderr(true)
+    
+    fetchStderrLogs(endpoint_id, log_path, build_task_id)
+
+    pollStderrIntervalRef.current = setInterval(async () => {
+        if (currentEndpointRef.current && currentStderrLogPathRef.current && currentTaskIdRef.current) {
+            const shouldStop = await fetchStderrLogs(
+                currentEndpointRef.current,
+                currentStderrLogPathRef.current,
+                currentTaskIdRef.current,
+                currentStderrLogTaskIdRef.current as string
+            )
+            
+            if (shouldStop) {
+                setIsPollingStderr(false)
+                if (pollStderrIntervalRef.current) {
+                    clearInterval(pollStderrIntervalRef.current)
+                }
+            }
+        }
+    }, 5000)
+
+    setTimeout(() => {
+        setIsPollingStderr(false)
+        if (pollStderrIntervalRef.current) {
+            clearInterval(pollStderrIntervalRef.current)
+        }
+    }, 300000)
+  }, [fetchStderrLogs])
+
   const handleFinalSubmit = async (data: FormData) => {
     setIsLoading(true)
-    // Clear existing logs
+    setIsSubmitted(true)
+    const logComponents = document.getElementById('logComponents')
+    if (logComponents) {
+        logComponents.classList.remove('hidden')
+    }
     const logElement = document.getElementById('buildLogs')
     const statusElement = document.getElementById('pollingStatus')
+    const stderrLogElement = document.getElementById('stderrLogs')
+    const stderrStatusElement = document.getElementById('stderrPollingStatus')
+    
     if (logElement) {
         logElement.textContent = 'Starting new build...'
     }
     if (statusElement) {
         statusElement.textContent = 'Preparing build...'
+    }
+    if (stderrLogElement) {
+        stderrLogElement.textContent = 'Waiting for stderr logs...'
+    }
+    if (stderrStatusElement) {
+        stderrStatusElement.textContent = 'Preparing stderr logs...'
     }
 
     try {
@@ -240,9 +340,12 @@ export function ImageBuilderStepper() {
         const result = await response.json()
         console.log('Submitted data:', result)
         const { task_id, container_name } = result
-        const logPath = `${data.location}${data.location.endsWith('/') ? '' : '/'}${container_name}_log.txt`
-        
+        const logPath = `${data.location}${data.location.endsWith('/') ? '' : '/'}${container_name}_log.stdout`
+        const stderrLogPath = `${data.location}${data.location.endsWith('/') ? '' : '/'}${container_name}_log.stderr`
+        console.log('logPath:', logPath)
+        console.log('stderrLogPath:', stderrLogPath)
         startPolling(data.endpoint, logPath, task_id)
+        startPollingStderr(data.endpoint, stderrLogPath, task_id)
 
         toast({
             title: 'Success',
@@ -256,6 +359,11 @@ export function ImageBuilderStepper() {
             description: 'Failed to submit image build configuration. Please try again.',
             variant: 'destructive'
         })
+        setIsSubmitted(false)
+        const logComponents = document.getElementById('logComponents')
+        if (logComponents) {
+            logComponents.classList.add('hidden')
+        }
     } finally {
         setIsLoading(false)
     }
@@ -305,6 +413,7 @@ export function ImageBuilderStepper() {
         control={control}
         endpoints={endpoints}
         endpointValue={endpointValue}
+        isSubmitted={isSubmitted}
       />
     </Scoped>
   )
@@ -318,9 +427,10 @@ function StepperContent({
   isLoading,
   control,
   endpoints,
-  endpointValue
+  endpointValue,
+  isSubmitted
 }: {
-  form: UseFormReturn<FormData, any, undefined>
+  form: UseFormReturn<FormData>
   formData: Partial<FormData>
   onStepSubmit: (data: Partial<FormData>) => void
   onFinalSubmit: (data: FormData) => void
@@ -328,15 +438,18 @@ function StepperContent({
   control: Control<FormData>
   endpoints: { endpoint_uuid: string; endpoint_name: string }[]
   endpointValue: string
+  isSubmitted: boolean
 }) {
   const stepper = useStepper()
 
   const onSubmit = (values: z.infer<typeof stepper.current.schema>) => {
     console.log(`Form values for step ${stepper.current.id}:`, values);
-    if(stepper.isLast){
+    if (stepper.isLast) {
       onFinalSubmit(values as FormData);
-      stepper.reset();
-    } else {
+      if (!isSubmitted) {
+        stepper.reset();
+      }
+    } else if (!isSubmitted) {
       stepper.next();
     }
     onStepSubmit(values as FormData);
@@ -355,7 +468,13 @@ function StepperContent({
             dependencies: () => <DependenciesStep />,
             environment: () => <EnvironmentStep />,
             commands: () => <CommandsStep />,
-            review: () => <ReviewStep onSubmit={onSubmit} isLoading={isLoading} />
+            review: () => (
+              <ReviewStep 
+                onSubmit={(values) => onSubmit(values as FullFormValues)} 
+                isLoading={isLoading} 
+                isSubmitted={isSubmitted} 
+              />
+            )
           })}
         </form>
       </Form>
@@ -364,32 +483,48 @@ function StepperContent({
           type="button"
           variant="outline"
           onClick={stepper.prev}
-          disabled={stepper.isFirst || isLoading}
+          disabled={stepper.isFirst || isLoading || isSubmitted}
           className="bg-background dark:bg-background/80 text-foreground hover:bg-muted"
         >
           Previous
         </Button>
         {stepper.isLast ? (
-          <Button
-            type="button"
-            onClick={() => onSubmit(form.getValues() as FormData)}
-            disabled={isLoading}
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Submitting...
-              </>
-            ) : (
-              'Submit'
+          <div className="flex gap-2">
+            {isSubmitted && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  stepper.reset();
+                  form.reset();
+                  window.location.reload();
+                }}
+                className="bg-background dark:bg-background/80 text-foreground hover:bg-muted"
+              >
+                Reset Form
+              </Button>
             )}
-          </Button>
+            <Button
+              type="button"
+              onClick={() => onSubmit(form.getValues() as FormData)}
+              disabled={isLoading || isSubmitted}
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                'Submit'
+              )}
+            </Button>
+          </div>
         ) : (
           <Button
             type="button"
             onClick={stepper.next}
-            disabled={isLoading}
+            disabled={isLoading || isSubmitted}
             className="bg-primary text-primary-foreground hover:bg-primary/90"
           >
             Next
@@ -734,7 +869,11 @@ python -m pytest`}
   )
 }
 
-function ReviewStep({ onSubmit, isLoading }: { onSubmit: (data: FullFormValues) => void, isLoading: boolean }) {
+function ReviewStep({ onSubmit, isLoading, isSubmitted }: { 
+  onSubmit: (values: FullFormValues) => void, 
+  isLoading: boolean,
+  isSubmitted: boolean 
+}) {
   const {
     watch,
     formState: { errors },
@@ -742,7 +881,7 @@ function ReviewStep({ onSubmit, isLoading }: { onSubmit: (data: FullFormValues) 
   const formData = watch();
   
   return (
-    <div>
+    <div className={`${isSubmitted ? 'opacity-75' : ''}`}>
       <h2 className="text-2xl font-bold mb-4 text-foreground">Review</h2>
       <div className="space-y-4">
         <div>
@@ -778,6 +917,13 @@ function ReviewStep({ onSubmit, isLoading }: { onSubmit: (data: FullFormValues) 
           <pre className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.commands}</pre>
         </div>
       </div>
+      {isSubmitted && (
+        <div className="mt-4 p-4 bg-primary/10 rounded-md">
+          <p className="text-primary font-medium">
+            Form submitted successfully! Check the logs below for build progress.
+          </p>
+        </div>
+      )}
     </div>
   )
 }
