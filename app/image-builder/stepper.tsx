@@ -32,6 +32,7 @@ import {
 const endpointSchema = z.object({
   endpoint: z.string().min(1, 'Endpoint selection is required'),
   partition: z.string().min(1, 'Partition is required'),
+  account: z.string().min(1, 'Account is required'),
 })
 
 const containerSchema = z.object({
@@ -46,7 +47,6 @@ const dependenciesSchema = z.object({
 
 const environmentSchema = z.object({
   environment: z.string().optional(),
-  location: z.string().optional()
 })
 
 const commandsSchema = z.object({
@@ -238,8 +238,8 @@ export function ImageBuilderStepper() {
 
         const result = await response.json()
         console.log('Submitted data:', result)
-        const { task_id, name } = result
-        const logPath = `${data.location}/${name}_log.txt`
+        const { task_id, container_name } = result
+        const logPath = `${data.location}${data.location.endsWith('/') ? '' : '/'}${container_name}_log.txt`
         
         startPolling(data.endpoint, logPath, task_id)
 
@@ -437,6 +437,8 @@ function EndpointStep({ control, endpoints, endpointValue }: { control: Control<
   const [partitions, setPartitions] = useState<string[]>([]);
   const [partitionsCache, setPartitionsCache] = useState<{ [key: string]: string[] }>({});
   const [isLoadingPartitions, setIsLoadingPartitions] = useState(false);
+  const [accounts, setAccounts] = useState<string[]>([]);
+  const [isLoadingAccounts, setIsLoadingAccounts] = useState(false);
 
   useEffect(() => {
     if (endpoints) {
@@ -472,6 +474,39 @@ function EndpointStep({ control, endpoints, endpointValue }: { control: Control<
     }
   }, [endpointValue]);
 
+  useEffect(() => {
+    if (endpoints) {
+      const fetchAccounts = async () => {
+        setIsLoadingAccounts(true);
+        try {
+          const response = await fetch('/api/list_accounts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ endpoint: endpointValue }),
+          });
+          const data = await response.json();
+          // Transform data to extract account and project info
+          const accountsWithProjects = data.map((line: string) => {
+            const matches = line.match(/^(\S+)\s+\d+\s+\d+\s+(.+)$/);
+            if (matches) {
+              return {
+                account: matches[1],
+                project: matches[2].trim()
+              };
+            }
+            return null;
+          }).filter(Boolean);
+          
+          setAccounts(accountsWithProjects.map((a: { account: string }) => a.account));
+        } catch (error) {
+          console.error('Error fetching accounts:', error);
+        } finally {
+          setIsLoadingAccounts(false);
+        }
+      };
+      fetchAccounts();
+    }
+  }, [endpointValue]);
 
   return (
     <div>
@@ -525,40 +560,86 @@ function EndpointStep({ control, endpoints, endpointValue }: { control: Control<
         render={({ field }) => (
           <FormItem className="w-[60%] md:w-[20%]">
             <FormLabel>Partition</FormLabel>
-            <Select
-              onValueChange={field.onChange}
-              value={field.value}
-              disabled={isLoadingPartitions || partitions.length === 0}
-            >
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder={isLoadingPartitions ? "Loading..." : "Select partition"} />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {partitions.length > 0 ? (
-                  partitions.map((partition) => (
-                    <SelectItem
-                      key={partition}
-                      value={partition}
-                    >
-                      {partition}
+            <div className="flex items-center gap-2">
+              <Select
+                onValueChange={field.onChange}
+                value={field.value}
+                disabled={isLoadingPartitions || partitions.length === 0}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder={isLoadingPartitions ? "Loading..." : "Select partition"} />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {partitions.length > 0 ? (
+                    partitions.map((partition) => (
+                      <SelectItem
+                        key={partition}
+                        value={partition}
+                      >
+                        {partition}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="none" disabled>
+                      No partitions available
                     </SelectItem>
-                  ))
-                ) : (
-                  <SelectItem value="none" disabled>
-                    No partitions available
-                  </SelectItem>
-                )}
-              </SelectContent>
-            </Select>
+                  )}
+                </SelectContent>
+              </Select>
+              {isLoadingPartitions && (
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              )}
+            </div>
             <FormDescription>
               Select a partition from the list.
             </FormDescription>
             <FormMessage />
           </FormItem>
         )}
-        />
+      />
+
+      {/* Account Selection Dropdown */}
+      <FormField
+        control={control}
+        name="account"
+        render={({ field }) => (
+          <FormItem className="w-[60%] md:w-[20%]">
+            <FormLabel>Account</FormLabel>
+            <div className="flex items-center gap-2">
+              <Select
+                onValueChange={field.onChange}
+                value={field.value}
+                disabled={isLoadingAccounts}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder={isLoadingAccounts ? "Loading..." : "Select account"} />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {accounts.map((account) => (
+                    <SelectItem
+                      key={account}
+                      value={account}
+                    >
+                      {account}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {isLoadingAccounts && (
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              )}
+            </div>
+            <FormDescription>
+              Select your account.
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
     </div>
   )
 }
@@ -585,8 +666,8 @@ function ContainerStep() {
         />
       </div>
       <div>
-        <h2 className="text-2xl font-bold mb-4">Container Name</h2>
-        <label htmlFor={register('baseImage').name}>Container Name</label>
+        <h2 className="text-2xl font-bold mb-4">Base Image</h2>
+        <label htmlFor={register('baseImage').name}>Base Image</label>
         <Input placeholder="python:3.9-slim" {...register('baseImage')} />
       </div>
     </>
