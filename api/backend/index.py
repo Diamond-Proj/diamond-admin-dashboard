@@ -209,7 +209,7 @@ def diamond_endpoint_image_builder():
     environment = request.json.get("environment")
     commands = request.json.get("commands")
     location = request.json.get("location")
-    accounts = request.json.get("accounts")
+    account = request.json.get("account")
     partitions = request.json.get("partition")
 
     logging.info(f"endpoint_id: {endpoint_id}")
@@ -219,7 +219,7 @@ def diamond_endpoint_image_builder():
     logging.info(f"environment: {environment}")
     logging.info(f"commands: {commands}")
     logging.info(f"location: {location}")
-    logging.info(f"accounts: {accounts}")
+    logging.info(f"account: {account}")
     logging.info(f"partitions: {partitions}")
 
     slurm_commands = f"""
@@ -227,7 +227,7 @@ def diamond_endpoint_image_builder():
 #SBATCH --ntasks-per-node=1
 #SBATCH --exclusive
 #SBATCH --partition={partitions}  
-#SBATCH --account={accounts}
+#SBATCH --account={account}
 """
     
     # use get_partitions Shell function. 
