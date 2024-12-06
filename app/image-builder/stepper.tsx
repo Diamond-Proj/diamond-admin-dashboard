@@ -224,6 +224,7 @@ export function ImageBuilderStepper() {
         dependencies: data.dependencies,
         environment: data.environment,
         commands: data.commands,
+        account: data.account,
       }
 
         const response = await fetch('/api/image_builder', {
