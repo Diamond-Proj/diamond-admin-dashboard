@@ -32,6 +32,7 @@ import {
 const endpointSchema = z.object({
   endpoint: z.string().min(1, 'Endpoint selection is required'),
   partition: z.string().min(1, 'Partition is required'),
+  account: z.string().min(1, 'Account name is required')
 })
 
 const containerSchema = z.object({
@@ -57,7 +58,7 @@ const reviewSchema = z.object({})
 
 
 const { Scoped, useStepper } = defineStepper(
-  { id: 'endpointinfo', title: 'Select Endpoint', schema: endpointSchema },
+  { id: 'endpointinfo', title: 'Endpoint Info', schema: endpointSchema },
   { id: 'containerinfo', title: 'Container Info', schema: containerSchema },
   { id: 'dependencies', title: 'Dependencies', schema: dependenciesSchema },
   { id: 'environment', title: 'Environment', schema: environmentSchema },
@@ -347,16 +348,17 @@ function EndpointStep({ control, endpoints, endpointValue }: { control: Control<
 
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-4">Select Endpoint</h2>
-      
-      {/* Endpoint Selection */}
-      <FormField
-        control={control}
-        name="endpoint"
-        render={({ field }) => (
-          <FormItem className="w-[60%] md:w-[20%]">
-            <FormLabel>Endpoint</FormLabel>
+    <>
+      <div className="grid grid-cols-1 gap-4">
+        {/* Endpoint Selection */}
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Select Endpoint</h2>
+          <FormField
+            control={control}
+            name="endpoint"
+            render={({ field }) => (
+              <FormItem className="w-[60%] md:w-[20%]">
+                <FormLabel>Endpoint</FormLabel>
             <Select
               onValueChange={(value) => {
                 setValue('endpoint', value)
@@ -386,17 +388,19 @@ function EndpointStep({ control, endpoints, endpointValue }: { control: Control<
                 )}
               </SelectContent>
             </Select>
-            <FormMessage>{errors.endpoint?.message}</FormMessage>
-          </FormItem>
-        )}
-      />
-
-      {/* Partition Selection Dropdown */}
-      <FormField
-        control={control}
-        name="partition"
-        render={({ field }) => (
-          <FormItem className="w-[60%] md:w-[20%]">
+                <FormMessage>{errors.endpoint?.message}</FormMessage>
+              </FormItem>
+            )}
+          />
+        </div>
+        {/* Partition Selection Dropdown */}
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Select Partition</h2>
+          <FormField
+            control={control}
+            name="partition"
+            render={({ field }) => (
+              <FormItem className="w-[60%] md:w-[20%]">
             <FormLabel>Partition</FormLabel>
             <Select
               onValueChange={field.onChange}
@@ -424,15 +428,22 @@ function EndpointStep({ control, endpoints, endpointValue }: { control: Control<
                   </SelectItem>
                 )}
               </SelectContent>
-            </Select>
-            <FormDescription>
-              Select a partition from the list.
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-        />
-    </div>
+              </Select>
+              <FormDescription>
+                Select a partition from the list.
+              </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold mb-4">HPC Account Name</h2>
+          <label htmlFor={register('account').name}>HPC Account Name</label>
+          <Input placeholder="Deep-Learning-at-Scat" {...register('account')} />
+        </div>
+      </div>
+    </>
   )
 }
 
@@ -444,23 +455,25 @@ function ContainerStep() {
   
   return (
     <>
-      <div>
-        <h2 className="text-2xl font-bold mb-4">Container Name</h2>
-        <label htmlFor={register('containerName').name}>Container Name</label>
-        <Input placeholder="myContainer" {...register('containerName')} />
-      </div>
-      <div>
-        <h2 className="text-2xl font-bold mb-4">Location</h2>
-        <label htmlFor={register('location').name}>Build Location</label>
-        <Input 
-          placeholder="e.g., /home/user/builds" 
-          {...register('location')}
-        />
-      </div>
-      <div>
-        <h2 className="text-2xl font-bold mb-4">Container Name</h2>
-        <label htmlFor={register('baseImage').name}>Container Name</label>
-        <Input placeholder="python:3.9-slim" {...register('baseImage')} />
+      <div className="grid grid-cols-1 gap-4">
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Container Name</h2>
+          <label htmlFor={register('containerName').name}>Container Name</label>
+          <Input placeholder="myContainer" {...register('containerName')} />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Location</h2>
+          <label htmlFor={register('location').name}>Build Location</label>
+          <Input 
+            placeholder="e.g., /home/user/builds" 
+            {...register('location')}
+          />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Base Image</h2>
+          <label htmlFor={register('baseImage').name}>Base Image</label>
+          <Input placeholder="python:3.9-slim" {...register('baseImage')} />
+        </div>
       </div>
     </>
     
@@ -543,6 +556,10 @@ function ReviewStep({ onSubmit, isLoading }: { onSubmit: (data: FullFormValues) 
         <div>
           <h3 className="font-semibold text-foreground">Selected Partition:</h3>
           <p className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.partition}</p>
+        </div>
+        <div>
+          <h3 className="font-semibold text-foreground">Selected HPC Account:</h3>
+          <p className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.account}</p>
         </div>
         <div>
           <h3 className="font-semibold text-foreground">Container name:</h3>

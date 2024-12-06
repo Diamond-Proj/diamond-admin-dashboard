@@ -55,7 +55,7 @@ certs/**
 next-env.d.ts
 .env*.local
 
-# database  # TODO need to see why its not being ignored
-api/backend/data/**  
+# database
+/api/backend/data/*
 # Pycharm
 .idea
