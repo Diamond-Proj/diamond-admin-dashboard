@@ -1,0 +1,11 @@
+providers = ["...","python"]
+
+[variables]
+NODE_ENV = "production"
+FLASK_ENV = "production"
+HOSTNAME = "0.0.0.0"
+PYTHONPATH = "/app"
+NIXPACKS_PATH = "/usr/local/bin:${PATH}"
+
+[phases.setup]
+nixPkgs = ["nodejs_22", "pnpm", "python312Packages.gunicorn"]

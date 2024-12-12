@@ -5,7 +5,7 @@
     "flask-dev": "FLASK_DEBUG=1 pip3 install -r requirements.txt && python3 -m flask --app api/backend/index.py --debug run -p 5328",
     "next-dev": "next dev",
     "dev": "flask --app api.backend:app --debug run --port=5328 & next dev --turbo",
-    "start": "gunicorn --workers=1 --threads=100 --worker-class=gthread api.backend.index:app --bind=0.0.0.0:5328 & node .next/standalone/server.js",
+    "start": "gunicorn --workers=4 --threads=50 --worker-class=gthread api.backend.index:app --bind=0.0.0.0:5328 & node .next/standalone/server.js",
     "build": "next build",
     "next-start": "next start",
     "lint": "next lint"
