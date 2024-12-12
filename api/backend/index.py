@@ -30,6 +30,11 @@ def home():
     log.info(f"Home route redirecting to {HOST}/sign-in")
     return redirect(HOST + "/sign-in")
 
+@app.route("/api/healthcheck", methods=["GET"])
+def healthcheck():
+    """Health check endpoint."""
+    return jsonify({"status": "healthy", "timestamp": datetime.utcnow().isoformat()})
+
 
 @app.route("/api/signup", methods=["GET"])
 def signup():
