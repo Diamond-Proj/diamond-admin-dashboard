@@ -1,7 +1,7 @@
 providers = ["...", "python"]
 
 [phases.setup]
-nixPkgs = ["...", "nodejs_22", "python312", "python312Packages.pip", "python312Packages.setuptools"]
+nixPkgs = ["nodejs_22", "python312", "python312Packages.pip", "python312Packages.setuptools"]
 
 [phases.install]
 cmds = [
