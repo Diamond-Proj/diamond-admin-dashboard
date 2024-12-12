@@ -1,0 +1,42 @@
+[phases.setup]
+nixPkgs = [
+  "nodejs_22",
+  "python312",
+  "python312Packages.pip",
+  "python312Packages.flask",
+  "python312Packages.gunicorn"
+]
+
+[phases.install]
+cmds = [
+  "python -m pip install -r api/backend/requirements.txt",
+  "npm install -g pnpm",
+  "pnpm install"
+]
+
+[phases.build]
+cmds = [
+  "pnpm build",
+  # Create standalone build as done in prod.Dockerfile
+  "cp -r .next/static .next/standalone/.next/static",
+  "cp -r public .next/standalone/public"
+]
+
+[start]
+cmd = "sh ./start.sh"
+
+[variables]
+NODE_ENV = "production"
+FLASK_ENV = "production"
+HOSTNAME = "0.0.0.0"
+
+# Multi-process configuration
+[[processes]]
+name = "next"
+command = "node .next/standalone/server.js"
+port = 3000
+
+[[processes]]
+name = "flask"
+command = "gunicorn --workers=1 --threads=100 --worker-class=gthread api.backend.index:app --bind=0.0.0.0:5328"
+port = 5328 
