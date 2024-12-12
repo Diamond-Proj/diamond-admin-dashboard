@@ -12,7 +12,7 @@ NODE_ENV = "production"
 FLASK_ENV = "production"
 HOSTNAME = "0.0.0.0"
 PYTHONPATH = "/app"
-PATH = "/usr/local/bin:${PATH}"
+NIXPACKS_PATH = "/usr/local/bin:${PATH}"
 
 [phases.install]
 cmds = [
