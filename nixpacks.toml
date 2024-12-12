@@ -1,18 +1,30 @@
 [phases.setup]
+aptPkgs = [
+  "python3-venv"
+]
+
 nixPkgs = [
   "nodejs_22",
   "python312",
   "python312Packages.pip",
   "python312Packages.flask",
+  "python312Packages.flask-cors",
+  "python312Packages.flask-sqlalchemy",
   "python312Packages.gunicorn",
-  "python312Packages.setuptools"
+  "python312Packages.setuptools",
+  "python312Packages.requests",
+  "python312Packages.python-dotenv",
+  "python312Packages.virtualenv"
 ]
 
 [phases.install]
 cmds = [
-  "python -m ensurepip --upgrade",
-  "python -m pip install --upgrade pip",
-  "python -m pip install -r api/backend/requirements.txt",
+  # Create and activate virtual environment
+  "python -m venv .venv",
+  "source .venv/bin/activate",
+  # Install Python requirements in venv
+  "pip install -r api/requirements.txt",
+  # Install Node dependencies
   "npm install -g pnpm",
   "pnpm install"
 ]
@@ -31,9 +43,9 @@ cmd = "sh ./start.sh"
 NODE_ENV = "production"
 FLASK_ENV = "production"
 HOSTNAME = "0.0.0.0"
-PATH = "/root/.local/bin:${PATH}"
+VIRTUAL_ENV = "/app/.venv"
+PATH = "/app/.venv/bin:${PATH}"
 
-# Multi-process configuration
 [[processes]]
 name = "next"
 command = "node .next/standalone/server.js"
@@ -41,5 +53,5 @@ port = 3000
 
 [[processes]]
 name = "flask"
-command = "gunicorn --workers=1 --threads=100 --worker-class=gthread api.backend.index:app --bind=0.0.0.0:5328"
+command = "source .venv/bin/activate && gunicorn --workers=1 --threads=100 --worker-class=gthread api.backend.index:app --bind=0.0.0.0:5328"
 port = 5328 
