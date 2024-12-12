@@ -1,13 +1,15 @@
 [phases.setup]
 nixPkgs = [
   "nodejs_22",
-  "python312"
+  "python312",
+  "python312Packages.pip",
+  "python312Packages.setuptools"
 ]
 
 [phases.install]
 cmds = [
-  # Install Python requirements
-  "pip install -r api/requirements.txt",
+  # Install Python requirements using python -m pip
+  "python -m pip install -r api/requirements.txt",
   # Install Node dependencies
   "npm install -g pnpm",
   "pnpm install"
