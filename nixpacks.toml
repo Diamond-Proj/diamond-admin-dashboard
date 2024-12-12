@@ -1,5 +1,4 @@
-[providers]
-include = ["...", "python", "nodejs"]
+providers = ["python", "nodejs"]
 
 [phases.setup]
 nixPkgs = ["...", "nodejs_22", "python312", "python312Packages.pip", "python312Packages.setuptools"]
