@@ -1,12 +1,12 @@
-providers = ["python"]
+providers = ["...","python"]
 
 [phases.setup]
-nixPkgs = ["nodejs_22", "python312", "python312Packages.pip", "python312Packages.setuptools"]
+nixPkgs = ["nodejs_22", "python312", "python312Packages.pip"]
 
 [phases.install]
 cmds = [
   # Install Python requirements using python -m pip
-  "python -m pip install -r api/requirements.txt",
+  "python -m pip install --no-cache-dir -r api/requirements.txt",
   # Install Node dependencies
   "npm install -g pnpm",
   "pnpm install"
@@ -26,8 +26,7 @@ cmd = "sh ./start.sh"
 NODE_ENV = "production"
 FLASK_ENV = "production"
 HOSTNAME = "0.0.0.0"
-PYTHONPATH = "/opt/venv/lib/python3.12/site-packages:${PYTHONPATH}"
-NIXPACKS_PYTHON_VERSION = "3.12"
+PYTHONPATH = "/app"
 
 [[processes]]
 name = "next"
