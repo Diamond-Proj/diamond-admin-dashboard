@@ -3,6 +3,7 @@ providers = ["...","python"]
 [phases.setup]
 nixPkgs = ["nodejs_22"]
 cmds = [
+  "npm config set prefix /usr/local",
   "npm install -g pnpm"
 ]
 
@@ -11,13 +12,12 @@ NODE_ENV = "production"
 FLASK_ENV = "production"
 HOSTNAME = "0.0.0.0"
 PYTHONPATH = "/app"
-PATH = "/root/.local/share/pnpm:${PATH}"
+PATH = "/usr/local/bin:${PATH}"
 
 [phases.install]
 cmds = [
   # Install Python requirements using python -m pip
   # Install Node dependencies
-  "export PATH=\"/root/.local/share/pnpm:$PATH\"",
   "pnpm install"
 ]
 
