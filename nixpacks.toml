@@ -1,12 +1,11 @@
 providers = ["...","python"]
 
 [phases.setup]
-nixPkgs = ["nodejs_22", "python312", "python312Packages.pip"]
+nixPkgs = ["nodejs_22"]
 
 [phases.install]
 cmds = [
   # Install Python requirements using python -m pip
-  "python -m pip install --no-cache-dir -r api/requirements.txt",
   # Install Node dependencies
   "npm install -g pnpm",
   "pnpm install"
@@ -18,9 +17,6 @@ cmds = [
   "cp -r .next/static .next/standalone/.next/static",
   "cp -r public .next/standalone/public"
 ]
-
-[start]
-cmd = "sh ./start.sh"
 
 [variables]
 NODE_ENV = "production"
