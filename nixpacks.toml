@@ -4,11 +4,14 @@ nixPkgs = [
   "python312",
   "python312Packages.pip",
   "python312Packages.flask",
-  "python312Packages.gunicorn"
+  "python312Packages.gunicorn",
+  "python312Packages.setuptools"
 ]
 
 [phases.install]
 cmds = [
+  "python -m ensurepip --upgrade",
+  "python -m pip install --upgrade pip",
   "python -m pip install -r api/backend/requirements.txt",
   "npm install -g pnpm",
   "pnpm install"
@@ -17,7 +20,6 @@ cmds = [
 [phases.build]
 cmds = [
   "pnpm build",
-  # Create standalone build as done in prod.Dockerfile
   "cp -r .next/static .next/standalone/.next/static",
   "cp -r public .next/standalone/public"
 ]
@@ -29,6 +31,7 @@ cmd = "sh ./start.sh"
 NODE_ENV = "production"
 FLASK_ENV = "production"
 HOSTNAME = "0.0.0.0"
+PATH = "/root/.local/bin:${PATH}"
 
 # Multi-process configuration
 [[processes]]
