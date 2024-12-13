@@ -42,8 +42,8 @@ services:
       - --log.level=DEBUG
       - --api
       # Entrypoints
-      - --entrypoints.http.address=:80
-      - --entrypoints.https.address=:443
+      - --entrypoints.http.address=:81
+      - --entrypoints.https.address=:444
       # Activate tls entrypoint resolver
       - --entrypoints.https.http.tls.certresolver=myresolver
       # letsencrypt
@@ -59,8 +59,8 @@ services:
       - --providers.docker.watch=true
     restart: unless-stopped
     ports:
-      - "${TRAEFIK_HTTP_PORT:-8000}:80"
-      - "${TRAEFIK_HTTPS_PORT:-8443}:443"
+      - "${TRAEFIK_HTTP_PORT:-8000}:81"
+      - "${TRAEFIK_HTTPS_PORT:-8443}:444"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock  # Mount the Docker daemon socket
       - ./certs:/certs # Mount the certificates directory for acme.json file
@@ -72,5 +72,5 @@ services:
       - "traefik.http.routers.traefik.rule=Host(`traefik.diamond.ncsa.illinois.edu`)"  # Dashboard
       - "traefik.http.routers.traefik.entrypoints=http"
       - "traefik.http.routers.traefik.service=api@internal"
-      - "traefik.http.services.traefik.loadbalancer.server.port=8000"
+      - "traefik.http.services.traefik.loadbalancer.server.port=8001"
 
