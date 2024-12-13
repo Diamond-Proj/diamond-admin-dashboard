@@ -9,3 +9,8 @@ NIXPACKS_PATH = "/usr/local/bin:${PATH}"
 
 [phases.setup]
 nixPkgs = ["nodejs_22", "pnpm", "python312Packages.gunicorn"]
+
+[phases.build]
+cmds = [
+  "mv /api /app/api"
+]
