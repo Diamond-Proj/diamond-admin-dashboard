@@ -72,5 +72,5 @@ services:
       - "traefik.http.routers.traefik.rule=Host(`traefik.diamond.ncsa.illinois.edu`)"  # Dashboard
       - "traefik.http.routers.traefik.entrypoints=http"
       - "traefik.http.routers.traefik.service=api@internal"
-      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+      - "traefik.http.services.traefik.loadbalancer.server.port=8000"
 
