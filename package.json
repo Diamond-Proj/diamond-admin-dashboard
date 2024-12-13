@@ -1,11 +1,16 @@
 {
   "name": "diamond-admin-dashboard",
+  "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "next-dev": "next dev",
-    "start": "next start",
+    "start": "node .next/standalone/server.js",
     "build": "next build",
-    "lint": "next lint"
+    "lint": "next lint",
+    "next-start": "next start"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
