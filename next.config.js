@@ -20,7 +20,7 @@ const nextConfig = {
           // TODO : need to check if this is the right way to do it
           process.env.NODE_ENV === 'development'
             ? 'http://127.0.0.1:5328/api/:path*'
-            : process.env.HOST + '/api/:path*'
+            : process.env.FLASK_URL + '/api/:path*'
       }
     ];
   },
