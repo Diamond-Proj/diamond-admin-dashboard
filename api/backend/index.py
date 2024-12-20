@@ -75,6 +75,7 @@ def diamond_list_active_endpoints():
     return active_endpoints
 
 
+# Not used
 def apptainer_builder_wrapper(base_image, location, name, dependencies, environment, commands):
     import os
     import textwrap
@@ -157,13 +158,14 @@ Bootstrap: docker
 From: {base_image}
 
 %post
+    echo "post section"
     apt-get -y update
+    apt-get -y install apt-utils
     apt-get -y install python3-pip
     mkdir -p /app
     cd /app
-    echo "{dependencies}" > requirements.txt
-    echo "cd /app
-    {commands}" > commands.sh
+    echo $PWD
+    {commands} > commands.sh
     chmod +x commands.sh
     /bin/bash commands.sh
 
