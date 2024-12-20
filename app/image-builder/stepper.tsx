@@ -737,53 +737,50 @@ function EndpointStep({ control, endpoints, endpointValue }: { control: Control<
                 <FormMessage />
               </FormItem>
             )}
-        />
-
-      {/* Account Selection Dropdown */}
-      <FormField
-        control={control}
-        name="account"
-        render={({ field }) => (
-          <FormItem className="w-[60%] md:w-[20%]">
-            <FormLabel>Account</FormLabel>
-            <div className="flex items-center gap-2">
-              <Select
-                onValueChange={field.onChange}
-                value={field.value}
-                disabled={isLoadingAccounts}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder={isLoadingAccounts ? "Loading..." : "Select account"} />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {accounts.map((account) => (
-                    <SelectItem
-                      key={account}
-                      value={account}
-                    >
-                      {account}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {isLoadingAccounts && (
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-              )}
-            </div>
-            <FormDescription>
-              Select your account.
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-        </div>
+            />
+          </div>
+        {/* Account Selection Dropdown */}
         <div>
           <h2 className="text-2xl font-bold mb-4">HPC Account Name</h2>
-          <label htmlFor={register('account').name}>HPC Account Name</label>
-          <Input placeholder="Deep-Learning-at-Scat" {...register('account')} />
+          <FormField
+          control={control}
+          name="account"
+          render={({ field }) => (
+            <FormItem className="w-[60%] md:w-[20%]">
+              <FormLabel>Account</FormLabel>
+              <div className="flex items-center gap-2">
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  disabled={isLoadingAccounts}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder={isLoadingAccounts ? "Loading..." : "Select account"} />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {accounts.map((account) => (
+                      <SelectItem
+                        key={account}
+                        value={account}
+                      >
+                        {account}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {isLoadingAccounts && (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                )}
+              </div>
+              <FormDescription>
+                Select your account.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         </div>
       </div>
     </>
