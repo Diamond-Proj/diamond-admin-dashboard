@@ -165,12 +165,11 @@ From: {base_image}
     mkdir -p /app
     cd /app
     echo $PWD
-    {commands} > commands.sh
+    echo "{commands}" > commands.sh
     chmod +x commands.sh
-    /bin/bash commands.sh
 
 %environment
-    {environment}
+    export {environment}
 
 %runscript
     /bin/bash /app/commands.sh
