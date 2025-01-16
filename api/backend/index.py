@@ -272,15 +272,18 @@ def diamond_endpoint_image_builder():
         dependencies=dependencies,
         environment=environment,
         commands=commands,
+        endpoint_id=endpoint_id,
     )
 
     return jsonify(def_file_creation_task_id)
 
 
+get_container_status = ShellFunction('squeue --name={name} -h -o "%T"')
+
 @app.route("/api/get_containers", methods=["GET"])
 @authenticated
 def get_containers():
-    global_compute_client = initialize_globus_compute_client()
+    globus_compute_client = initialize_globus_compute_client()
 
     containers = database.load_containers(identity_id=session["primary_identity"])
     containers_data = {}
@@ -288,13 +291,26 @@ def get_containers():
         logging.info(f"container: {container.container_task_id}")
         container_task_id = container.container_task_id
         name = container.name
-        container_status = global_compute_client.get_task(container_task_id)
+
+        endpoint_id = container.endpoint_id
+        globus_compute_executer = GlobusComputeExecutor(
+            client=globus_compute_client,endpoint_id=endpoint_id)
+        fu = globus_compute_executer.submit(get_container_status, name=name)
+        fu_stdout = fu.result().stdout
+        if fu_stdout == "":
+            container_status = container.container_status
+        else:
+            container_status = fu_stdout
+            database.update_container_status(container_task_id, container_status)
+        logging.info("***************************************")
+        logging.info(fu_stdout)
+
+
         containers_data[name] = {
             "container_task_id": container_task_id,
-            "status": container_status["status"],
+            "status": container_status,
             "base_image": container.base_image,
             "location": container.location,
-            # "description": container["description"],
         }
 
     logging.info(f"container status is {containers_data}")
@@ -357,7 +373,7 @@ cat << EOF > test.submit
 #SBATCH --job-name={task_name}
 #SBATCH --output={log_path}/{task_name}.stdout
 #SBATCH --error={log_path}/{task_name}.stderr
-#SBATCH --nodes=1
+#SBATCH --nodes={num_of_nodes}
 #SBATCH --time=01:00:00
 #SBATCH --ntasks-per-node=1
 #SBATCH --exclusive
@@ -370,7 +386,6 @@ apptainer run --nv {container} {task}
 EOF
 
 sbatch $PWD/test.submit
-cat $PWD/test.submit
 """)
 
 @app.route("/api/submit_task", methods=["POST"])
@@ -382,10 +397,14 @@ def diamond_endpoint_submit_job():
     container = request.json.get("container")
     log_path = request.json.get("log_path")
     task = request.json.get("task")
+    num_of_nodes = request.json.get("num_of_nodes")
+    if not num_of_nodes:
+        num_of_nodes = 1
 
     container_path = database.get_container_path_by_name(container)
 
     globus_compute_client=initialize_globus_compute_client()
+    # globus_compute_executor = GlobusComputeExecutor(client=globus_compute_client, endpoint_id=endpoint_id)
 
     function_id = globus_compute_client.register_function(submit_task)
     
@@ -394,10 +413,26 @@ def diamond_endpoint_submit_job():
         container=container_path + "/" + container + ".sif",
         task=task,
         log_path=log_path,
+        num_of_nodes=num_of_nodes,
+        task_name=task_name,
         endpoint_id=endpoint_id,
         function_id=function_id,
-        task_name=task_name,
     )
+
+    # fu = globus_compute_executor.submit(
+    #     submit_task,
+    #     partition=partition,
+    #     container=container_path + "/" + container + ".sif",
+    #     task=task,
+    #     log_path=log_path,
+    #     num_of_nodes=num_of_nodes,
+    #     task_name=task_name)
+    
+    # fu_stdout = fu.result().stdout
+    # logging.info("++++++++++++++++!!!???????????????????++++++++++")
+    # logging.info(fu_stdout)
+    # logging.info(fu.result().stderr)
+    # logging.info("++++++++++++++++!!!!!!!!!!!!!!!!+++++++++++++")
 
     database.save_task(
         task_id=task_id,
@@ -409,25 +444,31 @@ def diamond_endpoint_submit_job():
     )
     return jsonify("hello")
 
-
+get_task_stauts = ShellFunction('squeue --name={task_name} -h -o "%T"')
 
 @app.route("/api/get_task_status", methods=["GET"])
 @authenticated
 def diamond_get_task_status():
     global_compute_client = initialize_globus_compute_client()
 
-    # Load tasks from the database for the authenticated user
     tasks = database.load_tasks(identity_id=session["primary_identity"])
 
-    # Update each task's status in the database
     for task in tasks:
         task_id = task.task_id
         logging.info(f"Updating status for task ID: {task_id}")
 
         current_task = global_compute_client.get_task(task_id)
 
-        task.task_status = current_task["status"]
         task.endpoint_id = current_task["details"]["endpoint_id"]
+        globus_compute_executor = GlobusComputeExecutor(client=global_compute_client, endpoint_id=task.endpoint_id)
+        fu = globus_compute_executor.submit(get_task_stauts, task_name=task.task_name)
+        fu_stdout = fu.result().stdout
+        if fu_stdout == "":
+            task.task_status = task.task_status
+        else:
+            task.task_status = fu_stdout
+        logging.info("++++++++++++++++++++++++++++++++++++++++++")
+        logging.info(fu_stdout)
 
         database.save_task(
             task_id=task.task_id,
