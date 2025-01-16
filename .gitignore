@@ -1,5 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+# Pycharm
+.idea
+
 # dependencies
 /node_modules
 /.pnp
@@ -16,8 +19,9 @@
 # production
 /build
 
-# vercel
-.vercel
+# backend database
+/api/backend/data/*.db
+
 
 # typescript
 *.tsbuildinfo
@@ -63,7 +67,4 @@ certs/**
 next-env.d.ts
 .env*.local
 
-# database
-/api/backend/data/*
-# Pycharm
-.idea
+
