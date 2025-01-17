@@ -6,11 +6,10 @@
     "node": "22.x"
   },
   "scripts": {
-    "next-dev": "next dev",
+    "dev": "next dev",
     "start": "next start",
     "build": "next build",
-    "lint": "next lint",
-    "next-start": "next start"
+    "lint": "next lint"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
