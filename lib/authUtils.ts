@@ -3,9 +3,10 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { redirect } from 'next/navigation';
 
-const HOST = process.env.HOST;
+const NODE_ENV = process.env.NODE_ENV;
+const HOST = NODE_ENV === 'development' ? 'http://' + process.env.HOST : 'https://' + process.env.HOST;
 const NEXT_URL = process.env.NEXT_URL;
-const FLASK_URL = process.env.FLASK_URL;
+const FLASK_URL = NODE_ENV === 'development' ? 'http://' + process.env.FLASK_URL : 'https://' + process.env.FLASK_URL;
 
 export async function is_authenticated() {
   const tokens = cookies().get('tokens');
