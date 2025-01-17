@@ -1,12 +1,14 @@
 {
   "name": "diamond-admin-dashboard",
+  "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
-    "flask-dev": "FLASK_DEBUG=1 pip3 install -r requirements.txt && python3 -m flask --app api/backend/index.py --debug run -p 5328",
-    "next-dev": "next dev",
-    "dev": "flask --app api.backend:app --debug run --port=5328 & next dev --turbo",
-    "build": "next build",
+    "dev": "next dev",
     "start": "next start",
+    "build": "next build",
     "lint": "next lint"
   },
   "dependencies": {

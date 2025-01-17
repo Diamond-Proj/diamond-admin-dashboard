@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { is_authenticated, signOut } from './authUtils';
 
-const HOST = process.env.HOST;
+const NODE_ENV = process.env.NODE_ENV;
+const HOST = NODE_ENV === 'development' ? 'http://' + process.env.HOST : 'https://' + process.env.HOST;
 
 function redirectToSignIn() {
   return NextResponse.redirect(HOST + '/sign-in');

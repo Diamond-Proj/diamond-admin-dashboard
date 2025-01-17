@@ -2,14 +2,13 @@
 
 ## Overview
 
-Diamond Admin Dashboard is a comprehensive admin interface built with Next.js and Flask, integrating SQLite for database management. It features a modern UI with Tailwind CSS and TypeScript, and is designed for managing jobs, users, and settings within a secure environment.
+Diamond Admin Dashboard is a comprehensive admin interface built with Next.js, featuring a modern UI with Tailwind CSS and TypeScript. It is designed for managing jobs, users, and settings within a secure environment. This repository contains the frontend application only.
 
 ## Installation Instructions
 
 ### Prerequisites
 
 - Node.js
-- Python 3
 - pnpm (Package manager)
 
 ### Setting Up the Project
@@ -17,8 +16,8 @@ Diamond Admin Dashboard is a comprehensive admin interface built with Next.js an
 1. **Clone the repository:**
 
    ```bash
-   git clone [repository-url]
-   cd [repository-directory]
+   git clone https://github.com/Diamond-Proj/diamond-admin-dashboard
+   cd diamond-admin-dashboard
    ```
 
 2. **Install Node dependencies:**
@@ -27,62 +26,46 @@ Diamond Admin Dashboard is a comprehensive admin interface built with Next.js an
    pnpm install
    ```
 
-3. **Set up Python environment:**
+3. **Environment Configuration:**
 
-   - Create a virtual environment:
-     ```bash
-     python -m venv venv
-     ```
-   - Activate the virtual environment:
-     ```bash
-     # For Windows
-     .\venv\Scripts\activate
-     # For Unix or MacOS
-     source venv/bin/activate
-     ```
-   - Install Python dependencies:
-     ```bash
-     pip install -r requirements.txt
-     ```
+   - Copy the `.env.example` file to `.env` and adjust the configuration to match your local setup.
+   - Ensure the backend API URL is correctly configured in your environment variables.
 
-4. **Environment Configuration:**
+4. **Running the Development Server:**
 
-   - Copy the `.env.example` file to `.env` and adjust the configuration to match your local setup for both backend and frontend.
+   ```bash
+   nvm use 22
+   pnpm run next-dev
+   ```
 
-5. **Running the Development Servers:**
-
-   - Start the Flask backend:
-     ```bash
-     nvm use 22
-     pnpm run flask-dev
-     ```
-   - In a new terminal, start the Next.js frontend:
-     ```bash
-     nvm use 22
-     pnpm run next-dev
-     ```
-
-6. **Access the Application:**
+5. **Access the Application:**
    - Open your web browser and navigate to `http://localhost:3000` to view the dashboard.
 
-## Deployment Instructions
-- ssh to deployment machine 
-- cd `Diamond-Proj/diamond-admin-dashboard`
-- Change git branch to the deployment PR. Eg: `gh pr checkout 9`
-- Build the docker-stack : `sudo docker-compose build`
-- Check if `certs/acme.json` file exists with 600 permissions. `chmod 600 certs/acme.json`.
-- Run the docker-stack : `sudo docker-compose up`
-   - OR Run the docker-stack in background : `sudo dokcer-compose up -d`
-- Test deployment at `diamond.ncsa.illinois.edu`
-  
-- If you ran into error `[Errno 28] No space left on device:`, try below:
-    - Free more spaces by running `docker system prune --all` 
-    - If in local, increase the Disk image size. You can find the configuration in Docker Desktop
+## Deployment
+The application uses automated deployment through Coolify:
 
+1. **Development Deployments:**
+   - Every Pull Request automatically gets a preview deployment
+   - Preview deployments can be accessed through the PR status checks
+
+2. **Production Deployment:**
+   - Merging to `main` branch automatically triggers production deployment
+   - Production site is available at `https://diamondhpc.ai`
+
+3. **Monitoring:**
+   - Deployment status can be monitored in the PR checks
+   - Coolify dashboard shows detailed deployment logs and status
+
+4. **Troubleshooting:**
+   If you encounter issues:
+   - Check PR status checks for deployment failures
+   - Review Coolify dashboard for detailed logs
+   - Contact system administrator if issues persist
 
 ## Additional Information
 
-- Ensure all environment variables and configurations are set correctly in the `.env` file for both the backend and frontend services.
+- This repository contains only the frontend application. The backend services are maintained in a separate repository.
+- Ensure all environment variables and configurations are set correctly in the `.env` file.
 
 <br>
 
