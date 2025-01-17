@@ -2,6 +2,7 @@ import logging
 import time
 import os
 from datetime import datetime
+import time
 
 import requests
 from flask import flash, jsonify, make_response, redirect, request, session, url_for
@@ -74,6 +75,7 @@ def diamond_list_active_endpoints():
     return active_endpoints
 
 
+# Not used
 def apptainer_builder_wrapper(base_image, location, name, dependencies, environment, commands):
     import os
     import textwrap
@@ -151,23 +153,23 @@ def container_builder_wrapper(base_image, location, name, dependencies, environm
 
 apptainer_def_file_creation = ShellFunction(
 """
-cat << EOF > {location}/{base_image}.def
+cat << EOF > {location}/{container_name}.def
 Bootstrap: docker
 From: {base_image}
 
 %post
+    echo "post section"
     apt-get -y update
+    apt-get -y install apt-utils
     apt-get -y install python3-pip
     mkdir -p /app
     cd /app
-    echo "{dependencies}" > requirements.txt
-    echo "cd /app
-    {commands}" > commands.sh
+    echo $PWD
+    echo "{commands}" > commands.sh
     chmod +x commands.sh
-    /bin/bash commands.sh
 
 %environment
-    {environment}
+    export {environment}
 
 %runscript
     /bin/bash /app/commands.sh
@@ -181,12 +183,12 @@ container_builder_wrapper_shell = ShellFunction(
 cat << EOF > test.submit
 #!/bin/bash
 
-#SBATCH --job-name={base_image}
-#SBATCH --output={location}/{base_image}_log.stdout
-#SBATCH --error={location}/{base_image}_log.stderr
+#SBATCH --job-name={container_name}
+#SBATCH --output={location}/{container_name}_log.stdout
+#SBATCH --error={location}/{container_name}_log.stderr
 {slurm_commands}  
 echo $PWD
-srun apptainer build {location}/{base_image}.sif {location}/{base_image}.def
+srun apptainer build {location}/{container_name}.sif {location}/{container_name}.def
 
 EOF
 
@@ -201,28 +203,39 @@ echo "SHELL ECHO"
 def diamond_endpoint_image_builder():
 
     endpoint_id = request.json.get("endpoint")
-    name = f"image-{endpoint_id}-v{datetime.now().strftime('%Y%m%d%H%M%S')}"
+    name = request.json.get("name")
+    # name = f"image-{endpoint_id}-v{datetime.now().strftime('%Y%m%d%H%M%S')}"
     base_image = request.json.get("base_image")
     dependencies = request.json.get("dependencies")
     environment = request.json.get("environment")
     commands = request.json.get("commands")
-    location = request.json.get("image_location")
-    accounts = request.json.get("accounts")
-    partitions = request.json.get("partitions")
+    location = request.json.get("location")
+    account = request.json.get("account")
+    partitions = request.json.get("partition")
+
+    logging.info(f"endpoint_id: {endpoint_id}")
+    logging.info(f"container_name: {name}")
+    logging.info(f"base_image: {base_image}")
+    logging.info(f"dependencies: {dependencies}")
+    logging.info(f"environment: {environment}")
+    logging.info(f"commands: {commands}")
+    logging.info(f"location: {location}")
+    logging.info(f"account: {account}")
+    logging.info(f"partitions: {partitions}")
 
     slurm_commands = f"""
 #SBATCH --time=00:10:00
 #SBATCH --ntasks-per-node=1
 #SBATCH --exclusive
 #SBATCH --partition={partitions}  
-#SBATCH --account={accounts}
+#SBATCH --account={account}
 """
     
     # use get_partitions Shell function. 
     # Use a env to have the command to get user accounts in an hpc system . Eg "accounts" in Delta.
     # We need user input text input for accounts now.
-
-
+    
+    # First we create the def file using ShellFunction.
     globus_compute_client = initialize_globus_compute_client()
     def_file_creation_function_id = globus_compute_client.register_function(apptainer_def_file_creation)
     def_file_creation_task_id = globus_compute_client.run(
@@ -233,8 +246,9 @@ def diamond_endpoint_image_builder():
         commands=commands,
         environment=environment,
         function_id=def_file_creation_function_id,
+        container_name=name
     )
-
+    # Wait for the def file creation task to complete.
     def_file_creation_task_status = globus_compute_client.get_task(def_file_creation_task_id)
     while (def_file_creation_task_status["pending"]):
         print("def_file_creation_task_id", def_file_creation_task_status)
@@ -242,29 +256,28 @@ def diamond_endpoint_image_builder():
         def_file_creation_task_status = globus_compute_client.get_task(def_file_creation_task_id)
         continue
 
-
+    print("def_file_creation_task_id", def_file_creation_task_status)
+    # Then we create the container using ShellFunction with SBATCH commands.
     function_id = globus_compute_client.register_function(container_builder_wrapper_shell)
-    
-    task_id = globus_compute_client.run(
-        name=name,
+    container_task_id = globus_compute_client.run(
+        container_name=name,
         base_image=base_image,
         location=location,
         endpoint_id=endpoint_id,
         function_id=function_id,
         slurm_commands=slurm_commands
     )
+    # Output is available at {location}/{base_image}_log.stdout
+    # container_task_status = globus_compute_client.get_task(container_task_id)
+    # print("container_builder_wrapper_shell" , container_task_status)
+    # while (container_task_status["pending"]):
+    #     print("container_builder_wrapper_shell" , container_task_status)
+    #     time.sleep(10)
+    #     container_task_status = globus_compute_client.get_task(container_task_id)
+    #     continue
 
-    function_task_status = globus_compute_client.get_task(task_id)
-    print("container_builder_wrapper_shell" , function_task_status)
-    while (function_task_status["pending"]):
-        print("container_builder_wrapper_shell" , function_task_status)
-        time.sleep(10)
-        function_task_status = globus_compute_client.get_task(task_id)
-        continue
-
-    
     database.save_container(
-        container_task_id=task_id,
+        container_task_id=container_task_id,
         identity_id=session["primary_identity"],
         name=name,
         base_image=base_image,
@@ -274,8 +287,110 @@ def diamond_endpoint_image_builder():
         commands=commands,
         endpoint_id=endpoint_id,
     )
+    return jsonify({"task_id": container_task_id, "container_name": name})
 
-    return jsonify(def_file_creation_task_id)
+def log_reader_wrapper(log_file_path):
+    """Wrapper function to read log file content"""
+    try:
+        with open(log_file_path, 'r') as f:
+            content = f.read()
+            # Check if build is complete
+            is_complete = 'INFO:    Build complete:' in content
+            return {
+                'content': content,
+                'is_complete': is_complete
+            }
+    except Exception as e:
+        return {
+            'content': f"Error reading log file: {str(e)}",
+            'is_complete': False,
+            'error': str(e)
+        }
+
+@app.route("/api/get_build_log", methods=["GET"])
+@authenticated
+def get_build_log():
+    """Get the content of a container build log file."""
+    globus_compute_client = initialize_globus_compute_client()
+    
+    # Get parameters from request
+    log_file_path = request.args.get("log_path")
+    endpoint_id = request.args.get("endpoint_id")
+    build_task_id = request.args.get("task_id")  # Original build task ID
+    log_task_id = request.args.get("log_task_id")  # Previous log reader task ID
+    
+    if not log_file_path or not endpoint_id:
+        return jsonify({"error": "Missing required parameters"}), 400
+    
+    try:
+        # Register function only once and store its ID
+        if not hasattr(get_build_log, 'log_reader_function_id'):
+            get_build_log.log_reader_function_id = globus_compute_client.register_function(log_reader_wrapper)
+            print(f'Registered log reader function: {get_build_log.log_reader_function_id}')
+
+        # Create new log reader task if no log_task_id
+        if not log_task_id:
+            log_task_id = globus_compute_client.run(
+                endpoint_id=endpoint_id,
+                function_id=get_build_log.log_reader_function_id,
+                log_file_path=log_file_path
+            )
+            print(f'Created new log reader task: {log_task_id}')
+        
+        # Get status of current log reader task
+        log_task_status = globus_compute_client.get_task(log_task_id)
+        print(f'Log task status: {log_task_status}')
+        
+        # Get log content if task completed
+        log_result = None
+        if log_task_status.get('status') == 'success':
+            try:
+                log_result = globus_compute_client.get_result(log_task_id)
+                print(f"Log result: {log_result}")
+                
+                # Create new task using the same function ID
+                new_log_task_id = globus_compute_client.run(
+                    endpoint_id=endpoint_id,
+                    function_id=get_build_log.log_reader_function_id,
+                    log_file_path=log_file_path
+                )
+            except Exception as e:
+                print(f"Error getting log result: {e}")
+                log_result = {'content': '', 'is_complete': False}
+                new_log_task_id = log_task_id
+        else:
+            new_log_task_id = log_task_id
+
+        # Check build task status if available
+        build_status = "running"
+        if build_task_id:
+            try:
+                build_task_status = globus_compute_client.get_task(build_task_id)
+                build_status = build_task_status.get('status', 'running')
+            except:
+                pass
+
+        # Determine overall status
+        if log_result and log_result.get('is_complete'):
+            status = "completed"
+        elif build_status in ['failed', 'error']:
+            status = build_status
+        else:
+            status = "running"
+
+        return jsonify({
+            "status": status,
+            "log_content": log_result.get('content', '') if log_result else '',
+            "build_task_id": build_task_id,
+            "log_task_id": new_log_task_id
+        })
+        
+    except Exception as e:
+        logging.error(f"Error getting build log: {str(e)}")
+        return jsonify({
+            "status": "error",
+            "error": str(e)
+        }), 500
 
 
 get_container_status = ShellFunction('squeue --name={name} -h -o "%T"')
@@ -347,6 +462,7 @@ def diamond_delete_container():
 #         return log_path
 
 get_partitions = ShellFunction('sinfo -h -o "%P"')
+get_accounts = ShellFunction(os.getenv('ACCOUNTS_COMMAND', 'accounts'))
 
 @app.route("/api/list_partitions", methods=["POST"])
 @authenticated
@@ -365,6 +481,22 @@ def diamond_get_partitions():
     logging.info(f"partitions: {partition_list}")
     return jsonify(partition_list)
 
+@app.route("/api/list_accounts", methods=["POST"]) 
+@authenticated
+def diamond_get_accounts():
+    endpoint_id = request.json.get("endpoint")
+    logging.info(f"endpoint_id: {endpoint_id}")
+    globus_compute_client = initialize_globus_compute_client()
+    globus_compute_executer = GlobusComputeExecutor(
+        client=globus_compute_client, endpoint_id=endpoint_id)
+    fu = globus_compute_executer.submit(get_accounts)
+    accounts = fu.result().stdout
+    account_list = accounts.split("\n")
+    for account in account_list:
+        if not account:
+            account_list.remove(account)
+    logging.info(f"accounts: {account_list}")
+    return jsonify(account_list)
 
 submit_task = ShellFunction("""
 cat << EOF > test.submit
