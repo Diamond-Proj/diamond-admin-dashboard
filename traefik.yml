@@ -1,4 +1,0 @@
-tls:
-  certificates:
-    - certFile: '/certs/diamond.ncsa.illinois.edu.cer'
-      keyFile: '/certs/diamond.ncsa.illinois.edu.key'
