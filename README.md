@@ -35,7 +35,7 @@ Diamond Admin Dashboard is a comprehensive admin interface built with Next.js, f
 
    ```bash
    nvm use 22
-   pnpm run next-dev
+   pnpm run dev
    ```
 
 5. **Access the Application:**
