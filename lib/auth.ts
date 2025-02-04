@@ -2,14 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { is_authenticated, signOut } from './authUtils';
 
 const NODE_ENV = process.env.NODE_ENV;
-const HOST = NODE_ENV === 'development' ? 'http://' + process.env.HOST : 'https://' + process.env.HOST;
+const NEXT_PUBLIC_VERCEL_URL = NODE_ENV === 'development' ? 'http://' + process.env.NEXT_PUBLIC_VERCEL_URL : 'https://' + process.env.NEXT_PUBLIC_VERCEL_URL;
 
 function redirectToSignIn() {
-  return NextResponse.redirect(HOST + '/sign-in');
+  return NextResponse.redirect(NEXT_PUBLIC_VERCEL_URL + '/sign-in');
 }
 
 function signIn() {
-  return NextResponse.redirect(`${HOST}/api/login`);
+  console.log('signIn() redirecting to ', `${NEXT_PUBLIC_VERCEL_URL}/api/login`);
+  return NextResponse.redirect(`${NEXT_PUBLIC_VERCEL_URL}/api/login`);
 }
 
 async function auth(request: NextRequest) {
