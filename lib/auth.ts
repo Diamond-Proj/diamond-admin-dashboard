@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { is_authenticated, signOut } from './authUtils';
 
+const FLASK_URL = process.env.FLASK_URL || 'http://localhost:5328';
+
 function getBaseUrl(request: NextRequest) {
   return request.nextUrl.origin;
 }
@@ -10,8 +12,8 @@ function redirectToSignIn(request: NextRequest) {
 }
 
 function signIn(request: NextRequest) {
-  console.log('signIn() redirecting to ', `${getBaseUrl(request)}/api/login`);
-  return NextResponse.redirect(`${getBaseUrl(request)}/api/login`);
+  console.log('signIn() redirecting to ', `${FLASK_URL}/api/login`);
+  return NextResponse.redirect(`${FLASK_URL}/api/login`);
 }
 
 async function auth(request: NextRequest) {
