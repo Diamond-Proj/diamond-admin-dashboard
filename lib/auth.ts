@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { is_authenticated, signOut } from './authUtils';
 
-const FLASK_URL = process.env.FLASK_URL || 'http://localhost:5328';
+const NODE_ENV = process.env.NODE_ENV;
+const FLASK_URL = NODE_ENV === 'development' ? 'http://localhost:5328' : `https://${process.env.FLASK_URL}`;
 
 function getBaseUrl(request: NextRequest) {
   return request.nextUrl.origin;
