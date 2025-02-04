@@ -1,16 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { is_authenticated, signOut } from './authUtils';
 
-const NODE_ENV = process.env.NODE_ENV;
-const NEXT_PUBLIC_VERCEL_URL = NODE_ENV === 'development' ? 'http://' + process.env.NEXT_PUBLIC_VERCEL_URL : 'https://' + process.env.NEXT_PUBLIC_VERCEL_URL;
-
-function redirectToSignIn() {
-  return NextResponse.redirect(NEXT_PUBLIC_VERCEL_URL + '/sign-in');
+function getBaseUrl(request: NextRequest) {
+  return request.nextUrl.origin;
 }
 
-function signIn() {
-  console.log('signIn() redirecting to ', `${NEXT_PUBLIC_VERCEL_URL}/api/login`);
-  return NextResponse.redirect(`${NEXT_PUBLIC_VERCEL_URL}/api/login`);
+function redirectToSignIn(request: NextRequest) {
+  return NextResponse.redirect(getBaseUrl(request) + '/sign-in');
+}
+
+function signIn(request: NextRequest) {
+  console.log('signIn() redirecting to ', `${getBaseUrl(request)}/api/login`);
+  return NextResponse.redirect(`${getBaseUrl(request)}/api/login`);
 }
 
 async function auth(request: NextRequest) {
@@ -23,7 +24,7 @@ async function auth(request: NextRequest) {
     !request.cookies.get('tokens')
   ) {
     console.debug('Signing in...');
-    return signIn();
+    return signIn(request);
   }
 
   // P2: Handle logout if the URL starts with '/logout'
@@ -46,7 +47,7 @@ async function auth(request: NextRequest) {
   // P5: Redirect to Sign-in if not authenticated and URL is not '/login'
   if (!isAuthenticated && !request.nextUrl.pathname.startsWith('/login')) {
     console.debug('Redirecting to Sign in...');
-    return redirectToSignIn();
+    return redirectToSignIn(request);
   }
 
   // P6: Proceed to the requested route if all conditions are met
