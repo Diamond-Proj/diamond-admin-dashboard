@@ -23,6 +23,7 @@ export async function is_authenticated() {
   const response = await resp;
   if (!response.ok) {
     if (response.status === 401) {
+      console.error('401 Unauthorized');
       sessionData = { is_authenticated: false };
     } else {
       throw new Error(
@@ -31,6 +32,7 @@ export async function is_authenticated() {
     }
   } else {
     sessionData = await response.json();
+    console.log('sessionData', sessionData);
   }
   return sessionData.is_authenticated;
 }

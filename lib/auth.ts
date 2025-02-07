@@ -19,7 +19,7 @@ function signIn(request: NextRequest) {
 
 async function auth(request: NextRequest) {
   // Always log incoming requests for debugging
-  console.debug('authenticating... from auth.ts with ');
+  console.log('authenticating... from auth.ts with ', FLASK_URL);
 
   // P1: Route to Globus login page if the URL starts with '/login'
   if (
@@ -38,18 +38,18 @@ async function auth(request: NextRequest) {
 
   // P3: Check if the user is authenticated
   const isAuthenticated = await is_authenticated();
-  console.debug('session in frontend: ', isAuthenticated);
-  console.debug('request url: ', request.nextUrl.pathname);
+  console.log('session in frontend: ', isAuthenticated);
+  console.log('request url: ', request.nextUrl.pathname);
 
   // P4: Redirect to profile if authenticated and URL starts with '/profile'
   if (isAuthenticated && request.nextUrl.pathname.startsWith('/profile')) {
-    console.debug('Redirecting to profile...');
+    console.log('Redirecting to profile...');
     return NextResponse.redirect(request.nextUrl.origin);
   }
 
   // P5: Redirect to Sign-in if not authenticated and URL is not '/login'
   if (!isAuthenticated && !request.nextUrl.pathname.startsWith('/login')) {
-    console.debug('Redirecting to Sign in...');
+    console.log('Redirecting to Sign in...');
     return redirectToSignIn(request);
   }
 
