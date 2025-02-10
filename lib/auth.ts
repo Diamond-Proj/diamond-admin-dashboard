@@ -38,7 +38,6 @@ async function auth(request: NextRequest) {
 
   // P3: Check if the user is authenticated
   const isAuthenticated = await is_authenticated();
-  console.log('session in frontend: ', isAuthenticated);
   console.log('request url: ', request.nextUrl.pathname);
 
   // P4: Redirect to profile if authenticated and URL starts with '/profile'
@@ -54,7 +53,6 @@ async function auth(request: NextRequest) {
   }
 
   // P6: Proceed to the requested route if all conditions are met
-  console.log('NextResponse.next()');
   return NextResponse.next();
 }
 
