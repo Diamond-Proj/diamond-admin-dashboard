@@ -13,7 +13,8 @@ export async function submitTask(data: any) {
       throw new Error('Network response was not ok');
     }
     const responseData = await response.json();
-    console.log(responseData);
+    console.log('submitTask responseData:', responseData);
+    return responseData;
   } catch (error) {
     console.error('Error in task submitting:', error);
   }
