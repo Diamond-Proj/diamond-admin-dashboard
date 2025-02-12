@@ -13,16 +13,17 @@ const nextConfig = {
     ]
   },
   rewrites: async () => {
+    const flaskUrl = process.env.FLASK_URL || 'localhost:5328'
+    // Use HTTPS for production domains, HTTP for localhost
+    const protocol = flaskUrl.includes('localhost') ? 'http' : 'https'
+    const baseUrl = flaskUrl.startsWith('http') ? flaskUrl : `${protocol}://${flaskUrl}`
+    console.log('baseUrl: ', baseUrl)
     return [
       {
         source: '/api/:path*',
-        destination:
-          // TODO : need to check if this is the right way to do it
-          process.env.NODE_ENV === 'development'
-            ? 'http://127.0.0.1:5328/api/:path*'
-            : '/api/:path*'
+        destination: `${baseUrl}/api/:path*`
       }
-    ];
+    ]
   },
   // output: 'standalone',
 };

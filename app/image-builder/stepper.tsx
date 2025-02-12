@@ -577,7 +577,7 @@ function EndpointStep({ control, endpoints, endpointValue }: { control: Control<
   const [isLoadingAccounts, setIsLoadingAccounts] = useState(false);
 
   useEffect(() => {
-    if (endpoints) {
+    if (endpoints && endpointValue) {
       if (partitionsCache[endpointValue]) {
         setPartitions(partitionsCache[endpointValue]);
       } else {
@@ -611,7 +611,7 @@ function EndpointStep({ control, endpoints, endpointValue }: { control: Control<
   }, [endpointValue]);
 
   useEffect(() => {
-    if (endpoints) {
+    if (endpoints && endpointValue) {
       const fetchAccounts = async () => {
         setIsLoadingAccounts(true);
         try {
