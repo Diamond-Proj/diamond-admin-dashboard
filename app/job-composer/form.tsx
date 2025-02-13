@@ -381,14 +381,15 @@ export function JobComposerForm() {
       switch (values.taskType) {
         case 'submitTask':
           response = await submitTask({
+            taskName: values.taskName,
             endpoint: values.endpoint,
             partition: values.partition,
+            account: values.account,
             log_path: values.log_path,
             num_of_nodes: values.num_of_nodes,
             task: values.task,
             container: values.container,
-            work_path: values.work_path,
-            taskName: values.taskName, // Include the taskName
+            work_path: values.work_path // TODO : this is not being used
           });
           break;
         default:
@@ -417,8 +418,8 @@ export function JobComposerForm() {
     const stderrLogPath = `${values.log_path}${values.log_path!.endsWith('/') ? '' : '/'}${values.taskName}.stderr`
     console.log('Task stdoutLogPath:', stdoutLogPath)
     console.log('Task stderrLogPath:', stderrLogPath)
-    startPollingStdout(values.endpoint!, stdoutLogPath, task_id)
-    startPollingStderr(values.endpoint!, stderrLogPath, task_id)
+    // startPollingStdout(values.endpoint!, stdoutLogPath, task_id)
+    // startPollingStderr(values.endpoint!, stderrLogPath, task_id)
   }
 
   return (
