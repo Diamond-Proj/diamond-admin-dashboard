@@ -418,8 +418,8 @@ export function JobComposerForm() {
     const stderrLogPath = `${values.log_path}${values.log_path!.endsWith('/') ? '' : '/'}${values.taskName}.stderr`
     console.log('Task stdoutLogPath:', stdoutLogPath)
     console.log('Task stderrLogPath:', stderrLogPath)
-    // startPollingStdout(values.endpoint!, stdoutLogPath, task_id)
-    // startPollingStderr(values.endpoint!, stderrLogPath, task_id)
+    startPollingStdout(values.endpoint!, stdoutLogPath, task_id)
+    startPollingStderr(values.endpoint!, stderrLogPath, task_id)
   }
 
   return (
