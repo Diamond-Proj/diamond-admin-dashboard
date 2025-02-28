@@ -10,16 +10,15 @@ import {
   TaskIcon,
 } from '@/components/icons';
 import { NavItem } from './nav-item';
-import { is_authenticated, signOut } from '@/lib/authUtils';
+import { is_authenticated } from '@/lib/authUtils';
 import { Toaster } from '@/components/ui/toaster';
 import { DashboardIcon, GlobeIcon } from '@radix-ui/react-icons';
 import { ImageIcon } from '@radix-ui/react-icons';
 
-import { LogoutButton } from '@/components/logout-button';
-import { LoginButton } from '@/components/login-button';
+import { AuthStatus } from '@/components/auth-status';
 import ThemeToggle from '@/components/layout/ThemeToggle/theme-toggle';
 import ThemeProvider from '@/components/layout/ThemeToggle/theme-provider';
-
+import { ClientSideNav } from '@/components/client-side-nav';
 
 export const metadata = {
   title: 'Diamond Admin Dashboard',
@@ -32,6 +31,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Get initial authentication status for server-side rendering
   const isAuthenticated = await is_authenticated();
 
   return (
@@ -56,44 +56,8 @@ export default async function RootLayout({
                 </Link>
               </div>
               <div className="flex-1 overflow-auto py-2 h-full">
-                {isAuthenticated ? (
-                  <nav className="grid items-start px-4 text-sm font-medium">
-                    <NavItem href="/">
-                      <DashboardIcon className="h-6 w-6" />
-                      Dashboard
-                    </NavItem>
-                    <NavItem href="/image-builder">
-                      <GlobeIcon className="h-6 w-6" />
-                      Image Builder
-                    </NavItem>
-                    <NavItem href="/image-manager">
-                      <FolderIcon className="h-6 w-6" />
-                      Image Manager
-                    </NavItem>
-                    <NavItem href="/job-composer">
-                      <EditIcon className="h-6 w-6" />
-                      Job Composer
-                    </NavItem>
-                    <NavItem href="/task-manager">
-                      <TaskIcon className="h-6 w-6" />
-                      Task Manager
-                    </NavItem>
-                    <NavItem href="/users">
-                      <UsersIcon className="h-6 w-6" />
-                      Users
-                    </NavItem>
-                    <NavItem href="/settings">
-                      <SettingsIcon className="h-6 w-6" />
-                      Settings
-                    </NavItem>
-                    {/* <NavItem href="/image-builder">
-                      <ImageIcon className="h-6 w-6" />
-                      Image Builder
-                    </NavItem> */}
-                  </nav>
-                ) : (
-                  <></>
-                )}
+                {/* Replace with client-side navigation component */}
+                <ClientSideNav initialIsAuthenticated={isAuthenticated} />
               </div>
             </div>
           </div>
@@ -107,7 +71,8 @@ export default async function RootLayout({
                 <span className="text-rose_red dark:text-honolulu_blue">DIAMOND</span>
               </Link>
 
-              {isAuthenticated ? <LogoutButton /> : <LoginButton />}
+              {/* Replace with client-side auth status component */}
+              <AuthStatus />
 
             </header>
             {children}
