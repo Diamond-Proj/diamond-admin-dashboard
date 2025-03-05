@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-export function TaskManagerForm() {
+export function TaskManagerForm( { isAuthenticated }: { isAuthenticated: boolean } ) {
   const [tasksData, setTasksData] = useState<Record<string, any>>({});
 
   const fetchTaskStatus = async () => {
@@ -47,9 +47,9 @@ export function TaskManagerForm() {
 
   useEffect(() => {
     fetchTaskStatus();
-    const intervalId = setInterval(fetchTaskStatus, 3000);
-    return () => clearInterval(intervalId);
-  }, []);
+    // const intervalId = setInterval(fetchTaskStatus, 3000);
+    // return () => clearInterval(intervalId);
+  }, [isAuthenticated]);
 
   return (
     <div>
