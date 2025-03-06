@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { LoginButton } from './login-button';
-import { LogoutButton } from './logout-button';
+import { UserAvatar } from './user-avatar';
 import { useRouter, usePathname } from 'next/navigation';
 
 export function AuthStatus() {
@@ -15,7 +15,7 @@ export function AuthStatus() {
     // Function to check authentication status from cookies
     const checkAuth = () => {
       const cookies = document.cookie.split(';');
-      console.log('Checking auth status, cookies:', cookies.map(c => c.trim().split('=')[0]));
+      // console.log('Checking auth status, cookies:', cookies.map(c => c.trim().split('=')[0]));
       
       const authCookies = [
         'is_authenticated',
@@ -67,5 +67,5 @@ export function AuthStatus() {
     return <div className="h-9 w-20 bg-gray-200 animate-pulse rounded-md"></div>;
   }
 
-  return isAuthenticated ? <LogoutButton /> : <LoginButton />;
+  return isAuthenticated ? <UserAvatar /> : <LoginButton />;
 } 

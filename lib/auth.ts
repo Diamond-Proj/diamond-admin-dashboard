@@ -52,12 +52,6 @@ async function auth(request: NextRequest) {
     
     console.log('Authentication status for', request.nextUrl.pathname, ':', isAuthenticated);
 
-    // P4: Redirect to profile if authenticated and URL starts with '/profile'
-    if (isAuthenticated && request.nextUrl.pathname.startsWith('/profile')) {
-      console.log('Redirecting authenticated user from profile to home...');
-      return NextResponse.redirect(request.nextUrl.origin);
-    }
-
     // P5: Redirect to Sign-in if not authenticated and URL is not '/login', '/sign-in', or '/auth/callback'
     if (!isAuthenticated && 
         !request.nextUrl.pathname.startsWith('/login') && 
