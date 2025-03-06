@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { LoginButton } from './login-button';
 import { UserAvatar } from './user-avatar';
+import { DocsButton } from './docs-button';
 import { useRouter, usePathname } from 'next/navigation';
 
 export function AuthStatus() {
@@ -64,8 +65,18 @@ export function AuthStatus() {
   }, [pathname, isAuthenticated, isLoading]);
 
   if (isLoading) {
-    return <div className="h-9 w-20 bg-gray-200 animate-pulse rounded-md"></div>;
+    return (
+      <div className="flex items-center gap-4">
+        <DocsButton />
+        <div className="h-9 w-20 bg-gray-200 animate-pulse rounded-md"></div>
+      </div>
+    );
   }
 
-  return isAuthenticated ? <UserAvatar /> : <LoginButton />;
+  return (
+    <div className="flex items-center gap-4">
+      <DocsButton />
+      {isAuthenticated ? <UserAvatar /> : <LoginButton />}
+    </div>
+  );
 } 
