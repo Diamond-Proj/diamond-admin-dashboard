@@ -2,54 +2,69 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { redirect } from 'next/navigation';
+import { clearTokensFromCookies } from '@/lib/globusAuth';
 
-const NODE_ENV = process.env.NODE_ENV;
-const FLASK_URL = NODE_ENV === 'development' ? 'http://' + process.env.FLASK_URL : 'https://' + process.env.FLASK_URL;
+// No need for FLASK_URL anymore
+// const NODE_ENV = process.env.NODE_ENV;
+// const FLASK_URL = NODE_ENV === 'development' ? 'http://' + process.env.FLASK_URL : 'https://' + process.env.FLASK_URL;
 
 export async function is_authenticated() {
-  const tokens = cookies().get('tokens');
-  let sessionData = null;
-  const headers: Record<string, string> = {};
-  if (tokens) {
-    // headers['Authorization'] = `Bearer ${tokens.value}`;
-    headers['Content-Type'] = 'application/json';
-    headers['Cookie'] = `tokens=${JSON.stringify(tokens)}`;
+  // Check for tokens in cookies
+  const tokensCookie = cookies().get('tokens');
+  const isAuthenticatedCookie = cookies().get('is_authenticated');
+  const accessTokenCookie = cookies().get('access_token');
+  const idTokenCookie = cookies().get('id_token');
+  
+  // Log authentication check
+  console.log('Authenticating request for:', process.env.NEXT_PUBLIC_VERCEL_URL || 'localhost');
+  
+  // If we have any of the authentication cookies, consider the user authenticated
+  if (tokensCookie || isAuthenticatedCookie || accessTokenCookie || idTokenCookie) {
+    console.log('Authentication status: true');
+    return true;
   }
-  console.log('in authUtils', `${FLASK_URL}/api/is_authenticated`);
-  const resp = fetch(`${FLASK_URL}/api/is_authenticated`, {
-    credentials: 'include', // Ensure cookies are sent with the request if needed
-    headers: headers
-  });
-  const response = await resp;
-  if (!response.ok) {
-    if (response.status === 401) {
-      console.error('401 Unauthorized');
-      sessionData = { is_authenticated: false };
-    } else {
-      throw new Error(
-        `Failed to fetch session data: ${response.status} ${response.statusText}`
-      );
-    }
-  } else {
-    sessionData = await response.json();
-    console.log('sessionData', sessionData);
+  
+  // Check for user profile cookies as a fallback
+  const nameCookie = cookies().get('name');
+  const emailCookie = cookies().get('email');
+  
+  if (nameCookie || emailCookie) {
+    console.log('Authentication status (via profile cookies): true');
+    return true;
   }
-  return sessionData.is_authenticated;
+  
+  // No authentication tokens found
+  console.log('Authentication status: false');
+  return false;
 }
 
 export async function logout() {
   try {
+    // Use signOut which now handles client-side cookie clearing
     await signOut();
-    redirect('/');  // Redirect to home page after logout
+    redirect('/sign-in');  // Redirect to sign-in page after logout
   } catch (error) {
     console.error('Logout failed:', error);
-    // You could throw an error here to be caught by error boundaries
-    // or return an error message to be displayed
+    // Still redirect to sign-in page even if there's an error
+    redirect('/sign-in');
   }
 }
 
 export async function signOut() {
-  const response = NextResponse.redirect(`${FLASK_URL}/api/logout`);
+  // Create a response that redirects to the sign-in page
+  const response = NextResponse.redirect('/sign-in');
+  
+  // Clear all auth-related cookies
   response.cookies.delete('tokens');
+  response.cookies.delete('is_authenticated');
+  response.cookies.delete('name');
+  response.cookies.delete('email');
+  response.cookies.delete('primary_identity');
+  response.cookies.delete('primary_username');
+  response.cookies.delete('institution');
+  
+  // Note: This server-side cookie clearing complements the client-side
+  // clearTokensFromCookies function for a comprehensive logout
+  
   return response;
 }
