@@ -442,7 +442,7 @@ function StepperContent({
 }) {
   const { current, next, prev, isFirst, isLast } = useStepper()
 
-  const onSubmit = (values: z.infer<typeof stepper.current.schema>) => {
+  const onSubmit = (values: z.infer<typeof current.schema>) => {
     onStepSubmit(values)
     if (isLast) {
       onFinalSubmit(form.getValues() as FormData)
