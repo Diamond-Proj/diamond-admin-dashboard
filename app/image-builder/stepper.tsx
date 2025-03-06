@@ -440,97 +440,71 @@ function StepperContent({
   endpointValue: string
   isSubmitted: boolean
 }) {
-  const stepper = useStepper()
+  const { current, next, prev, isFirst, isLast } = useStepper()
 
   const onSubmit = (values: z.infer<typeof stepper.current.schema>) => {
-    console.log(`Form values for step ${stepper.current.id}:`, values);
-    if (stepper.isLast) {
-      onFinalSubmit(values as FormData);
-      if (!isSubmitted) {
-        stepper.reset();
-      }
-    } else if (!isSubmitted) {
-      stepper.next();
+    onStepSubmit(values)
+    if (isLast) {
+      onFinalSubmit(form.getValues() as FormData)
+    } else {
+      next()
     }
-    onStepSubmit(values as FormData);
   }
 
   return (
-    <div className="bg-card dark:bg-card/80 shadow-lg rounded-xl p-6 border border-border">
-      <div className="mb-8">
-        <StepIndicator />
-      </div>
+    <div className="card p-6">
+      <StepIndicator />
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          {stepper.switch({
-            endpointinfo: () => <EndpointStep control={control} endpoints={endpoints} endpointValue={endpointValue} />,
-            containerinfo: () => <ContainerStep />,
-            dependencies: () => <DependenciesStep />,
-            environment: () => <EnvironmentStep />,
-            commands: () => <CommandsStep />,
-            review: () => (
-              <ReviewStep 
-                onSubmit={(values) => onSubmit(values as FullFormValues)} 
-                isLoading={isLoading} 
-                isSubmitted={isSubmitted} 
-              />
-            )
-          })}
-        </form>
-      </Form>
-      <div className="mt-8 flex justify-between">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={stepper.prev}
-          disabled={stepper.isFirst || isLoading || isSubmitted}
-          className="bg-background dark:bg-background/80 text-foreground hover:bg-muted"
-        >
-          Previous
-        </Button>
-        {stepper.isLast ? (
-          <div className="flex gap-2">
-            {isSubmitted && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  stepper.reset();
-                  form.reset();
-                  window.location.reload();
-                }}
-                className="bg-background dark:bg-background/80 text-foreground hover:bg-muted"
-              >
-                Reset Form
-              </Button>
-            )}
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-6">
+          {current.id === 'endpointinfo' && (
+            <EndpointStep control={control} endpoints={endpoints} endpointValue={endpointValue} />
+          )}
+          {current.id === 'containerinfo' && <ContainerStep />}
+          {current.id === 'dependencies' && <DependenciesStep />}
+          {current.id === 'environment' && <EnvironmentStep />}
+          {current.id === 'commands' && <CommandsStep />}
+          {current.id === 'review' && (
+            <ReviewStep 
+              onSubmit={() => onFinalSubmit(form.getValues() as FormData)} 
+              isLoading={isLoading}
+              isSubmitted={isSubmitted}
+            />
+          )}
+
+          <div className="flex justify-between mt-8">
             <Button
               type="button"
-              onClick={() => onSubmit(form.getValues() as FormData)}
-              disabled={isLoading || isSubmitted}
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
+              variant="outline"
+              onClick={prev}
+              disabled={isFirst || isLoading}
             >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Submitting...
-                </>
-              ) : (
-                'Submit'
-              )}
+              Previous
             </Button>
+            {!isLast ? (
+              <Button type="submit" disabled={isLoading}>
+                Next
+              </Button>
+            ) : (
+              <Button 
+                type="submit" 
+                disabled={isLoading || isSubmitted}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Building...
+                  </>
+                ) : isSubmitted ? (
+                  "Submitted"
+                ) : (
+                  "Submit"
+                )}
+              </Button>
+            )}
           </div>
-        ) : (
-          <Button
-            type="button"
-            onClick={stepper.next}
-            disabled={isLoading || isSubmitted}
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
-          >
-            Next
-          </Button>
-        )}
-      </div>
+        </form>
+      </Form>
     </div>
   )
 }
@@ -883,60 +857,61 @@ function ReviewStep({ onSubmit, isLoading, isSubmitted }: {
   isLoading: boolean,
   isSubmitted: boolean 
 }) {
-  const {
-    watch,
-    formState: { errors },
-  } = useFormContext<FullFormValues>();
-  const formData = watch();
-  
+  const { getValues } = useFormContext<FullFormValues>()
+  const values = getValues()
+
   return (
-    <div className={`${isSubmitted ? 'opacity-75' : ''}`}>
-      <h2 className="text-2xl font-bold mb-4 text-foreground">Review</h2>
-      <div className="space-y-4">
-        <div>
-          <h3 className="font-semibold text-foreground">Selected Endpoint:</h3>
-          <p className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.endpoint}</p>
-        </div>
-        <div>
-          <h3 className="font-semibold text-foreground">Selected Partition:</h3>
-          <p className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.partition}</p>
-        </div>
-        <div>
-          <h3 className="font-semibold text-foreground">Selected HPC Account:</h3>
-          <p className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.account}</p>
-        </div>
-        <div>
-          <h3 className="font-semibold text-foreground">Container name:</h3>
-          <p className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.containerName}</p>
-        </div>
-        <div>
-          <h3 className="font-semibold text-foreground">Base Image:</h3>
-          <p className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.baseImage}</p>
-        </div>
-        <div>
-          <h3 className="font-semibold text-foreground">Location:</h3>
-          <p className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.location}</p>
-        </div>
-        <div>
-          <h3 className="font-semibold text-foreground">Dependencies:</h3>
-          <pre className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.dependencies}</pre>
-        </div>
-        <div>
-          <h3 className="font-semibold text-foreground">Environment:</h3>
-          <pre className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.environment}</pre>
-        </div>
-        <div>
-          <h3 className="font-semibold text-foreground">Build Commands:</h3>
-          <pre className="bg-muted/50 dark:bg-muted p-2 rounded-md">{formData.commands}</pre>
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-medium mb-2">Selected Endpoint:</h3>
+        <div className="card-muted p-4 rounded-md">
+          <p><strong>Endpoint:</strong> {values.endpoint}</p>
+          <p><strong>Partition:</strong> {values.partition}</p>
+          <p><strong>HPC Account:</strong> {values.account}</p>
         </div>
       </div>
-      {isSubmitted && (
-        <div className="mt-4 p-4 bg-primary/10 rounded-md">
-          <p className="text-primary font-medium">
-            Form submitted successfully! Check the logs below for build progress.
-          </p>
+
+      <div>
+        <h3 className="text-lg font-medium mb-2">Container name:</h3>
+        <div className="card-muted p-4 rounded-md">
+          <p>{values.containerName}</p>
         </div>
-      )}
+      </div>
+
+      <div>
+        <h3 className="text-lg font-medium mb-2">Base Image:</h3>
+        <div className="card-muted p-4 rounded-md">
+          <p>{values.baseImage}</p>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-lg font-medium mb-2">Location:</h3>
+        <div className="card-muted p-4 rounded-md">
+          <p>{values.location}</p>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-lg font-medium mb-2">Dependencies:</h3>
+        <div className="card-muted p-4 rounded-md font-mono whitespace-pre-wrap">
+          {values.dependencies || 'No dependencies specified'}
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-lg font-medium mb-2">Environment:</h3>
+        <div className="card-muted p-4 rounded-md font-mono whitespace-pre-wrap">
+          {values.environment || 'No environment variables specified'}
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-lg font-medium mb-2">Build Commands:</h3>
+        <div className="card-muted p-4 rounded-md font-mono whitespace-pre-wrap">
+          {values.commands}
+        </div>
+      </div>
     </div>
   )
 }
