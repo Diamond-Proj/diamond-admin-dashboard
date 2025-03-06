@@ -35,7 +35,7 @@ export function LoginButton() {
       size={'default'}
       onClick={handleLogin}
       disabled={isLoading}
-      className="flex items-center gap-2"
+      className="flex items-center gap-2 border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground"
     >
       {isLoading ? (
         <>

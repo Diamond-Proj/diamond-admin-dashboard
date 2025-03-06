@@ -19,8 +19,8 @@ export default async function SignInPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
-      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
+      <div className="w-full max-w-md p-8 space-y-8 bg-card text-card-foreground rounded-lg shadow-md">
         <div className="flex flex-col items-center">
           <div className="relative w-32 h-32 mb-4">
             <Image 
@@ -31,15 +31,15 @@ export default async function SignInPage() {
               priority
             />
           </div>
-          <h2 className="mt-2 text-2xl font-bold text-gray-900">Welcome to Diamond</h2>
-          <p className="mt-2 text-center text-gray-600">
+          <h2 className="mt-2 text-2xl font-bold text-foreground">Welcome to Diamond</h2>
+          <p className="mt-2 text-center text-muted-foreground">
             Please sign in with your Globus account to access the Diamond HPC service.
           </p>
         </div>
         
         <div className="mt-8 flex flex-col items-center">
           <LoginButton />
-          <p className="mt-4 text-sm text-gray-500">
+          <p className="mt-4 text-sm text-muted-foreground">
             By signing in, you agree to the Diamond service terms and conditions.
           </p>
         </div>
