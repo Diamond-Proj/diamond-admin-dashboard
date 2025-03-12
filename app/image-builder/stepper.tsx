@@ -446,9 +446,10 @@ function StepperContent({
     console.log(`Form values for step ${stepper.current.id}:`, values);
     if (stepper.isLast) {
       onFinalSubmit(values as FormData);
-      if (!isSubmitted) {
-        stepper.reset();
-      }
+      // prevent form from resetting when submitting
+      // if (!isSubmitted) {
+      //   stepper.reset();
+      // }
     } else if (!isSubmitted) {
       stepper.next();
     }
