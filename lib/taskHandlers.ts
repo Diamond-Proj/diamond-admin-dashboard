@@ -51,3 +51,35 @@ export async function registerContainer(data: {
     console.error('Error in registerContainer:', error);
   }
 }
+
+/**
+ * Get the jobID for a given jobName
+ * @param endpoint The endpoint UUID
+ * @param jobName The name of the job to search for
+ * @returns The jobID if found, or null if not found
+ */
+export async function getJobIdByName(endpoint: string, jobName: string): Promise<string | null> {
+  try {
+    // Construct the API request to get job information
+    const response = await fetch('/api/get_job_id', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        endpoint,
+        jobName,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to get job ID: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.jobId;
+  } catch (error) {
+    console.error('Error getting job ID:', error);
+    return null;
+  }
+}
