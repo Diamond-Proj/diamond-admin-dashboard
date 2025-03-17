@@ -68,3 +68,25 @@ export async function signOut() {
   
   return response;
 }
+
+export async function getUserInfo() {
+  const nameCookie = cookies().get('name');
+  const emailCookie = cookies().get('email');
+  const primary_identityCookie = cookies().get('primary_identity');
+  const institutionCookie = cookies().get('institution');
+  
+  if (!nameCookie || !emailCookie) {
+    throw new Error('No userInfo found in cookies');
+  }
+  
+  const name = nameCookie.value;
+  const email = emailCookie.value;
+  const primary_identity = primary_identityCookie!.value;
+  const institution = institutionCookie!.value;
+  return {
+    name: name,
+    email: email,
+    primary_identity: primary_identity,
+    institution: institution,
+  };
+}
