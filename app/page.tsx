@@ -1,12 +1,91 @@
-import React from 'react';
-import { is_authenticated } from '@/lib/authUtils';
+'use client';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { updateUserProfile } from '@/lib/taskHandlers';
 
-export default async function DashboardPage({
+export default function DashboardPage({
   searchParams
 }: {
   searchParams: { q: string; offset: string };
 }) {
-  const isAuthenticated = await is_authenticated();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [userInfo, setUserInfo] = useState<any>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    // Check authentication status from cookies client-side
+    const checkAuth = () => {
+      const cookies = document.cookie.split(';');
+      
+      const authCookies = [
+        'is_authenticated',
+        'tokens',
+        'access_token',
+        'id_token',
+        'refresh_token',
+        'name',
+        'email',
+        'primary_identity'
+      ];
+      
+      const hasAuthCookie = cookies.some(cookie => {
+        const cookieName = cookie.trim().split('=')[0];
+        return authCookies.includes(cookieName);
+      });
+      
+      setIsAuthenticated(hasAuthCookie);
+      
+      // If authenticated, get user info from cookies
+      if (hasAuthCookie) {
+        const cookieObj: Record<string, string> = {};
+        cookies.forEach(cookie => {
+          const [name, value] = cookie.trim().split('=');
+          if (name) cookieObj[name] = decodeURIComponent(value || '');
+        });
+        
+        setUserInfo({
+          name: cookieObj['name'],
+          email: cookieObj['email'],
+          primary_identity: cookieObj['primary_identity'],
+          institution: cookieObj['institution']
+        });
+      }
+    };
+
+    // Check auth only once when component mounts
+    checkAuth();
+  }, []);
+  
+  // Update user profile once when authenticated and user info is available
+  useEffect(() => {
+    const updateProfile = async () => {
+      if (isAuthenticated && userInfo && userInfo.primary_identity) {
+        try {
+          await updateUserProfile({
+            identity_id: userInfo.primary_identity,
+            name: userInfo.name,
+            email: userInfo.email,
+            institution: userInfo.institution,
+          });
+        } catch (error) {
+          console.error('Error updating profile:', error);
+        }
+      }
+    };
+    
+    updateProfile();
+  }, [isAuthenticated, userInfo]);
+
+  // Show loading state while checking authentication
+  if (isAuthenticated === null) {
+    return (
+      <main className="flex flex-1 flex-col p-4 md:p-6 items-center justify-center">
+        <div className="text-center">
+          <p>Loading dashboard...</p>
+        </div>
+      </main>
+    );
+  }
   
   return (
     <>

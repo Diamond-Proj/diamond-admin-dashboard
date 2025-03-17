@@ -1,5 +1,26 @@
 import { toast } from '@/components/ui/use-toast';
 
+export async function updateUserProfile(data: any) {
+  try {
+    const response = await fetch(`/api/profile`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    const responseData = await response.json();
+    console.log('  responseData:', responseData);
+    return responseData;
+  } catch (error) {
+    console.error('Error in updateUserProfile:', error);
+  }
+}
+
+
 export async function submitTask(data: any) {
   try {
     const response = await fetch(`/api/submit_task`, {
