@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { NavItem } from './nav-item';
 import {
   SettingsIcon,
@@ -10,59 +10,54 @@ import {
   TaskIcon,
 } from '@/components/icons';
 import { DashboardIcon, GlobeIcon } from '@radix-ui/react-icons';
+import { debounce } from 'lodash';
 
 export function ClientSideNav({ initialIsAuthenticated }: { initialIsAuthenticated: boolean }) {
   const [isAuthenticated, setIsAuthenticated] = useState(initialIsAuthenticated);
   const [isLoading, setIsLoading] = useState(!initialIsAuthenticated);
 
-  useEffect(() => {
-    // Function to check authentication status from cookies
-    const checkAuth = () => {
-      const cookies = document.cookie.split(';');
-      
-      const authCookies = [
-        'is_authenticated',
-        'tokens',
-        'access_token',
-        'id_token',
-        'refresh_token',
-        'name',
-        'email',
-        'primary_identity'
-      ];
-      
-      const hasAuthCookie = cookies.some(cookie => {
-        const cookieName = cookie.trim().split('=')[0];
-        return authCookies.includes(cookieName);
-      });
-      
-      // Only update state if it changed to avoid unnecessary re-renders
-      if (hasAuthCookie !== isAuthenticated || isLoading) {
-        console.log('Navigation: Auth status changed to', hasAuthCookie);
-        setIsAuthenticated(hasAuthCookie);
-        setIsLoading(false);
-      }
-    };
+  const checkAuth = useCallback(debounce(() => {
+    const cookies = document.cookie.split(';');
+    const authCookies = [
+      'is_authenticated',
+      'tokens',
+      'access_token',
+      'id_token',
+      'refresh_token',
+      'name',
+      'email',
+      'primary_identity'
+    ];
+    
+    const hasAuthCookie = cookies.some(cookie => {
+      const cookieName = cookie.trim().split('=')[0];
+      return authCookies.includes(cookieName);
+    });
+    
+    if (hasAuthCookie !== isAuthenticated || isLoading) {
+      console.log('Navigation: Auth status changed to', hasAuthCookie);
+      setIsAuthenticated(hasAuthCookie);
+      setIsLoading(false);
+    }
+  }, 300), [isAuthenticated, isLoading]);
 
-    // Check auth on mount
+  useEffect(() => {
     checkAuth();
 
-    // Set up an interval to periodically check auth status
-    const interval = setInterval(checkAuth, 2000);
+    const observer = new MutationObserver(checkAuth);
+    observer.observe(document.body, { attributes: true, childList: true, subtree: true });
 
-    // Also check auth status when the window gets focus
     const handleFocus = () => {
       checkAuth();
     };
     
     window.addEventListener('focus', handleFocus);
 
-    // Clean up interval and event listener on unmount
     return () => {
-      clearInterval(interval);
+      observer.disconnect();
       window.removeEventListener('focus', handleFocus);
     };
-  }, [isAuthenticated, isLoading]);
+  }, [checkAuth]);
 
   if (isLoading) {
     return (
