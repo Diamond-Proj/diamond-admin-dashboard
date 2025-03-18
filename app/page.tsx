@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { updateUserProfile } from '@/lib/taskHandlers';
+import { getUserProfile, updateUserProfile } from '@/lib/taskHandlers';
 
 export default function DashboardPage({
   searchParams
@@ -58,22 +58,33 @@ export default function DashboardPage({
   
   // Update user profile once when authenticated and user info is available
   useEffect(() => {
-    const updateProfile = async () => {
+    const checkAndUpdateProfile = async () => {
+      console.log('checkAndUpdateProfile');
       if (isAuthenticated && userInfo && userInfo.primary_identity) {
+        console.log('userInfo', userInfo);
         try {
-          await updateUserProfile({
-            identity_id: userInfo.primary_identity,
-            name: userInfo.name,
-            email: userInfo.email,
-            institution: userInfo.institution,
+          const profile = await getUserProfile({
+            identity_id: userInfo.primary_identity
           });
+          console.log('profile', profile);
+          // If the profile is not found, create it or if any of the fields are different, update it
+          if (!profile.profile || profile.profile.institution !== userInfo.institution) {
+            console.log('updating profile');
+            await updateUserProfile({
+              identity_id: userInfo.primary_identity,
+              name: userInfo.name,
+              email: userInfo.email,
+              institution: userInfo.institution,
+            });
+            console.log('profile updated');
+          }
         } catch (error) {
           console.error('Error updating profile:', error);
         }
       }
     };
     
-    updateProfile();
+    checkAndUpdateProfile();
   }, [isAuthenticated, userInfo]);
 
   // Show loading state while checking authentication
