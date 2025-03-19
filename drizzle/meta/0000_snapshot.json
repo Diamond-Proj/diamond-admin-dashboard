@@ -1,10 +1,8 @@
 {
-  "id": "ed416de7-f3e6-46c7-95d9-9c4eacc724e3",
-  "prevId": "00000000-0000-0000-0000-000000000000",
-  "version": "5",
-  "dialect": "pg",
+  "version": "7",
+  "dialect": "postgresql",
   "tables": {
-    "container": {
+    "public.container": {
       "name": "container",
       "schema": "",
       "columns": {
@@ -80,21 +78,24 @@
         "container_identity_id_profile_identity_id_fk": {
           "name": "container_identity_id_profile_identity_id_fk",
           "tableFrom": "container",
-          "tableTo": "profile",
           "columnsFrom": [
             "identity_id"
           ],
+          "tableTo": "profile",
           "columnsTo": [
             "identity_id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "profile": {
+    "public.profile": {
       "name": "profile",
       "schema": "",
       "columns": {
@@ -126,9 +127,12 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     },
-    "task": {
+    "public.task": {
       "name": "task",
       "schema": "",
       "columns": {
@@ -181,26 +185,35 @@
         "task_identity_id_profile_identity_id_fk": {
           "name": "task_identity_id_profile_identity_id_fk",
           "tableFrom": "task",
-          "tableTo": "profile",
           "columnsFrom": [
             "identity_id"
           ],
+          "tableTo": "profile",
           "columnsTo": [
             "identity_id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false,
+      "checkConstraints": {}
     }
   },
   "enums": {},
   "schemas": {},
   "_meta": {
-    "columns": {},
     "schemas": {},
-    "tables": {}
-  }
+    "tables": {},
+    "columns": {}
+  },
+  "id": "ed416de7-f3e6-46c7-95d9-9c4eacc724e3",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "sequences": {},
+  "policies": {},
+  "views": {},
+  "roles": {}
 }
