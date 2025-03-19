@@ -122,13 +122,19 @@ export default function DashboardPage({
                 <h3 className="text-lg font-medium mb-2">Globus Compute Endpoint Setup</h3>
                 <div className="bg-info p-4 rounded-md">
                   <p className="mb-2 text-info font-medium">
-                    <strong>Important:</strong> Before using Diamond services, you need to create a Globus Compute endpoint on your HPC machine.
+                    <strong>Important:</strong> Before using Diamond services, you need to create a <a href="https://globus-compute.readthedocs.io/en/2.6.0/endpoints.html" target="_blank" rel="noopener noreferrer">Globus Compute endpoint</a> on your HPC machine.
                   </p>
+                  <p className="mb-2">
+                    Install Globus Compute Endpoint package PyPi package:
+                  </p>
+                  <div className="card-muted p-3 rounded font-mono text-sm mb-3">
+                    python3 -m pipx install globus-compute-endpoint
+                  </div>
                   <p className="mb-2">
                     To create an endpoint, run the following command on your HPC machine:
                   </p>
                   <div className="card-muted p-3 rounded font-mono text-sm mb-3">
-                    globus-compute-endpoint create &lt;endpoint-name&gt;
+                    globus-compute-endpoint configure &lt;endpoint-name&gt;
                   </div>
                   <p className="mb-2">
                     After creating your endpoint, start it with:
