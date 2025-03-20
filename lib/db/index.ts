@@ -12,7 +12,7 @@ if (!connectionString && process.env.NODE_ENV !== 'development') {
 
 // For server-side only
 const client = postgres(connectionString || 'postgres://postgres:postgres@localhost:5432/postgres', {
-  max: 10, // Maximum number of connections
+  max: 100, // Maximum number of connections
   ssl: process.env.NODE_ENV === 'production' 
     ? { rejectUnauthorized: false } // Accept self-signed certificates in production
     : false, // No SSL in development
