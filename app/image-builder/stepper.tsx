@@ -115,7 +115,6 @@ export function ImageBuilderStepper() {
   const { control, register } = form;
 
   const handleStepSubmit = (stepData: Partial<FormData>) => {
-    console.log(stepData);
     setFormData((prev) => ({ ...prev, ...stepData }))
   }
 
@@ -720,7 +719,7 @@ function EndpointStep({ control, endpoints, endpointValue }: { control: Control<
           control={control}
           name="account"
           render={({ field }) => (
-            <FormItem className="w-[60%] md:w-[20%]">
+            <FormItem className="w-full md:w-[80%]">
               <FormLabel>Account</FormLabel>
               <div className="flex items-center gap-2">
                 <Select
@@ -747,6 +746,11 @@ function EndpointStep({ control, endpoints, endpointValue }: { control: Control<
                 {isLoadingAccounts && (
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                 )}
+                <Input
+                  placeholder="Or enter account name"
+                  onChange={(e) => setValue('account', e.target.value)}
+                  className="ml-2 w-full md:w-[60%]"
+                />
               </div>
               <FormDescription>
                 Select your account.
