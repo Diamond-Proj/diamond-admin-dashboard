@@ -542,12 +542,15 @@ function EndpointStep({ control, endpoints, endpointValue }: { control: Control<
     register,
     formState: { errors },
     setValue,
-  } = useFormContext<EndpointFormValues>()
+    getValues
+  } = useFormContext<EndpointFormValues>();
   const [partitions, setPartitions] = useState<string[]>([]);
   const [partitionsCache, setPartitionsCache] = useState<{ [key: string]: string[] }>({});
   const [isLoadingPartitions, setIsLoadingPartitions] = useState(false);
   const [accounts, setAccounts] = useState<string[]>([]);
   const [isLoadingAccounts, setIsLoadingAccounts] = useState(false);
+  const [accountInputValue, setAccountInputValue] = useState('');
+  const [selectedAccount, setSelectedAccount] = useState('');
 
   useEffect(() => {
     if (endpoints && endpointValue) {
@@ -716,49 +719,62 @@ function EndpointStep({ control, endpoints, endpointValue }: { control: Control<
         <div>
           <h2 className="text-2xl font-bold mb-4">HPC Account Name</h2>
           <FormField
-          control={control}
-          name="account"
-          render={({ field }) => (
-            <FormItem className="w-full md:w-[80%]">
-              <FormLabel>Account</FormLabel>
-              <div className="flex items-center gap-2">
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  disabled={isLoadingAccounts}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder={isLoadingAccounts ? "Loading..." : "Select account"} />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {accounts.map((account) => (
-                      <SelectItem
-                        key={account}
-                        value={account}
-                      >
-                        {account}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {isLoadingAccounts && (
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                )}
-                <Input
-                  placeholder="Or enter account name"
-                  onChange={(e) => setValue('account', e.target.value)}
-                  className="ml-2 w-full md:w-[60%]"
-                />
-              </div>
-              <FormDescription>
-                Select your account.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            control={control}
+            name="account"
+            render={({ field }) => (
+              <FormItem className="w-full md:w-[80%]">
+                <FormLabel>Account</FormLabel>
+                <div className="flex items-center gap-2">
+                  <Select
+                    onValueChange={(value) => {
+                      setSelectedAccount(value);
+                      setAccountInputValue(''); // Clear input when dropdown is used
+                      setValue('account', value);
+                      field.onChange(value);
+                    }}
+                    value={selectedAccount}
+                    disabled={isLoadingAccounts}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={isLoadingAccounts ? "Loading..." : "Select account"} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {accounts.map((account) => (
+                        <SelectItem
+                          key={account}
+                          value={account}
+                        >
+                          {account}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {isLoadingAccounts && (
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  )}
+                  <Input
+                    id="accountInput"
+                    placeholder="Or enter account name"
+                    value={accountInputValue}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setAccountInputValue(value);
+                      setSelectedAccount(''); // Clear dropdown when input is used
+                      setValue('account', value, { shouldValidate: true, shouldDirty: true });
+                      field.onChange(value);
+                    }}
+                    className="ml-2 w-full md:w-[60%]"
+                  />
+                </div>
+                <FormDescription>
+                  Select your account.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
       </div>
     </>
