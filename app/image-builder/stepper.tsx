@@ -509,17 +509,19 @@ function StepperContent({
 }
 
 function StepIndicator() {
-  const stepper = useStepper()
+  const stepper = useStepper();
+
   return (
     <div className="flex justify-between">
       {stepper.all.map((step, index) => (
         <div
           key={step.id}
-          className={`flex flex-col items-center ${
+          className={`flex flex-col items-center cursor-pointer ${
             index <= stepper.all.indexOf(stepper.current)
               ? 'text-primary'
               : 'text-muted-foreground'
           }`}
+          onClick={() => stepper.goTo(step.id)}
         >
           <div
             className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 border-2 ${
@@ -534,7 +536,7 @@ function StepIndicator() {
         </div>
       ))}
     </div>
-  )
+  );
 }
 
 function EndpointStep({ control, endpoints, endpointValue }: { control: Control<FormData>, endpoints: { endpoint_uuid: string; endpoint_name: string }[], endpointValue: string }) {
