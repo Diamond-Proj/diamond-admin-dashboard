@@ -34,7 +34,7 @@ export function AuthStatus() {
         return authCookies.includes(cookieName);
       });
       
-      console.log('Auth status check result:', hasAuthCookie);
+      // console.log('Auth status check result:', hasAuthCookie);
       
       // Only update state if it changed to avoid unnecessary re-renders
       if (hasAuthCookie !== isAuthenticated || isLoading) {
@@ -51,7 +51,7 @@ export function AuthStatus() {
 
     // Also check auth status when the window gets focus
     const handleFocus = () => {
-      console.log('Window focused, checking auth status');
+      // console.log('Window focused, checking auth status');
       checkAuth();
     };
     
