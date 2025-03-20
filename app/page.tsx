@@ -1,12 +1,102 @@
-import React from 'react';
-import { is_authenticated } from '@/lib/authUtils';
+'use client';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { getUserProfile, updateUserProfile } from '@/lib/taskHandlers';
 
-export default async function DashboardPage({
+export default function DashboardPage({
   searchParams
 }: {
   searchParams: { q: string; offset: string };
 }) {
-  const isAuthenticated = await is_authenticated();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [userInfo, setUserInfo] = useState<any>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    // Check authentication status from cookies client-side
+    const checkAuth = () => {
+      const cookies = document.cookie.split(';');
+      
+      const authCookies = [
+        'is_authenticated',
+        'tokens',
+        'access_token',
+        'id_token',
+        'refresh_token',
+        'name',
+        'email',
+        'primary_identity'
+      ];
+      
+      const hasAuthCookie = cookies.some(cookie => {
+        const cookieName = cookie.trim().split('=')[0];
+        return authCookies.includes(cookieName);
+      });
+      
+      setIsAuthenticated(hasAuthCookie);
+      
+      // If authenticated, get user info from cookies
+      if (hasAuthCookie) {
+        const cookieObj: Record<string, string> = {};
+        cookies.forEach(cookie => {
+          const [name, value] = cookie.trim().split('=');
+          if (name) cookieObj[name] = decodeURIComponent(value || '');
+        });
+        
+        setUserInfo({
+          name: cookieObj['name'],
+          email: cookieObj['email'],
+          primary_identity: cookieObj['primary_identity'],
+          institution: cookieObj['institution']
+        });
+      }
+    };
+
+    // Check auth only once when component mounts
+    checkAuth();
+  }, []);
+  
+  // Update user profile once when authenticated and user info is available
+  useEffect(() => {
+    const checkAndUpdateProfile = async () => {
+      console.log('checkAndUpdateProfile');
+      if (isAuthenticated && userInfo && userInfo.primary_identity) {
+        console.log('userInfo', userInfo);
+        try {
+          const profile = await getUserProfile({
+            identity_id: userInfo.primary_identity
+          });
+          console.log('profile', profile);
+          // If the profile is not found, create it or if any of the fields are different, update it
+          if (!profile.profile || profile.profile.institution !== userInfo.institution) {
+            console.log('updating profile');
+            await updateUserProfile({
+              identity_id: userInfo.primary_identity,
+              name: userInfo.name,
+              email: userInfo.email,
+              institution: userInfo.institution,
+            });
+            console.log('profile updated');
+          }
+        } catch (error) {
+          console.error('Error updating profile:', error);
+        }
+      }
+    };
+    
+    checkAndUpdateProfile();
+  }, [isAuthenticated, userInfo]);
+
+  // Show loading state while checking authentication
+  if (isAuthenticated === null) {
+    return (
+      <main className="flex flex-1 flex-col p-4 md:p-6 items-center justify-center">
+        <div className="text-center">
+          <p>Loading dashboard...</p>
+        </div>
+      </main>
+    );
+  }
   
   return (
     <>
@@ -32,13 +122,19 @@ export default async function DashboardPage({
                 <h3 className="text-lg font-medium mb-2">Globus Compute Endpoint Setup</h3>
                 <div className="bg-info p-4 rounded-md">
                   <p className="mb-2 text-info font-medium">
-                    <strong>Important:</strong> Before using Diamond services, you need to create a Globus Compute endpoint on your HPC machine.
+                    <strong>Important:</strong> Before using Diamond services, you need to create a <a href="https://globus-compute.readthedocs.io/en/2.6.0/endpoints.html" target="_blank" rel="noopener noreferrer">Globus Compute endpoint</a> on your HPC machine.
                   </p>
+                  <p className="mb-2">
+                    Install Globus Compute Endpoint package PyPi package:
+                  </p>
+                  <div className="card-muted p-3 rounded font-mono text-sm mb-3">
+                    python3 -m pipx install globus-compute-endpoint
+                  </div>
                   <p className="mb-2">
                     To create an endpoint, run the following command on your HPC machine:
                   </p>
                   <div className="card-muted p-3 rounded font-mono text-sm mb-3">
-                    globus-compute-endpoint create &lt;endpoint-name&gt;
+                    globus-compute-endpoint configure &lt;endpoint-name&gt;
                   </div>
                   <p className="mb-2">
                     After creating your endpoint, start it with:

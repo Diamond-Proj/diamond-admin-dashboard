@@ -1,5 +1,48 @@
 import { toast } from '@/components/ui/use-toast';
 
+export async function getUserProfile(data: { identity_id: string }) {
+  try {
+    const { identity_id } = data;
+    const response = await fetch(`/api/profile?identity_id=${encodeURIComponent(identity_id)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    const responseData = await response.json();
+    console.log('getUserProfile responseData:', responseData);
+    return responseData;
+  } catch (error) {
+    console.error('Error in getUserProfile:', error);
+    throw error;
+  }
+}
+
+export async function updateUserProfile(data: any) {
+  try {
+    const response = await fetch(`/api/profile`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    const responseData = await response.json();
+    console.log('  responseData:', responseData);
+    return responseData;
+  } catch (error) {
+    console.error('Error in updateUserProfile:', error);
+    throw error;
+  }
+}
+
+
 export async function submitTask(data: any) {
   try {
     const response = await fetch(`/api/submit_task`, {
@@ -17,6 +60,7 @@ export async function submitTask(data: any) {
     return responseData;
   } catch (error) {
     console.error('Error in task submitting:', error);
+    throw error;
   }
 }
 
@@ -49,5 +93,6 @@ export async function registerContainer(data: {
     return responseData;
   } catch (error) {
     console.error('Error in registerContainer:', error);
+    throw error;
   }
 }

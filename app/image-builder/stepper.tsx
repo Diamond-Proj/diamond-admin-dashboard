@@ -115,7 +115,6 @@ export function ImageBuilderStepper() {
   const { control, register } = form;
 
   const handleStepSubmit = (stepData: Partial<FormData>) => {
-    console.log(stepData);
     setFormData((prev) => ({ ...prev, ...stepData }))
   }
 
@@ -510,17 +509,19 @@ function StepperContent({
 }
 
 function StepIndicator() {
-  const stepper = useStepper()
+  const stepper = useStepper();
+
   return (
     <div className="flex justify-between">
       {stepper.all.map((step, index) => (
         <div
           key={step.id}
-          className={`flex flex-col items-center ${
+          className={`flex flex-col items-center cursor-pointer ${
             index <= stepper.all.indexOf(stepper.current)
               ? 'text-primary'
               : 'text-muted-foreground'
           }`}
+          onClick={() => stepper.goTo(step.id)}
         >
           <div
             className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 border-2 ${
@@ -535,7 +536,7 @@ function StepIndicator() {
         </div>
       ))}
     </div>
-  )
+  );
 }
 
 function EndpointStep({ control, endpoints, endpointValue }: { control: Control<FormData>, endpoints: { endpoint_uuid: string; endpoint_name: string }[], endpointValue: string }) {
@@ -543,12 +544,15 @@ function EndpointStep({ control, endpoints, endpointValue }: { control: Control<
     register,
     formState: { errors },
     setValue,
-  } = useFormContext<EndpointFormValues>()
+    getValues
+  } = useFormContext<EndpointFormValues>();
   const [partitions, setPartitions] = useState<string[]>([]);
   const [partitionsCache, setPartitionsCache] = useState<{ [key: string]: string[] }>({});
   const [isLoadingPartitions, setIsLoadingPartitions] = useState(false);
   const [accounts, setAccounts] = useState<string[]>([]);
   const [isLoadingAccounts, setIsLoadingAccounts] = useState(false);
+  const [accountInputValue, setAccountInputValue] = useState('');
+  const [selectedAccount, setSelectedAccount] = useState('');
 
   useEffect(() => {
     if (endpoints && endpointValue) {
@@ -717,44 +721,62 @@ function EndpointStep({ control, endpoints, endpointValue }: { control: Control<
         <div>
           <h2 className="text-2xl font-bold mb-4">HPC Account Name</h2>
           <FormField
-          control={control}
-          name="account"
-          render={({ field }) => (
-            <FormItem className="w-[60%] md:w-[20%]">
-              <FormLabel>Account</FormLabel>
-              <div className="flex items-center gap-2">
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  disabled={isLoadingAccounts}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder={isLoadingAccounts ? "Loading..." : "Select account"} />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {accounts.map((account) => (
-                      <SelectItem
-                        key={account}
-                        value={account}
-                      >
-                        {account}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {isLoadingAccounts && (
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                )}
-              </div>
-              <FormDescription>
-                Select your account.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            control={control}
+            name="account"
+            render={({ field }) => (
+              <FormItem className="w-full md:w-[80%]">
+                <FormLabel>Account</FormLabel>
+                <div className="flex items-center gap-2">
+                  <Select
+                    onValueChange={(value) => {
+                      setSelectedAccount(value);
+                      setAccountInputValue(''); // Clear input when dropdown is used
+                      setValue('account', value);
+                      field.onChange(value);
+                    }}
+                    value={selectedAccount}
+                    disabled={isLoadingAccounts}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={isLoadingAccounts ? "Loading..." : "Select account"} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {accounts.map((account) => (
+                        <SelectItem
+                          key={account}
+                          value={account}
+                        >
+                          {account}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {isLoadingAccounts && (
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  )}
+                  <Input
+                    id="accountInput"
+                    placeholder="Or enter account name"
+                    value={accountInputValue}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setAccountInputValue(value);
+                      setSelectedAccount(''); // Clear dropdown when input is used
+                      setValue('account', value, { shouldValidate: true, shouldDirty: true });
+                      field.onChange(value);
+                    }}
+                    className="ml-2 w-full md:w-[60%]"
+                  />
+                </div>
+                <FormDescription>
+                  Select your account.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
       </div>
     </>
