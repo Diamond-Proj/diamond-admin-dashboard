@@ -16,6 +16,7 @@ import { DashboardIcon, GlobeIcon } from '@radix-ui/react-icons';
 import { ImageIcon } from '@radix-ui/react-icons';
 
 import { AuthStatus } from '@/components/auth-status';
+import { DataPrepStatus } from '@/components/data-prep-status';
 import ThemeToggle from '@/components/layout/ThemeToggle/theme-toggle';
 import ThemeProvider from '@/components/layout/ThemeToggle/theme-provider';
 import { ClientSideNav } from '@/components/client-side-nav';
@@ -71,8 +72,10 @@ export default async function RootLayout({
                 <span className="text-rose_red dark:text-honolulu_blue">DIAMOND</span>
               </Link>
 
-              {/* Replace with client-side auth status component */}
-              <AuthStatus />
+              <div className="flex items-center gap-4">
+                <DataPrepStatus initialIsAuthenticated={isAuthenticated} />
+                <AuthStatus />
+              </div>
 
             </header>
             {children}
