@@ -68,6 +68,22 @@ export default function AuthCallbackPage() {
             throw new Error('Failed to store authentication tokens');
           }
           
+          setProcessingStep('Preparing user data...');
+          console.log('Calling data prep API...');
+          
+          const dataPrepResponse = await fetch('/api/data_prep', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+          });
+  
+          if (!dataPrepResponse.ok) {
+            const errorDetail = await dataPrepResponse.text();
+            console.error('Data preparation failed:', errorDetail);
+            throw new Error('Data preparation failed');
+          }
+  
+          console.log('Data preparation successful');
+
           // Log success and show toast
           console.log('Authentication successful', { 
             userInfo: responseData.userInfo,

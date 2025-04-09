@@ -599,19 +599,7 @@ function EndpointStep({ control, endpoints, endpointValue }: { control: Control<
             body: JSON.stringify({ endpoint: endpointValue }),
           });
           const data = await response.json();
-          // Transform data to extract account and project info
-          const accountsWithProjects = data.map((line: string) => {
-            const matches = line.match(/^(\S+)\s+\d+\s+\d+\s+(.+)$/);
-            if (matches) {
-              return {
-                account: matches[1],
-                project: matches[2].trim()
-              };
-            }
-            return null;
-          }).filter(Boolean);
-          
-          setAccounts(accountsWithProjects.map((a: { account: string }) => a.account));
+          setAccounts(data);
         } catch (error) {
           console.error('Error fetching accounts:', error);
         } finally {
