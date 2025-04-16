@@ -198,13 +198,13 @@ export function ImageBuilderStepper() {
         }
     }, 5000)
 
-    // Safety timeout after 5 minutes
+    // Safety timeout after 15 minutes
     setTimeout(() => {
         setIsPolling(false)
         if (pollIntervalRef.current) {
             clearInterval(pollIntervalRef.current)
         }
-    }, 300000)
+    }, 900000)
   }, [fetchBuildLogs])
 
   const fetchStderrLogs = useCallback(async (endpoint_id: string, log_path: string, build_task_id?: string, log_task_id?: string) => {
