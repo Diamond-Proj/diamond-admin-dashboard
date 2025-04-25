@@ -37,6 +37,7 @@ const formSchema = z.object({
   endpoint: z.string(),
   partition: z.string(),
   account: z.string(),
+  reservation: z.string().optional(),
   num_of_nodes: z
   .string()
   .regex(/^\d+$/, { message: 'Must be a positive integer' })
@@ -373,6 +374,7 @@ export function JobComposerForm() {
             endpoint: values.endpoint,
             partition: values.partition,
             account: values.account,
+            reservation: values.reservation,
             log_path: values.log_path,
             num_of_nodes: values.num_of_nodes,
             task: values.task,
@@ -585,7 +587,24 @@ export function JobComposerForm() {
               )}
             />
 
-
+            <FormField
+              control={form.control}
+              name="reservation"
+              render={({ field }) => (
+                <FormItem className="w-[60%] md:w-[20%]">
+                  <FormLabel>Reservation</FormLabel>
+                  <Input
+                    placeholder="Reservation"
+                    {...field}
+                    disabled={isLoadingPartitions || isLoadingContainers}
+                  />
+                  <FormDescription>
+                    Optional: Specify a reservation name.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
