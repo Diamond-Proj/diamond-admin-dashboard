@@ -32,7 +32,8 @@ import {
 const endpointSchema = z.object({
   endpoint: z.string().min(1, 'Endpoint selection is required'),
   partition: z.string().min(1, 'Partition is required'),
-  account: z.string().min(1, 'Account name is required')
+  account: z.string().min(1, 'Account name is required'),
+  reservation: z.string().optional(),
 })
 
 const containerSchema = z.object({
@@ -324,6 +325,7 @@ export function ImageBuilderStepper() {
         environment: data.environment,
         commands: data.commands,
         account: data.account,
+        reservation: data.reservation
       }
 
         const response = await fetch('/api/image_builder', {
@@ -610,6 +612,13 @@ function EndpointStep({ control, endpoints, endpointValue }: { control: Control<
     }
   }, [endpointValue]);
 
+  useEffect(() => {
+    const reservation = getValues('reservation');
+    if (reservation) {
+      setValue('reservation', reservation);
+    }
+  }, [getValues, setValue]);
+
   return (
     <>
       <div className="grid grid-cols-1 gap-4">
@@ -766,6 +775,28 @@ function EndpointStep({ control, endpoints, endpointValue }: { control: Control<
             )}
           />
         </div>
+        {/* Reservation Input */}
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Reservation</h2>
+          <FormField
+            control={control}
+            name="reservation"
+            render={({ field }) => (
+              <FormItem className="w-full md:w-[80%]">
+                <FormLabel>Reservation</FormLabel>
+                <Input
+                  placeholder="Optional reservation"
+                  {...register('reservation')}
+                  className="w-full"
+                />
+                <FormDescription>
+                  Optional reservation for the build.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
       </div>
     </>
   )
@@ -878,6 +909,7 @@ function ReviewStep({ onSubmit, isLoading, isSubmitted }: {
           <p><strong>Endpoint:</strong> {values.endpoint}</p>
           <p><strong>Partition:</strong> {values.partition}</p>
           <p><strong>HPC Account:</strong> {values.account}</p>
+          <p><strong>Reservation:</strong> {values.reservation || 'None'}</p>
         </div>
       </div>
 
