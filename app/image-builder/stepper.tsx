@@ -180,31 +180,35 @@ export function ImageBuilderStepper() {
     // Initial fetch
     fetchBuildLogs(endpoint_id, log_path, build_task_id)
 
-    // Start polling
-    pollIntervalRef.current = setInterval(async () => {
-        if (currentEndpointRef.current && currentLogPathRef.current && currentTaskIdRef.current) {
-            const shouldStop = await fetchBuildLogs(
-                currentEndpointRef.current,
-                currentLogPathRef.current,
-                currentTaskIdRef.current,
-                currentLogTaskIdRef.current as string
-            )
-            
-            if (shouldStop) {
-                setIsPolling(false)
-                if (pollIntervalRef.current) {
-                    clearInterval(pollIntervalRef.current)
-                }
-            }
+    // Start polling with a 5s delay between polls
+    const poll = async () => {
+      if (currentEndpointRef.current && currentLogPathRef.current && currentTaskIdRef.current) {
+        const shouldStop = await fetchBuildLogs(
+          currentEndpointRef.current,
+          currentLogPathRef.current,
+          currentTaskIdRef.current,
+          currentLogTaskIdRef.current as string
+        )
+        
+        if (shouldStop) {
+          setIsPolling(false)
+          return
         }
-    }, 5000)
+        
+        // Set a 5s sleep timer between polls
+        pollIntervalRef.current = setTimeout(poll, 5000)
+      }
+    }
+    
+    // Start the polling process
+    pollIntervalRef.current = setTimeout(poll, 5000)
 
     // Safety timeout after 15 minutes
     setTimeout(() => {
-        setIsPolling(false)
-        if (pollIntervalRef.current) {
-            clearInterval(pollIntervalRef.current)
-        }
+      setIsPolling(false)
+      if (pollIntervalRef.current) {
+        clearTimeout(pollIntervalRef.current)
+      }
     }, 900000)
   }, [fetchBuildLogs])
 
@@ -397,8 +401,8 @@ export function ImageBuilderStepper() {
 
   useEffect(() => {
     return () => {
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current)
+      if (pollStderrIntervalRef.current) {
+        clearInterval(pollStderrIntervalRef.current)
       }
     }
   }, [])
