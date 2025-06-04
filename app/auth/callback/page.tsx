@@ -67,7 +67,7 @@ export default function AuthCallbackPage() {
           if (!success) {
             throw new Error('Failed to store authentication tokens');
           }
-          
+
           // Log success and show toast
           console.log('Authentication successful', { 
             userInfo: responseData.userInfo,

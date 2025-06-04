@@ -32,7 +32,8 @@ import {
 const endpointSchema = z.object({
   endpoint: z.string().min(1, 'Endpoint selection is required'),
   partition: z.string().min(1, 'Partition is required'),
-  account: z.string().min(1, 'Account name is required')
+  account: z.string().min(1, 'Account name is required'),
+  reservation: z.string().optional(),
 })
 
 const containerSchema = z.object({
@@ -179,32 +180,36 @@ export function ImageBuilderStepper() {
     // Initial fetch
     fetchBuildLogs(endpoint_id, log_path, build_task_id)
 
-    // Start polling
-    pollIntervalRef.current = setInterval(async () => {
-        if (currentEndpointRef.current && currentLogPathRef.current && currentTaskIdRef.current) {
-            const shouldStop = await fetchBuildLogs(
-                currentEndpointRef.current,
-                currentLogPathRef.current,
-                currentTaskIdRef.current,
-                currentLogTaskIdRef.current as string
-            )
-            
-            if (shouldStop) {
-                setIsPolling(false)
-                if (pollIntervalRef.current) {
-                    clearInterval(pollIntervalRef.current)
-                }
-            }
+    // Start polling with a 5s delay between polls
+    const poll = async () => {
+      if (currentEndpointRef.current && currentLogPathRef.current && currentTaskIdRef.current) {
+        const shouldStop = await fetchBuildLogs(
+          currentEndpointRef.current,
+          currentLogPathRef.current,
+          currentTaskIdRef.current,
+          currentLogTaskIdRef.current as string
+        )
+        
+        if (shouldStop) {
+          setIsPolling(false)
+          return
         }
-    }, 5000)
+        
+        // Set a 5s sleep timer between polls
+        pollIntervalRef.current = setTimeout(poll, 5000)
+      }
+    }
+    
+    // Start the polling process
+    pollIntervalRef.current = setTimeout(poll, 5000)
 
-    // Safety timeout after 5 minutes
+    // Safety timeout after 15 minutes
     setTimeout(() => {
-        setIsPolling(false)
-        if (pollIntervalRef.current) {
-            clearInterval(pollIntervalRef.current)
-        }
-    }, 300000)
+      setIsPolling(false)
+      if (pollIntervalRef.current) {
+        clearTimeout(pollIntervalRef.current)
+      }
+    }, 900000)
   }, [fetchBuildLogs])
 
   const fetchStderrLogs = useCallback(async (endpoint_id: string, log_path: string, build_task_id?: string, log_task_id?: string) => {
@@ -324,6 +329,7 @@ export function ImageBuilderStepper() {
         environment: data.environment,
         commands: data.commands,
         account: data.account,
+        reservation: data.reservation
       }
 
         const response = await fetch('/api/image_builder', {
@@ -395,8 +401,8 @@ export function ImageBuilderStepper() {
 
   useEffect(() => {
     return () => {
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current)
+      if (pollStderrIntervalRef.current) {
+        clearInterval(pollStderrIntervalRef.current)
       }
     }
   }, [])
@@ -599,19 +605,7 @@ function EndpointStep({ control, endpoints, endpointValue }: { control: Control<
             body: JSON.stringify({ endpoint: endpointValue }),
           });
           const data = await response.json();
-          // Transform data to extract account and project info
-          const accountsWithProjects = data.map((line: string) => {
-            const matches = line.match(/^(\S+)\s+\d+\s+\d+\s+(.+)$/);
-            if (matches) {
-              return {
-                account: matches[1],
-                project: matches[2].trim()
-              };
-            }
-            return null;
-          }).filter(Boolean);
-          
-          setAccounts(accountsWithProjects.map((a: { account: string }) => a.account));
+          setAccounts(data);
         } catch (error) {
           console.error('Error fetching accounts:', error);
         } finally {
@@ -621,6 +615,13 @@ function EndpointStep({ control, endpoints, endpointValue }: { control: Control<
       fetchAccounts();
     }
   }, [endpointValue]);
+
+  useEffect(() => {
+    const reservation = getValues('reservation');
+    if (reservation) {
+      setValue('reservation', reservation);
+    }
+  }, [getValues, setValue]);
 
   return (
     <>
@@ -778,6 +779,28 @@ function EndpointStep({ control, endpoints, endpointValue }: { control: Control<
             )}
           />
         </div>
+        {/* Reservation Input */}
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Reservation</h2>
+          <FormField
+            control={control}
+            name="reservation"
+            render={({ field }) => (
+              <FormItem className="w-full md:w-[80%]">
+                <FormLabel>Reservation</FormLabel>
+                <Input
+                  placeholder="Optional reservation"
+                  {...register('reservation')}
+                  className="w-full"
+                />
+                <FormDescription>
+                  Optional reservation for the build.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
       </div>
     </>
   )
@@ -890,6 +913,7 @@ function ReviewStep({ onSubmit, isLoading, isSubmitted }: {
           <p><strong>Endpoint:</strong> {values.endpoint}</p>
           <p><strong>Partition:</strong> {values.partition}</p>
           <p><strong>HPC Account:</strong> {values.account}</p>
+          <p><strong>Reservation:</strong> {values.reservation || 'None'}</p>
         </div>
       </div>
 

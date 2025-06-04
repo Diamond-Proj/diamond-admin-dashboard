@@ -1,4 +1,4 @@
-import { pgTable, text, varchar, timestamp, foreignKey } from 'drizzle-orm/pg-core';
+import { pgTable, text, varchar, json, timestamp, foreignKey } from 'drizzle-orm/pg-core';
 
 // Profile table schema
 export const profiles = pgTable('profile', {
@@ -36,6 +36,17 @@ export const containers = pgTable('container', {
   endpoint_id: varchar('endpoint_id')
 });
 
+export const endpoints = pgTable('endpoints', {
+  endpoint_uuid: varchar('endpoint_uuid').primaryKey(),
+  identity_id: varchar('identity_id', { length: 255 })
+    .notNull()
+    .references(() => profiles.identity_id),
+  endpoint_name: varchar('endpoint_name'),
+  endpoint_host: varchar('endpoint_host'),
+  partitions: json('partitions'),
+  accounts: json('accounts'),
+});
+
 // Export types
 export type Profile = typeof profiles.$inferSelect;
 export type NewProfile = typeof profiles.$inferInsert;
@@ -45,3 +56,6 @@ export type NewTask = typeof tasks.$inferInsert;
 
 export type Container = typeof containers.$inferSelect;
 export type NewContainer = typeof containers.$inferInsert; 
+
+export type Endpoint = typeof endpoints.$inferSelect;
+export type NewEndpoint = typeof endpoints.$inferInsert;

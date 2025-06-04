@@ -37,6 +37,7 @@ const formSchema = z.object({
   endpoint: z.string(),
   partition: z.string(),
   account: z.string(),
+  reservation: z.string().optional(),
   num_of_nodes: z
   .string()
   .regex(/^\d+$/, { message: 'Must be a positive integer' })
@@ -132,7 +133,7 @@ export function JobComposerForm() {
   }, [endpointValue]);
 
   useEffect(() => {
-    if (endpoints) {
+    if (endpoints && endpointValue) {
       const fetchAccounts = async () => {
         setIsLoadingAccounts(true);
         try {
@@ -142,19 +143,7 @@ export function JobComposerForm() {
             body: JSON.stringify({ endpoint: endpointValue }),
           });
           const data = await response.json();
-          // Transform data to extract account and project info
-          const accountsWithProjects = data.map((line: string) => {
-            const matches = line.match(/^(\S+)\s+\d+\s+\d+\s+(.+)$/);
-            if (matches) {
-              return {
-                account: matches[1],
-                project: matches[2].trim()
-              };
-            }
-            return null;
-          }).filter(Boolean);
-          
-          setAccounts(accountsWithProjects.map((a: { account: string }) => a.account));
+          setAccounts(data);
         } catch (error) {
           console.error('Error fetching accounts:', error);
         } finally {
@@ -385,6 +374,7 @@ export function JobComposerForm() {
             endpoint: values.endpoint,
             partition: values.partition,
             account: values.account,
+            reservation: values.reservation,
             log_path: values.log_path,
             num_of_nodes: values.num_of_nodes,
             task: values.task,
@@ -564,37 +554,52 @@ export function JobComposerForm() {
               control={form.control}
               name="account"
               render={({ field }) => (
-                <FormItem className="w-[60%] md:w-[20%]">
+                <FormItem className="w-[60%] md:w-[40%]">
                   <FormLabel>Account</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    disabled={isLoadingAccounts}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder={isLoadingAccounts ? "Loading..." : "Select account"} />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {accounts.length > 0 ? (
-                        accounts.map((account) => (
-                          <SelectItem
-                            key={account}
-                            value={account}
-                          >
+                  <div className="flex flex-col gap-2">
+                    <Select
+                      onValueChange={(val) => field.onChange(val)}
+                      value={accounts.includes(field.value) ? field.value : ''}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={isLoadingAccounts ? 'Loading...' : 'Select account'} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {accounts.map((account) => (
+                          <SelectItem key={account} value={account}>
                             {account}
                           </SelectItem>
-                        ))
-                      ) : (
-                        <SelectItem value="none" disabled>
-                          No accounts available
-                        </SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    <Input
+                      placeholder="Or enter account name"
+                      value={!accounts.includes(field.value) ? field.value : ''}
+                      onChange={(e) => field.onChange(e.target.value)}
+                    />
+                  </div>
+                  <FormDescription>Select from the list or enter a custom account name.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="reservation"
+              render={({ field }) => (
+                <FormItem className="w-[60%] md:w-[20%]">
+                  <FormLabel>Reservation</FormLabel>
+                  <Input
+                    placeholder="Reservation"
+                    {...field}
+                    disabled={isLoadingPartitions || isLoadingContainers}
+                  />
                   <FormDescription>
-                    Select an account from the list.
+                    Optional: Specify a reservation name.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
