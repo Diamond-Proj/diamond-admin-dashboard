@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { StatusSelectItem } from '@/components/ui/status-select';
 
 
 const endpointSchema = z.object({
@@ -92,7 +93,7 @@ export function ImageBuilderStepper() {
   const [buildLogs, setBuildLogs] = useState<string>('')
   const [stderrLogs, setStderrLogs] = useState<string>('')
   const [endpoints, setEndpoints] = useState<
-    { endpoint_uuid: string; endpoint_name: string }[]
+    { endpoint_uuid: string; endpoint_name: string; endpoint_status: string }[]
   >([])
   const [isPolling, setIsPolling] = useState(false)
   const [isPollingStderr, setIsPollingStderr] = useState(false)
@@ -377,7 +378,7 @@ export function ImageBuilderStepper() {
   useEffect(() => {
     async function fetchEndpoints() {
       try {
-        const response = await fetch('/api/list_active_endpoints')
+        const response = await fetch('/api/list_all_endpoints')
         const data = await response.json()
         setEndpoints(data)
       } catch (error) {
@@ -441,7 +442,7 @@ function StepperContent({
   onFinalSubmit: (data: FormData) => void
   isLoading: boolean
   control: Control<FormData>
-  endpoints: { endpoint_uuid: string; endpoint_name: string }[]
+  endpoints: { endpoint_uuid: string; endpoint_name: string; endpoint_status: string }[]  
   endpointValue: string
   isSubmitted: boolean
 }) {
@@ -545,7 +546,7 @@ function StepIndicator() {
   );
 }
 
-function EndpointStep({ control, endpoints, endpointValue }: { control: Control<FormData>, endpoints: { endpoint_uuid: string; endpoint_name: string }[], endpointValue: string }) {
+function EndpointStep({ control, endpoints, endpointValue }: { control: Control<FormData>, endpoints: { endpoint_uuid: string; endpoint_name: string; endpoint_status: string }[], endpointValue: string }) {
   const {
     register,
     formState: { errors },
@@ -650,12 +651,14 @@ function EndpointStep({ control, endpoints, endpointValue }: { control: Control<
               <SelectContent>
                 {endpoints.length > 0 ? (
                   endpoints.map((endpoint) => (
-                    <SelectItem
+                    <StatusSelectItem
                       key={endpoint.endpoint_uuid}
                       value={endpoint.endpoint_uuid}
+                      disabled={endpoint.endpoint_status !== "online"}
+                      status={endpoint.endpoint_status === "online" ? "online" : "offline"}
                     >
-                      {endpoint.endpoint_name}
-                    </SelectItem>
+                      {endpoint.endpoint_name} {endpoint.endpoint_status !== "online" && "(offline)"}
+                    </StatusSelectItem>
                   ))
                 ) : (
                   <SelectItem value="none" disabled>
