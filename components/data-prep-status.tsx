@@ -17,36 +17,75 @@ interface DataPrepStatusProps {
 export function DataPrepStatus({ initialIsAuthenticated }: DataPrepStatusProps) {
   const [isAuthenticated] = useState(initialIsAuthenticated);
   const [dataPrepStatus, setDataPrepStatus] = useState<DataPrepStatus>('idle');
+  const [errorMessage, setErrorMessage] = useState<string>('');
   
   // Handle data preparation when authenticated
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    let abortController: AbortController | null = null;
+    
     const dataPrep = async () => {
       setDataPrepStatus('loading');
       
       try {
+        abortController = new AbortController();
+        timeoutId = setTimeout(() => {
+          if (abortController) abortController.abort();
+        }, 300000); // 5 minute timeout
+        
         const dataPrepResponse = await fetch('/api/data_prep', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          signal: abortController.signal,
+          // Increase fetch timeout
+          cache: 'no-store',
         });
+        
+        clearTimeout(timeoutId);
 
         if (!dataPrepResponse.ok) {
-          const errorDetail = await dataPrepResponse.text();
-          console.error('Data preparation failed:', errorDetail);
+          let errorData;
+          try {
+            errorData = await dataPrepResponse.json();
+          } catch (e) {
+            // If JSON parsing fails, use text
+            const textError = await dataPrepResponse.text();
+            errorData = { message: textError || 'Unknown error' };
+          }
+          
+          console.error('Data preparation failed:', errorData);
+          setErrorMessage(errorData.message || `Error ${dataPrepResponse.status}`);
           setDataPrepStatus('error');
           return;
         }
 
-        console.log('Data preparation successful');
-        setDataPrepStatus('success');
+        const responseData = await dataPrepResponse.json();
+        console.log('Data preparation successful:', responseData);
+        
+        if (responseData.status === 'success') {
+          setDataPrepStatus('success');
+        } else {
+          setErrorMessage(responseData.message || 'Unknown error');
+          setDataPrepStatus('error');
+        }
       } catch (error) {
+        clearTimeout(timeoutId);
         console.error('Data preparation failed:', error);
+        setErrorMessage(error instanceof Error ? error.message : 'Connection error');
         setDataPrepStatus('error');
+      } finally {
+        abortController = null;
       }
     };
 
     if (isAuthenticated) {
       dataPrep();
     }
+    
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      if (abortController) abortController.abort();
+    };
   }, [isAuthenticated]);
 
   if (dataPrepStatus === 'idle' || !isAuthenticated) {
@@ -80,7 +119,7 @@ export function DataPrepStatus({ initialIsAuthenticated }: DataPrepStatusProps) 
                 ? 'You must wait for data preparation to complete before using any functionality. This process prepares necessary data for your session.'
                 : dataPrepStatus === 'success'
                 ? 'Data preparation is complete. You can now use all functionality.'
-                : 'Data preparation has failed. Some functionality may be unavailable. Please try refreshing the page or contact support.'}
+                : `Data preparation has failed: ${errorMessage}. Some functionality may be unavailable. Please try refreshing the page or contact support.`}
             </p>
           </div>
         </HoverCardContent>

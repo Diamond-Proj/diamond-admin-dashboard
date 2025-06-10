@@ -21,9 +21,13 @@ const nextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: `${baseUrl}/api/:path*`
+        destination: `${baseUrl}/api/:path*`,
+        basePath: false,
       }
     ]
+  },
+  experimental: {
+    proxyTimeout: 300000 // 5 minutes
   },
   // output: 'standalone',
 };
