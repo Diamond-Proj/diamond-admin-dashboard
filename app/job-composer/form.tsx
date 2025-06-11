@@ -46,7 +46,8 @@ const formSchema = z.object({
   log_path: z.string(),
   task: z.string().optional(),
   container: z.string(),
-  work_path: z.string().optional()
+  work_path: z.string().optional(),
+  time_duration: z.string().optional()
 });
 
 export function JobComposerForm() {
@@ -379,7 +380,8 @@ export function JobComposerForm() {
             num_of_nodes: values.num_of_nodes,
             task: values.task,
             container: values.container,
-            work_path: values.work_path // TODO : this is not being used
+            work_path: values.work_path, // TODO : this is not being used
+            time_duration: values.time_duration
           });
           break;
         default:
@@ -621,7 +623,21 @@ export function JobComposerForm() {
                 </FormItem>
               )}
             />
-
+            <FormField
+              control={form.control}
+              name="time_duration"
+              render={({ field }) => (
+                <FormItem className="w-[60%] md:w-[20%]">
+                  <FormLabel>Time Duration (HH:MM:SS)</FormLabel>
+                  <Input
+                    placeholder="01:00:00"
+                    {...field}
+                    disabled={isLoadingPartitions || isLoadingContainers}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="container"
