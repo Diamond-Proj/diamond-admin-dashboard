@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+import { StatusSelectItem } from '@/components/ui/status-select';
 import { submitTask } from '@/lib/taskHandlers';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
@@ -61,7 +62,7 @@ export function JobComposerForm() {
   });
 
   const [endpoints, setEndpoints] = useState<
-    { endpoint_uuid: string; endpoint_name: string }[]
+    { endpoint_uuid: string; endpoint_name: string; endpoint_status: string }[]
   >([]);
 
   const [partitions, setPartitions] = useState<string[]>([]);
@@ -89,7 +90,7 @@ export function JobComposerForm() {
   useEffect(() => {
     async function fetchEndpoints() {
       try {
-        const response = await fetch('/api/list_active_endpoints');
+        const response = await fetch('/api/list_all_endpoints');
         const data = await response.json();
         setEndpoints(data);
       } catch (error) {
@@ -493,12 +494,14 @@ export function JobComposerForm() {
                     <SelectContent>
                       {endpoints.length > 0 ? (
                         endpoints.map((endpoint) => (
-                          <SelectItem
+                          <StatusSelectItem
                             key={endpoint.endpoint_uuid}
                             value={endpoint.endpoint_uuid}
+                            disabled={endpoint.endpoint_status !== "online"}
+                            status={endpoint.endpoint_status === "online" ? "online" : "offline"}
                           >
-                            {endpoint.endpoint_name}
-                          </SelectItem>
+                            {endpoint.endpoint_name} {endpoint.endpoint_status !== "online" && "(offline)"}
+                          </StatusSelectItem>
                         ))
                       ) : (
                         <SelectItem value="none" disabled>
