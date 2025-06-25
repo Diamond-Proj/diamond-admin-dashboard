@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { execSync } from 'child_process';
-import { string } from 'zod';
 
 // GET method to retrieve health status and git information
 export async function GET(request: NextRequest) {
