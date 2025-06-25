@@ -1,42 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { execSync } from 'child_process';
+import { string } from 'zod';
 
 // GET method to retrieve health status and git information
 export async function GET(request: NextRequest) {
   try {
     const currentDateTime = new Date().toISOString();
     
-    // Get git commit SHA and time for main branch
-    let gitCommitSha = 'unknown';
-    let gitCommitTime = 'unknown';
-    
-    try {
-      // Get the latest commit SHA on main branch
-      gitCommitSha = execSync('git rev-parse HEAD', { 
-        encoding: 'utf8',
-        cwd: process.cwd()
-      }).trim();
-      
-      // Get the commit time for the latest commit
-      gitCommitTime = execSync('git log -1 --format=%cd --date=iso', { 
-        encoding: 'utf8',
-        cwd: process.cwd()
-      }).trim();
-    } catch (gitError) {
-      console.warn('Could not retrieve git information:', gitError);
-      // Keep default values if git commands fail
+    // Get git commit SHA for deployment
+    let gitCommitSha = process.env.VERCEL_GIT_COMMIT_SHA;
+    let healthData;
+
+    if (gitCommitSha && typeof gitCommitSha === 'string' && gitCommitSha.length > 2) {
+      healthData = {
+        status: 'healthy',
+        timestamp: currentDateTime,
+        git: {
+          commit_sha: gitCommitSha
+        }
+      };
+      return NextResponse.json(healthData, { status: 200 });
+
+    } else {
+      healthData = {
+        status: 'unhealthy',
+        timestamp: currentDateTime,
+        git: {
+          commit_sha: 'unknown'
+        }
+      };
+      return NextResponse.json(healthData, { status: 500 });
     }
-    
-    const healthData = {
-      status: 'healthy',
-      timestamp: currentDateTime,
-      git: {
-        commit_sha: gitCommitSha,
-        commit_time: gitCommitTime
-      }
-    };
-    
-    return NextResponse.json(healthData);
     
   } catch (error) {
     console.error('Error retrieving health status:', error);
