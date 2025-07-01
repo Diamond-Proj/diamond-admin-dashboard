@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     let gitCommitSha = process.env.VERCEL_GIT_COMMIT_SHA;
     let healthData;
 
-    if (gitCommitSha && typeof gitCommitSha === 'string' && gitCommitSha.length > 2) {
+    if (gitCommitSha && typeof gitCommitSha === 'string' && gitCommitSha.length === 40) {
       healthData = {
         status: 'healthy',
         timestamp: currentDateTime,
