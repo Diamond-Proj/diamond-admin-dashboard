@@ -37,10 +37,7 @@ const endpointSchema = z.object({
   reservation: z.string().optional(),
 })
 
-const jobDetailsSchema = z.object({
-  jobName: z.string().min(2, {
-    message: 'Job name must be at least 2 characters.'
-  }),
+const taskDetailsSchema = z.object({
   taskName: z.string().min(2, {
     message: 'Task name must be at least 2 characters.'
   }),
@@ -63,21 +60,21 @@ const reviewSchema = z.object({})
 
 const { Scoped, useStepper } = defineStepper(
   { id: 'endpointinfo', title: 'Endpoint Info', schema: endpointSchema },
-  { id: 'jobdetails', title: 'Job Details', schema: jobDetailsSchema },
+  { id: 'taskdetails', title: 'Task Details', schema: taskDetailsSchema },
   { id: 'taskconfig', title: 'Task Config', schema: taskConfigSchema },
   { id: 'review', title: 'Review', schema: reviewSchema }
 )
 
 type FormData = z.infer<typeof endpointSchema> &
-  z.infer<typeof jobDetailsSchema> &
+  z.infer<typeof taskDetailsSchema> &
   z.infer<typeof taskConfigSchema>
 
 type EndpointFormValues = z.infer<typeof endpointSchema>
-type JobDetailsFormValues = z.infer<typeof jobDetailsSchema>
+type TaskDetailsFormValues = z.infer<typeof taskDetailsSchema>
 type TaskConfigFormValues = z.infer<typeof taskConfigSchema>
 
 type FullFormValues = EndpointFormValues &
-  JobDetailsFormValues &
+  TaskDetailsFormValues &
   TaskConfigFormValues
 
 export function JobComposerStepper() {
@@ -852,23 +849,6 @@ function JobDetailsStep() {
     <>
       <div className="grid grid-cols-1 gap-4">
         <div>
-          <h2 className="text-2xl font-bold mb-4">Job Name</h2>
-          <FormField
-            name="jobName"
-            render={({ field }) => (
-              <FormItem className="w-full md:w-[60%]">
-                <FormLabel>Job Name</FormLabel>
-                <Input placeholder="Enter job name" {...register('jobName')} />
-                <FormDescription>
-                  Provide a name for the job.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div>
           <h2 className="text-2xl font-bold mb-4">Task Name</h2>
           <FormField
             name="taskName"
@@ -1061,9 +1041,8 @@ function ReviewStep({ onSubmit, isLoading, isSubmitted }: {
       </div>
 
       <div>
-        <h3 className="text-lg font-medium mb-2">Job Details:</h3>
+        <h3 className="text-lg font-medium mb-2">Task Details:</h3>
         <div className="card-muted p-4 rounded-md">
-          <p><strong>Job Name:</strong> {values.jobName}</p>
           <p><strong>Task Name:</strong> {values.taskName}</p>
           <p><strong>Number of Nodes:</strong> {values.num_of_nodes || '1'}</p>
           <p><strong>Time Duration:</strong> {values.time_duration || 'Not specified'}</p>
