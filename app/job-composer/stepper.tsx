@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { defineStepper } from '@stepperize/react'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Control, useForm, useFormContext, UseFormReturn } from 'react-hook-form'
+import { Control, useForm, useFormContext, UseFormReturn, UseFormSetValue } from 'react-hook-form'
 import { Schema, z } from 'zod'
 import { Button } from '@/components/ui/button'
 import {
@@ -105,11 +105,13 @@ export function JobComposerStepper() {
 
   const form = useForm<FormData>({
     resolver: zodResolver(z.object({})),
-    defaultValues: formData
+    defaultValues: formData,
+    mode: 'onChange',
+    reValidateMode: 'onChange'
   })
 
   const endpointValue = form.watch('endpoint')
-  const { control, register } = form
+  const { control, register, setError, clearErrors } = form
 
   const handleStepSubmit = (stepData: Partial<FormData>) => {
     setFormData((prev) => ({ ...prev, ...stepData }))
@@ -399,7 +401,7 @@ export function JobComposerStepper() {
     } else {
       setPartitions([])
     }
-  }, [endpointValue])
+  }, [endpointValue, partitionsCache])
 
   useEffect(() => {
     if (endpoints && endpointValue) {
@@ -464,6 +466,8 @@ export function JobComposerStepper() {
         onFinalSubmit={handleFinalSubmit}
         isLoading={isLoading}
         control={control}
+        setError={setError}
+        clearErrors={form.clearErrors}
         endpoints={endpoints}
         endpointValue={endpointValue}
         partitions={partitions}
@@ -485,6 +489,8 @@ function StepperContent({
   onFinalSubmit,
   isLoading,
   control,
+  setError,
+  clearErrors,
   endpoints,
   endpointValue,
   partitions,
@@ -501,6 +507,8 @@ function StepperContent({
   onFinalSubmit: (data: FormData) => void
   isLoading: boolean
   control: Control<FormData>
+  setError: (name: any, error: { type: string; message: string }) => void
+  clearErrors: (name?: any) => void
   endpoints: { endpoint_uuid: string; endpoint_name: string; endpoint_status: string }[]
   endpointValue: string
   partitions: string[]
@@ -513,12 +521,58 @@ function StepperContent({
 }) {
   const { current, next, prev, isFirst, isLast } = useStepper()
 
-  const onSubmit = (values: z.infer<typeof current.schema>) => {
-    onStepSubmit(values)
-    if (isLast) {
-      onFinalSubmit(form.getValues() as FormData)
-    } else {
-      next()
+  const onSubmit = async (values: any) => {
+    try {
+      // Get all current form values
+      const allFormValues = form.getValues()
+      
+      // Extract only the fields that belong to the current step
+      const stepFields = Object.keys(current.schema.shape)
+      const currentStepData: any = {}
+      stepFields.forEach(fieldName => {
+        currentStepData[fieldName] = allFormValues[fieldName as keyof typeof allFormValues]
+      })
+      
+      // Validate only the current step data against its schema
+      const validatedData = current.schema.parse(currentStepData)
+      
+      // Clear any errors for the current step fields since validation passed
+      stepFields.forEach((fieldName) => {
+        if (form.formState.errors[fieldName as keyof typeof form.formState.errors]) {
+          form.clearErrors(fieldName as any)
+        }
+      })
+      
+      onStepSubmit(validatedData)
+      
+      if (isLast) {
+        onFinalSubmit(allFormValues as FormData)
+      } else {
+        next()
+      }
+    } catch (error) {
+      // Handle Zod validation errors and set them in the form
+      if (error instanceof z.ZodError) {
+        const fieldErrors: Record<string, { type: string; message: string }> = {}
+        
+        error.errors.forEach((err) => {
+          const fieldName = err.path.join('.')
+          fieldErrors[fieldName] = {
+            type: 'validation',
+            message: err.message
+          }
+        })
+        
+        // Set the errors in the form state
+        Object.keys(fieldErrors).forEach((fieldName) => {
+          setError(fieldName as any, {
+            type: fieldErrors[fieldName].type,
+            message: fieldErrors[fieldName].message
+          })
+        })
+      }
+      console.error('Validation error:', error)
+      return // Don't proceed to next step
     }
   }
 
@@ -530,6 +584,7 @@ function StepperContent({
           {current.id === 'endpointinfo' && (
             <EndpointStep 
               control={control} 
+              clearErrors={clearErrors}
               endpoints={endpoints} 
               endpointValue={endpointValue}
               partitions={partitions}
@@ -538,11 +593,16 @@ function StepperContent({
               isLoadingAccounts={isLoadingAccounts}
             />
           )}
-          {current.id === 'jobdetails' && <JobDetailsStep />}
+          {current.id === 'taskdetails' && (
+            <TaskDetailsStep 
+              clearErrors={clearErrors}
+            />
+          )}
           {current.id === 'taskconfig' && (
             <TaskConfigStep 
               containers={containers}
               isLoadingContainers={isLoadingContainers}
+              clearErrors={clearErrors}
             />
           )}
           {current.id === 'review' && (
@@ -624,6 +684,7 @@ function StepIndicator() {
 
 function EndpointStep({ 
   control, 
+  clearErrors,
   endpoints, 
   endpointValue,
   partitions,
@@ -632,6 +693,7 @@ function EndpointStep({
   isLoadingAccounts
 }: { 
   control: Control<FormData>
+  clearErrors: (name?: any) => void
   endpoints: { endpoint_uuid: string; endpoint_name: string; endpoint_status: string }[]
   endpointValue: string
   partitions: string[]
@@ -642,18 +704,17 @@ function EndpointStep({
   const {
     register,
     formState: { errors },
-    setValue,
-    getValues
+    watch
   } = useFormContext<EndpointFormValues>()
   const [accountInputValue, setAccountInputValue] = useState('')
   const [selectedAccount, setSelectedAccount] = useState('')
 
+  // Clear errors dynamically when values become valid
   useEffect(() => {
-    const reservation = getValues('reservation')
-    if (reservation) {
-      setValue('reservation', reservation)
-    }
-  }, [getValues, setValue])
+    if (watch('endpoint')) clearErrors('endpoint')
+    if (watch('partition')) clearErrors('partition')
+    if (watch('account')) clearErrors('account')
+  }, [watch('endpoint'), watch('partition'), watch('account')])
 
   return (
     <>
@@ -668,10 +729,13 @@ function EndpointStep({
                 <FormLabel>Endpoint</FormLabel>
                 <Select
                   onValueChange={(value) => {
-                    setValue('endpoint', value)
                     field.onChange(value)
+                    if (value && value.length > 0) {
+                      clearErrors('endpoint')
+                    }
                   }}
-                  defaultValue={field.value}
+                  value={field.value}
+                  disabled={endpoints.length === 0}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -713,9 +777,14 @@ function EndpointStep({
                 <FormLabel>Partition</FormLabel>
                 <div className="flex items-center gap-2">
                   <Select
-                    onValueChange={field.onChange}
+                    onValueChange={(value) => {
+                      field.onChange(value)
+                      if (value && value.length > 0) {
+                        clearErrors('partition')
+                      }
+                    }}
                     value={field.value}
-                    disabled={isLoadingPartitions || partitions.length === 0}
+                    disabled={!endpointValue || isLoadingPartitions || partitions.length === 0}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -765,11 +834,13 @@ function EndpointStep({
                     onValueChange={(value) => {
                       setSelectedAccount(value)
                       setAccountInputValue('')
-                      setValue('account', value)
                       field.onChange(value)
+                      if (value && value.length > 0) {
+                        clearErrors('account')
+                      }
                     }}
                     value={selectedAccount}
-                    disabled={isLoadingAccounts}
+                    disabled={!endpointValue || isLoadingAccounts}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -798,8 +869,10 @@ function EndpointStep({
                       const value = e.target.value
                       setAccountInputValue(value)
                       setSelectedAccount('')
-                      setValue('account', value, { shouldValidate: true, shouldDirty: true })
                       field.onChange(value)
+                      if (value && value.length > 0) {
+                        clearErrors('account')
+                      }
                     }}
                     className="ml-2 w-full md:w-[60%]"
                   />
@@ -839,11 +912,18 @@ function EndpointStep({
   )
 }
 
-function JobDetailsStep() {
+function TaskDetailsStep({ clearErrors }: { clearErrors: (name?: any) => void }) {
   const {
     register,
     formState: { errors },
-  } = useFormContext<JobDetailsFormValues>()
+    watch,
+  } = useFormContext<TaskDetailsFormValues>()
+
+  // Clear errors dynamically when values become valid
+  useEffect(() => {
+    if (watch('taskName') && watch('taskName').length >= 2) clearErrors('taskName')
+    if (watch('log_path') && watch('log_path').length > 0) clearErrors('log_path')
+  }, [watch('taskName'), watch('log_path')])
   
   return (
     <>
@@ -855,7 +935,17 @@ function JobDetailsStep() {
             render={({ field }) => (
               <FormItem className="w-full md:w-[60%]">
                 <FormLabel>Task Name</FormLabel>
-                <Input placeholder="Enter task name" {...register('taskName')} />
+                <Input 
+                  placeholder="Enter task name" 
+                  {...register('taskName', {
+                    onChange: (e) => {
+                      if (e.target.value && e.target.value.length >= 2) {
+                        clearErrors('taskName')
+                      }
+                    }
+                  })} 
+                  className={errors.taskName ? 'border-red-500 focus:border-red-500' : ''}
+                />
                 <FormDescription>
                   Provide a name for the task.
                 </FormDescription>
@@ -874,7 +964,9 @@ function JobDetailsStep() {
                 <FormLabel>Number of Nodes</FormLabel>
                 <Input
                   placeholder="1"
+                  defaultValue="1"
                   {...register('num_of_nodes')}
+                  className={errors.num_of_nodes ? 'border-red-500 focus:border-red-500' : ''}
                 />
                 <FormMessage />
               </FormItem>
@@ -892,6 +984,7 @@ function JobDetailsStep() {
                 <Input
                   placeholder="01:00:00"
                   {...register('time_duration')}
+                  className={errors.time_duration ? 'border-red-500 focus:border-red-500' : ''}
                 />
                 <FormMessage />
               </FormItem>
@@ -906,7 +999,17 @@ function JobDetailsStep() {
             render={({ field }) => (
               <FormItem className="w-full md:w-[60%]">
                 <FormLabel>Log Path</FormLabel>
-                <Input placeholder="Log Path" {...register('log_path')} />
+                <Input 
+                  placeholder="Log Path" 
+                  {...register('log_path', {
+                    onChange: (e) => {
+                      if (e.target.value && e.target.value.length > 0) {
+                        clearErrors('log_path')
+                      }
+                    }
+                  })} 
+                  className={errors.log_path ? 'border-red-500 focus:border-red-500' : ''}
+                />
                 <FormDescription>
                   Path where log files will be stored.
                 </FormDescription>
@@ -920,14 +1023,21 @@ function JobDetailsStep() {
   )
 }
 
-function TaskConfigStep({ containers, isLoadingContainers }: { 
+function TaskConfigStep({ containers, isLoadingContainers, clearErrors }: { 
   containers: { [key: string]: any }
   isLoadingContainers: boolean
+  clearErrors: (name?: any) => void
 }) {
   const {
     register,
     formState: { errors },
+    watch,
   } = useFormContext<TaskConfigFormValues>()
+
+  // Clear errors dynamically when values become valid
+  useEffect(() => {
+    if (watch('container') && watch('container').length > 0) clearErrors('container')
+  }, [watch('container')])
 
   return (
     <>
@@ -940,12 +1050,17 @@ function TaskConfigStep({ containers, isLoadingContainers }: {
               <FormItem className="w-full md:w-[60%]">
                 <FormLabel>Container</FormLabel>
                 <Select
-                  onValueChange={field.onChange}
+                  onValueChange={(value) => {
+                    field.onChange(value)
+                    if (value && value.length > 0) {
+                      clearErrors('container')
+                    }
+                  }}
                   value={field.value}
                   disabled={isLoadingContainers}
                 >
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className={errors.container ? 'border-red-500 focus:border-red-500' : ''}>
                       <SelectValue placeholder={isLoadingContainers ? "Loading..." : "Select container"} />
                     </SelectTrigger>
                   </FormControl>
@@ -985,7 +1100,7 @@ function TaskConfigStep({ containers, isLoadingContainers }: {
                 <Textarea 
                   placeholder="Task details" 
                   {...register('task')} 
-                  className="min-h-[200px] w-full"
+                  className={`min-h-[200px] w-full ${errors.task ? 'border-red-500 focus:border-red-500' : ''}`}
                 />
                 <FormDescription>
                   Enter the commands or script to execute.
@@ -1006,6 +1121,7 @@ function TaskConfigStep({ containers, isLoadingContainers }: {
                 <Input 
                   placeholder="Working directory path" 
                   {...register('work_path')} 
+                  className={errors.work_path ? 'border-red-500 focus:border-red-500' : ''}
                 />
                 <FormDescription>
                   Optional: Specify the working directory for the task.
