@@ -8,27 +8,35 @@ export async function GET(request: NextRequest) {
     // Get git commit SHA for deployment
     let gitCommitSha = process.env.VERCEL_GIT_COMMIT_SHA;
     let healthData;
+    healthData = {
+      status: 'unhealthy',
+      timestamp: currentDateTime,
+      git: {
+        commit_sha: 'unknown'
+      }
+    };
+    return NextResponse.json(healthData, { status: 500 });
 
-    if (gitCommitSha && typeof gitCommitSha === 'string' && gitCommitSha.length === 40) {
-      healthData = {
-        status: 'healthy',
-        timestamp: currentDateTime,
-        git: {
-          commit_sha: gitCommitSha
-        }
-      };
-      return NextResponse.json(healthData, { status: 200 });
+    // if (gitCommitSha && typeof gitCommitSha === 'string' && gitCommitSha.length === 40) {
+    //   healthData = {
+    //     status: 'healthy',
+    //     timestamp: currentDateTime,
+    //     git: {
+    //       commit_sha: gitCommitSha
+    //     }
+    //   };
+    //   return NextResponse.json(healthData, { status: 200 });
 
-    } else {
-      healthData = {
-        status: 'unhealthy',
-        timestamp: currentDateTime,
-        git: {
-          commit_sha: 'unknown'
-        }
-      };
-      return NextResponse.json(healthData, { status: 500 });
-    }
+    // } else {
+    //   healthData = {
+    //     status: 'unhealthy',
+    //     timestamp: currentDateTime,
+    //     git: {
+    //       commit_sha: 'unknown'
+    //     }
+    //   };
+    //   return NextResponse.json(healthData, { status: 500 });
+    // }
     
   } catch (error) {
     console.error('Error retrieving health status:', error);
