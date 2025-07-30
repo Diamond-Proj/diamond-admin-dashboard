@@ -8,6 +8,7 @@ import {
   UsersIcon,
   FolderIcon,
   TaskIcon,
+  DataTransferIcon,
 } from '@/components/icons';
 import { DashboardIcon, GlobeIcon } from '@radix-ui/react-icons';
 import { debounce } from 'lodash';
@@ -78,6 +79,10 @@ export function ClientSideNav({ initialIsAuthenticated }: { initialIsAuthenticat
       <NavItem href="/">
         <DashboardIcon className="h-6 w-6" />
         Dashboard
+      </NavItem>
+      <NavItem href="/data-transfer">
+        <DataTransferIcon className="h-6 w-6" />
+        Data Transfer
       </NavItem>
       <NavItem href="/image-builder">
         <GlobeIcon className="h-6 w-6" />
