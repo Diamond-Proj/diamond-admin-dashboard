@@ -1,5 +1,5 @@
 import { is_authenticated } from '@/lib/authUtils';
-import { DataTransferPanel } from './panel';
+import { DataTransferPanel } from './transferpanel';
 
 export default async function DataTransferPage() {
   const isAuthenticated = await is_authenticated();
