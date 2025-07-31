@@ -77,7 +77,7 @@ module.exports = {
           900: '#cacada'
         },
         honolulu_blue: {
-          DEFAULT: '#0e79b2',
+          DEFAULT: 'hsl(var(--honolulu-blue))',
           100: '#031824',
           200: '#063148',
           300: '#09496c',
@@ -89,7 +89,7 @@ module.exports = {
           900: '#c5e7fa'
         },
         rose_red: {
-          DEFAULT: '#bf1363',
+          DEFAULT: 'hsl(var(--rose-red))',
           100: '#260414',
           200: '#4c0828',
           300: '#720b3b',
