@@ -272,6 +272,7 @@ export function getTransferAPIToken(): string | null {
     
     const tokensValue = decodeURIComponent(tokensCookie.split('=')[1]);
     const tokensByResourceServer = JSON.parse(tokensValue);
+    console.log('Tokens by resource server:', tokensByResourceServer);
     
     // Look for transfer.api.globus.org token first (this is the ideal case)
     if (tokensByResourceServer['transfer.api.globus.org']) {
