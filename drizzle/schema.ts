@@ -1,5 +1,6 @@
-import { pgTable, text, varchar, json, timestamp, foreignKey } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+import { pgTable, foreignKey, varchar, json, text, timestamp } from "drizzle-orm/pg-core"
+import { sql } from "drizzle-orm"
+
 
 
 export const endpoints = pgTable("endpoints", {
@@ -65,44 +66,3 @@ export const task = pgTable("task", {
 			name: "task_identity_id_profile_identity_id_fk"
 		}),
 ]);
-
-// Relations
-export const profilesRelations = relations(profile, ({ many }) => ({
-  endpoints: many(endpoints),
-  containers: many(container),
-  tasks: many(task),
-}));
-
-export const endpointsRelations = relations(endpoints, ({ one }) => ({
-  profile: one(profile, {
-    fields: [endpoints.identityId],
-    references: [profile.identityId]
-  }),
-}));
-
-export const containersRelations = relations(container, ({ one }) => ({
-  profile: one(profile, {
-    fields: [container.identityId],
-    references: [profile.identityId]
-  }),
-}));
-
-export const tasksRelations = relations(task, ({ one }) => ({
-  profile: one(profile, {
-    fields: [task.identityId],
-    references: [profile.identityId]
-  }),
-}));
-
-// Export types
-export type Profile = typeof profile.$inferSelect;
-export type NewProfile = typeof profile.$inferInsert;
-
-export type Task = typeof task.$inferSelect;
-export type NewTask = typeof task.$inferInsert;
-
-export type Container = typeof container.$inferSelect;
-export type NewContainer = typeof container.$inferInsert; 
-
-export type Endpoint = typeof endpoints.$inferSelect;
-export type NewEndpoint = typeof endpoints.$inferInsert;
