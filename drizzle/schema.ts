@@ -1,0 +1,62 @@
+import { pgTable, foreignKey, varchar, json, text, timestamp } from "drizzle-orm/pg-core"
+import { sql } from "drizzle-orm"
+
+
+
+export const endpoints = pgTable("endpoints", {
+	endpointUuid: varchar("endpoint_uuid").primaryKey().notNull(),
+	identityId: varchar("identity_id", { length: 255 }).notNull(),
+	endpointName: varchar("endpoint_name"),
+	endpointHost: varchar("endpoint_host"),
+	partitions: json(),
+	accounts: json(),
+}, (table) => [
+	foreignKey({
+			columns: [table.identityId],
+			foreignColumns: [profile.identityId],
+			name: "endpoints_identity_id_profile_identity_id_fk"
+		}),
+]);
+
+export const profile = pgTable("profile", {
+	identityId: varchar("identity_id", { length: 255 }).primaryKey().notNull(),
+	name: varchar({ length: 255 }),
+	email: varchar({ length: 255 }),
+	institution: text(),
+});
+
+export const container = pgTable("container", {
+	name: varchar().primaryKey().notNull(),
+	containerTaskId: varchar("container_task_id"),
+	containerStatus: varchar("container_status"),
+	identityId: varchar("identity_id", { length: 255 }),
+	baseImage: varchar("base_image"),
+	location: varchar(),
+	description: text(),
+	dependencies: text(),
+	environment: text(),
+	commands: text(),
+	endpointId: varchar("endpoint_id"),
+}, (table) => [
+	foreignKey({
+			columns: [table.identityId],
+			foreignColumns: [profile.identityId],
+			name: "container_identity_id_profile_identity_id_fk"
+		}),
+]);
+
+export const task = pgTable("task", {
+	taskId: varchar("task_id").primaryKey().notNull(),
+	taskName: varchar("task_name"),
+	identityId: varchar("identity_id", { length: 255 }),
+	taskStatus: varchar("task_status"),
+	taskCreateTime: timestamp("task_create_time", { mode: 'string' }).defaultNow(),
+	logPath: varchar("log_path"),
+	endpointId: varchar("endpoint_id"),
+}, (table) => [
+	foreignKey({
+			columns: [table.identityId],
+			foreignColumns: [profile.identityId],
+			name: "task_identity_id_profile_identity_id_fk"
+		}),
+]);
