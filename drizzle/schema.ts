@@ -10,6 +10,7 @@ export const endpoints = pgTable("endpoints", {
 	endpointHost: varchar("endpoint_host"),
 	partitions: json(),
 	accounts: json(),
+	endpointStatus: varchar("endpoint_status"),
 }, (table) => [
 	foreignKey({
 			columns: [table.identityId],
@@ -26,11 +27,11 @@ export const profile = pgTable("profile", {
 });
 
 export const container = pgTable("container", {
-	name: varchar().primaryKey().notNull(),
 	containerTaskId: varchar("container_task_id"),
 	containerStatus: varchar("container_status"),
 	identityId: varchar("identity_id", { length: 255 }),
 	baseImage: varchar("base_image"),
+	name: varchar().primaryKey().notNull(),
 	location: varchar(),
 	description: text(),
 	dependencies: text(),
@@ -53,6 +54,11 @@ export const task = pgTable("task", {
 	taskCreateTime: timestamp("task_create_time", { mode: 'string' }).defaultNow(),
 	logPath: varchar("log_path"),
 	endpointId: varchar("endpoint_id"),
+	batchJobId: varchar("batch_job_id"),
+	stdoutPath: varchar("stdout_path"),
+	stderrPath: varchar("stderr_path"),
+	computeEndpointId: varchar("compute_endpoint_id"),
+	checkpointPath: varchar("checkpoint_path"),
 }, (table) => [
 	foreignKey({
 			columns: [table.identityId],

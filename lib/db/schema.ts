@@ -1,61 +1,108 @@
 import { pgTable, text, varchar, json, timestamp, foreignKey } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
 
-// Profile table schema
-export const profiles = pgTable('profile', {
-  identity_id: varchar('identity_id', { length: 255 }).primaryKey(),
-  name: varchar('name', { length: 255 }),
-  email: varchar('email', { length: 255 }),
-  institution: text('institution')
+
+export const endpoints = pgTable("endpoints", {
+	endpointUuid: varchar("endpoint_uuid").primaryKey().notNull(),
+	identityId: varchar("identity_id", { length: 255 }).notNull(),
+	endpointName: varchar("endpoint_name"),
+	endpointHost: varchar("endpoint_host"),
+	partitions: json(),
+	accounts: json(),
+	endpointStatus: varchar("endpoint_status"),
+}, (table) => [
+	foreignKey({
+			columns: [table.identityId],
+			foreignColumns: [profile.identityId],
+			name: "endpoints_identity_id_profile_identity_id_fk"
+		}),
+]);
+
+export const profile = pgTable("profile", {
+	identityId: varchar("identity_id", { length: 255 }).primaryKey().notNull(),
+	name: varchar({ length: 255 }),
+	email: varchar({ length: 255 }),
+	institution: text(),
 });
 
-// Task table schema
-export const tasks = pgTable('task', {
-  task_id: varchar('task_id').primaryKey(),
-  task_name: varchar('task_name'),
-  identity_id: varchar('identity_id', { length: 255 })
-    .references(() => profiles.identity_id),
-  task_status: varchar('task_status'),
-  task_create_time: timestamp('task_create_time').defaultNow(),
-  log_path: varchar('log_path'),
-  endpoint_id: varchar('endpoint_id')
-});
+export const container = pgTable("container", {
+	containerTaskId: varchar("container_task_id"),
+	containerStatus: varchar("container_status"),
+	identityId: varchar("identity_id", { length: 255 }),
+	baseImage: varchar("base_image"),
+	name: varchar().primaryKey().notNull(),
+	location: varchar(),
+	description: text(),
+	dependencies: text(),
+	environment: text(),
+	commands: text(),
+	endpointId: varchar("endpoint_id"),
+}, (table) => [
+	foreignKey({
+			columns: [table.identityId],
+			foreignColumns: [profile.identityId],
+			name: "container_identity_id_profile_identity_id_fk"
+		}),
+]);
 
-// Container table schema
-export const containers = pgTable('container', {
-  name: varchar('name').primaryKey(),
-  container_task_id: varchar('container_task_id'),
-  container_status: varchar('container_status'),
-  identity_id: varchar('identity_id', { length: 255 })
-    .references(() => profiles.identity_id),
-  base_image: varchar('base_image'),
-  location: varchar('location'),
-  description: text('description'),
-  dependencies: text('dependencies'),
-  environment: text('environment'),
-  commands: text('commands'),
-  endpoint_id: varchar('endpoint_id')
-});
+export const task = pgTable("task", {
+	taskId: varchar("task_id").primaryKey().notNull(),
+	taskName: varchar("task_name"),
+	identityId: varchar("identity_id", { length: 255 }),
+	taskStatus: varchar("task_status"),
+	taskCreateTime: timestamp("task_create_time", { mode: 'string' }).defaultNow(),
+	logPath: varchar("log_path"),
+	endpointId: varchar("endpoint_id"),
+	batchJobId: varchar("batch_job_id"),
+	stdoutPath: varchar("stdout_path"),
+	stderrPath: varchar("stderr_path"),
+	computeEndpointId: varchar("compute_endpoint_id"),
+	checkpointPath: varchar("checkpoint_path"),
+}, (table) => [
+	foreignKey({
+			columns: [table.identityId],
+			foreignColumns: [profile.identityId],
+			name: "task_identity_id_profile_identity_id_fk"
+		}),
+]);
 
-export const endpoints = pgTable('endpoints', {
-  endpoint_uuid: varchar('endpoint_uuid').primaryKey(),
-  identity_id: varchar('identity_id', { length: 255 })
-    .notNull()
-    .references(() => profiles.identity_id),
-  endpoint_name: varchar('endpoint_name'),
-  endpoint_host: varchar('endpoint_host'),
-  partitions: json('partitions'),
-  accounts: json('accounts'),
-});
+// Relations
+export const profilesRelations = relations(profile, ({ many }) => ({
+  endpoints: many(endpoints),
+  containers: many(container),
+  tasks: many(task),
+}));
+
+export const endpointsRelations = relations(endpoints, ({ one }) => ({
+  profile: one(profile, {
+    fields: [endpoints.identityId],
+    references: [profile.identityId]
+  }),
+}));
+
+export const containersRelations = relations(container, ({ one }) => ({
+  profile: one(profile, {
+    fields: [container.identityId],
+    references: [profile.identityId]
+  }),
+}));
+
+export const tasksRelations = relations(task, ({ one }) => ({
+  profile: one(profile, {
+    fields: [task.identityId],
+    references: [profile.identityId]
+  }),
+}));
 
 // Export types
-export type Profile = typeof profiles.$inferSelect;
-export type NewProfile = typeof profiles.$inferInsert;
+export type Profile = typeof profile.$inferSelect;
+export type NewProfile = typeof profile.$inferInsert;
 
-export type Task = typeof tasks.$inferSelect;
-export type NewTask = typeof tasks.$inferInsert;
+export type Task = typeof task.$inferSelect;
+export type NewTask = typeof task.$inferInsert;
 
-export type Container = typeof containers.$inferSelect;
-export type NewContainer = typeof containers.$inferInsert; 
+export type Container = typeof container.$inferSelect;
+export type NewContainer = typeof container.$inferInsert; 
 
 export type Endpoint = typeof endpoints.$inferSelect;
 export type NewEndpoint = typeof endpoints.$inferInsert;
