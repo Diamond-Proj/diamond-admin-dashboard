@@ -253,3 +253,61 @@ export async function exchangeCodeForTokens(code: string): Promise<any> {
     throw error;
   }
 } 
+
+// Enhanced function specifically for Transfer API authentication
+// This leverages the existing persistTokensInCookies structure
+export function getTransferAPIToken(): string | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  try {
+    const cookies = document.cookie.split(';');
+    const tokensCookie = cookies.find(cookie => cookie.trim().startsWith('tokens='));
+
+    if (!tokensCookie) {
+      console.warn('No tokens cookie found - user may not be authenticated');
+      return null;
+    }
+
+    const tokensValue = decodeURIComponent(tokensCookie.split('=')[1]);
+    const tokensByResourceServer = JSON.parse(tokensValue);
+    console.log('Tokens by resource server:', tokensByResourceServer);
+
+    // Look for transfer.api.globus.org token first (this is the ideal case)
+    if (tokensByResourceServer['transfer.api.globus.org']) {
+      const transferToken = tokensByResourceServer['transfer.api.globus.org'].access_token;
+      console.log('✓ Found dedicated Transfer API token');
+      return transferToken;
+    }
+
+    // Look for tokens with transfer scope
+    for (const [resourceServer, tokenData] of Object.entries(tokensByResourceServer)) {
+      if (tokenData && typeof tokenData === 'object') {
+        const scope = (tokenData as any).scope || '';
+        if (scope.includes('transfer.api.globus.org') || 
+            scope.includes('urn:globus:auth:scope:transfer.api.globus.org')) {
+          console.log(`✓ Found Transfer API token from ${resourceServer}`);
+          return (tokenData as any).access_token;
+        }
+      }
+    }
+
+    // Fallback to auth.globus.org token if it has broad scopes
+    if (tokensByResourceServer['https://auth.globus.org']) {
+      const authToken = tokensByResourceServer['https://auth.globus.org'];
+      const scope = authToken.scope || '';
+      if (scope.includes('transfer') || scope.includes('openid')) {
+        console.log('⚠️ Using auth.globus.org token as fallback for Transfer API');
+        return authToken.access_token;
+      }
+    }
+
+    console.error('❌ No suitable token found for Transfer API');
+    return null;
+  } catch (error) {
+    console.error('Error extracting Transfer API token:', error);
+    return null;
+  }
+}
+
