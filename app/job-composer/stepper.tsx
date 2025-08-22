@@ -117,11 +117,13 @@ export function JobComposerStepper() {
     setFormData((prev) => ({ ...prev, ...stepData }))
   }
 
-  const fetchBuildLogs = useCallback(async (endpoint_id: string, log_path: string, build_task_id?: string, log_task_id?: string) => {
+  // TODO: Merge this with fetchStderrLogs, use defined log_type to determine which log to fetch
+  const fetchBuildLogs = useCallback(async (task_name: string, endpoint_id: string, build_task_id?: string, log_task_id?: string, log_type: string = 'stdout') => {
     try {
         const url = new URL('/api/get_build_log', window.location.origin)
+        url.searchParams.append('container_name', task_name)
         url.searchParams.append('endpoint_id', endpoint_id)
-        url.searchParams.append('log_path', log_path)
+        url.searchParams.append('log_type', log_type)
         if (build_task_id) {
             url.searchParams.append('task_id', build_task_id)
         }
@@ -159,27 +161,28 @@ export function JobComposerStepper() {
     return false
   }, [])
 
-  const startPollingStdout = useCallback((endpoint_id: string, log_path: string, build_task_id: string) => {
+  const startPollingStdout = useCallback((task_name: string, endpoint_id: string, build_task_id: string) => {
     if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current)
     }
 
     currentEndpointRef.current = endpoint_id
-    currentLogPathRef.current = log_path
+    currentLogPathRef.current = task_name
     currentTaskIdRef.current = build_task_id
     currentLogTaskIdRef.current = null
 
     setIsPolling(true)
     
-    fetchBuildLogs(endpoint_id, log_path, build_task_id)
+    fetchBuildLogs(task_name, endpoint_id, build_task_id, undefined, 'stdout')
 
     pollIntervalRef.current = setInterval(async () => {
         if (currentEndpointRef.current && currentLogPathRef.current && currentTaskIdRef.current) {
             const shouldStop = await fetchBuildLogs(
-                currentEndpointRef.current,
                 currentLogPathRef.current,
+                currentEndpointRef.current,
                 currentTaskIdRef.current,
-                currentLogTaskIdRef.current as string
+                currentLogTaskIdRef.current as string,
+                'stdout'
             )
             
             if (shouldStop) {
@@ -200,11 +203,13 @@ export function JobComposerStepper() {
   }, [fetchBuildLogs])
 
 
-  const fetchStderrLogs = useCallback(async (endpoint_id: string, log_path: string, build_task_id?: string, log_task_id?: string) => {
+  // TODO: Merge this with fetchBuildLogs
+  const fetchStderrLogs = useCallback(async (task_name: string, endpoint_id: string, build_task_id?: string, log_task_id?: string, log_type: string = 'stderr') => {
     try {
         const url = new URL('/api/get_build_log', window.location.origin)
+        url.searchParams.append('container_name', task_name)
         url.searchParams.append('endpoint_id', endpoint_id)
-        url.searchParams.append('log_path', log_path)
+        url.searchParams.append('log_type', log_type)
         if (build_task_id) {
             url.searchParams.append('task_id', build_task_id)
         }
@@ -242,27 +247,28 @@ export function JobComposerStepper() {
   }, [])
 
 
-  const startPollingStderr = useCallback((endpoint_id: string, log_path: string, build_task_id: string) => {
+  const startPollingStderr = useCallback((task_name: string, endpoint_id: string, build_task_id: string) => {
     if (pollStderrIntervalRef.current) {
         clearInterval(pollStderrIntervalRef.current)
     }
 
     currentEndpointRef.current = endpoint_id
-    currentStderrLogPathRef.current = log_path
+    currentStderrLogPathRef.current = task_name
     currentTaskIdRef.current = build_task_id
     currentStderrLogTaskIdRef.current = null
 
     setIsPollingStderr(true)
     
-    fetchStderrLogs(endpoint_id, log_path, build_task_id)
+    fetchStderrLogs(task_name, endpoint_id, build_task_id, undefined, 'stderr')
 
     pollStderrIntervalRef.current = setInterval(async () => {
         if (currentEndpointRef.current && currentStderrLogPathRef.current && currentTaskIdRef.current) {
             const shouldStop = await fetchStderrLogs(
-                currentEndpointRef.current,
                 currentStderrLogPathRef.current,
+                currentEndpointRef.current,
                 currentTaskIdRef.current,
-                currentStderrLogTaskIdRef.current as string
+                currentStderrLogTaskIdRef.current as string,
+                'stderr'
             )
             
             if (shouldStop) {
@@ -332,12 +338,10 @@ export function JobComposerStepper() {
         })
 
         const task_id = response.task_id
-        const stdoutLogPath = `${data.log_path}${data.log_path!.endsWith('/') ? '' : '/'}${data.taskName}.stdout`
-        const stderrLogPath = `${data.log_path}${data.log_path!.endsWith('/') ? '' : '/'}${data.taskName}.stderr`
-        console.log('Task stdoutLogPath:', stdoutLogPath)
-        console.log('Task stderrLogPath:', stderrLogPath)
-        startPollingStdout(data.endpoint!, stdoutLogPath, task_id)
-        startPollingStderr(data.endpoint!, stderrLogPath, task_id)
+        console.log('Task name:', data.taskName)
+        console.log('Task ID:', task_id)
+        startPollingStdout(data.taskName, data.endpoint!, task_id)
+        startPollingStderr(data.taskName, data.endpoint!, task_id)
       }
     } catch (error) {
       console.error('Error triggering task:', error)
