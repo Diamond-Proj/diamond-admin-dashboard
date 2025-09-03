@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -41,11 +41,7 @@ export function SettingsForm() {
   const { toast } = useToast();
 
   // Fetch endpoints on component mount
-  useEffect(() => {
-    fetchEndpoints();
-  }, []);
-
-  const fetchEndpoints = async () => {
+  const fetchEndpoints = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await fetch('/api/list_all_endpoints');
@@ -76,7 +72,11 @@ export function SettingsForm() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchEndpoints();
+  }, [fetchEndpoints]);
 
   const refreshEndpoints = async () => {
     try {
@@ -204,7 +204,7 @@ export function SettingsForm() {
         {endpoints.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-muted-foreground mb-4">
-              No endpoints found. Click "Refresh Endpoints" to discover your available endpoints.
+              No endpoints found. Click &quot;Refresh Endpoints&quot; to discover your available endpoints.
             </p>
             <Button onClick={refreshEndpoints} disabled={isRefreshing}>
               {isRefreshing ? (
