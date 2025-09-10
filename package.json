@@ -10,6 +10,8 @@
     "start": "next start",
     "build": "next build",
     "lint": "next lint",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "check": "pnpm lint && pnpm typecheck",
     "shadcn:add": "npx shadcn@latest add",
     "shadcn:init": "npx shadcn@latest init",
     "db:generate": "npx drizzle-kit generate",
