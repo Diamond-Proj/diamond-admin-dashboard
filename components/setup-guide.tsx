@@ -8,7 +8,7 @@ export function SetupGuide() {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   return (
-    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xs dark:border-gray-700 dark:bg-gray-800">
       {/* Header - Always visible */}
       <div
         className="flex cursor-pointer items-center justify-between rounded-t-lg p-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"

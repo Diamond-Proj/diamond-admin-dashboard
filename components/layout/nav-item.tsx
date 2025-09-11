@@ -24,9 +24,9 @@ export function NavItem({
   return (
     <Link
       href={href}
-      className={`mx-1 my-1 flex items-center gap-4 rounded-lg px-4 py-3 text-gray-600 transition-all duration-200 hover:translate-x-1 hover:bg-primary/5 hover:text-gray-700 hover:shadow-sm active:scale-95 dark:text-gray-400 dark:hover:bg-primary/10 dark:hover:text-gray-300 ${
+      className={`mx-1 my-1 flex items-center gap-4 rounded-lg px-4 py-3 text-gray-600 transition-all duration-200 hover:translate-x-1 hover:bg-primary/5 hover:text-gray-700 hover:shadow-xs active:scale-95 dark:text-gray-400 dark:hover:bg-primary/10 dark:hover:text-gray-300 ${
         isActive
-          ? 'border-l-4 border-primary bg-primary/10 text-primary shadow-sm dark:bg-primary/20 dark:text-primary-foreground'
+          ? 'border-l-4 border-primary bg-primary/10 text-primary shadow-xs dark:bg-primary/20 dark:text-primary-foreground'
           : 'border-l-4 border-transparent'
       } `}
     >

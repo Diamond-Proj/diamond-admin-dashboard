@@ -6,7 +6,7 @@ export default function Loading() {
       <div className="relative flex -translate-y-14 flex-col items-center justify-center p-10 lg:translate-x-[-110px] lg:translate-y-[-60px]">
         {/* Diamond Logo */}
         <div className="mb-8">
-          <div className="mb-4 inline-flex h-32 w-32 items-center justify-center rounded-full bg-gradient-to-br from-rose_red/10 to-rose_red/5 shadow-xl dark:from-honolulu_blue/10 dark:to-honolulu_blue/5">
+          <div className="mb-4 inline-flex h-32 w-32 items-center justify-center rounded-full bg-linear-to-br from-rose_red/10 to-rose_red/5 shadow-xl dark:from-honolulu_blue/10 dark:to-honolulu_blue/5">
             <Logo width={120} height={120} className="h-24 w-24" />
           </div>
         </div>

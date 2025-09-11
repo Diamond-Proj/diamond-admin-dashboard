@@ -28,7 +28,7 @@
 
 //   return (
 //     <>
-//       <form className="border shadow-sm rounded-lg">
+//       <form className="border shadow-xs rounded-lg">
 //         <Table>
 //           <TableHeader>
 //             <TableRow>
