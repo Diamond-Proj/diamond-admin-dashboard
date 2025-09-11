@@ -36,7 +36,7 @@ export default async function RootLayout({
           {/* Main layout: sidebar + content area */}
           <div className="flex h-screen w-screen flex-col bg-gray-100/40 dark:bg-gray-800/40 lg:flex-row">
             {/* Sidebar - Desktop only */}
-            <div className="hidden h-full overflow-hidden border-r bg-gray-100/40 dark:bg-gray-800/40 lg:block">
+            <div className="hidden h-full w-[220px] overflow-hidden border-r bg-gray-100/40 dark:bg-gray-800/40 lg:block">
               <div className="flex h-full flex-col">
                 {/* Logo header */}
                 <div className="flex h-[60px] items-center border-b px-7">
@@ -83,7 +83,9 @@ export default async function RootLayout({
               </header>
 
               {/* Page content */}
-              <main className="flex-1 overflow-auto">{children}</main>
+              <main className="flex-1 overflow-auto bg-gray-100/40 dark:bg-gray-800/40">
+                {children}
+              </main>
             </div>
 
             {/* Toast notifications */}
