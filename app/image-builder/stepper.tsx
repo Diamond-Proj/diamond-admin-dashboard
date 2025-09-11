@@ -121,12 +121,14 @@ export function ImageBuilderStepper() {
   }
 
   // const onSubmit = (values: z.infer<typeof stepper))
-
-  const fetchBuildLogs = useCallback(async (endpoint_id: string, log_path: string, build_task_id?: string, log_task_id?: string) => {
+  // TODO: Merge this with fetchStderrLogs, use defined log_type to determine which log to fetch
+  const fetchBuildLogs = useCallback(async (
+    container_name: string, endpoint_id: string, build_task_id?: string, log_task_id?: string, log_type: string = 'stdout') => {
     try {
         const url = new URL('/api/get_build_log', window.location.origin)
+        url.searchParams.append('container_name', container_name)
         url.searchParams.append('endpoint_id', endpoint_id)
-        url.searchParams.append('log_path', log_path)
+        url.searchParams.append('log_type', log_type)
         if (build_task_id) {
             url.searchParams.append('task_id', build_task_id)
         }
@@ -166,29 +168,30 @@ export function ImageBuilderStepper() {
     return false
   }, [])
 
-  const startPolling = useCallback((endpoint_id: string, log_path: string, build_task_id: string) => {
+  const startPollingStdout = useCallback((container_name: string, endpoint_id: string, build_task_id: string) => {
     if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current)
     }
 
     currentEndpointRef.current = endpoint_id
-    currentLogPathRef.current = log_path
+    currentLogPathRef.current = container_name
     currentTaskIdRef.current = build_task_id
     currentLogTaskIdRef.current = null  // Reset log task ID
 
     setIsPolling(true)
     
     // Initial fetch
-    fetchBuildLogs(endpoint_id, log_path, build_task_id)
+    fetchBuildLogs(container_name, endpoint_id, build_task_id, undefined, 'stdout')
 
     // Start polling with a 5s delay between polls
     const poll = async () => {
       if (currentEndpointRef.current && currentLogPathRef.current && currentTaskIdRef.current) {
         const shouldStop = await fetchBuildLogs(
-          currentEndpointRef.current,
           currentLogPathRef.current,
+          currentEndpointRef.current,
           currentTaskIdRef.current,
-          currentLogTaskIdRef.current as string
+          currentLogTaskIdRef.current as string,
+          'stdout'
         )
         
         if (shouldStop) {
@@ -213,11 +216,14 @@ export function ImageBuilderStepper() {
     }, 900000)
   }, [fetchBuildLogs])
 
-  const fetchStderrLogs = useCallback(async (endpoint_id: string, log_path: string, build_task_id?: string, log_task_id?: string) => {
+  // TODO: Merge this with fetchBuildLogs
+  const fetchStderrLogs = useCallback(async (
+    container_name: string, endpoint_id: string, build_task_id?: string, log_task_id?: string, log_type: string = 'stderr') => {
     try {
         const url = new URL('/api/get_build_log', window.location.origin)
+        url.searchParams.append('container_name', container_name)
         url.searchParams.append('endpoint_id', endpoint_id)
-        url.searchParams.append('log_path', log_path)
+        url.searchParams.append('log_type', log_type)
         if (build_task_id) {
             url.searchParams.append('task_id', build_task_id)
         }
@@ -254,27 +260,28 @@ export function ImageBuilderStepper() {
     return false
   }, [])
 
-  const startPollingStderr = useCallback((endpoint_id: string, log_path: string, build_task_id: string) => {
+  const startPollingStderr = useCallback((container_name: string, endpoint_id: string, build_task_id: string) => {
     if (pollStderrIntervalRef.current) {
         clearInterval(pollStderrIntervalRef.current)
     }
 
     currentEndpointRef.current = endpoint_id
-    currentStderrLogPathRef.current = log_path
+    currentStderrLogPathRef.current = container_name
     currentTaskIdRef.current = build_task_id
     currentStderrLogTaskIdRef.current = null
 
     setIsPollingStderr(true)
     
-    fetchStderrLogs(endpoint_id, log_path, build_task_id)
+    fetchStderrLogs(container_name, endpoint_id, build_task_id, undefined, 'stderr')
 
     pollStderrIntervalRef.current = setInterval(async () => {
         if (currentEndpointRef.current && currentStderrLogPathRef.current && currentTaskIdRef.current) {
             const shouldStop = await fetchStderrLogs(
-                currentEndpointRef.current,
                 currentStderrLogPathRef.current,
+                currentEndpointRef.current,
                 currentTaskIdRef.current,
-                currentStderrLogTaskIdRef.current as string
+                currentStderrLogTaskIdRef.current as string,
+                'stderr'
             )
             
             if (shouldStop) {
@@ -346,12 +353,12 @@ export function ImageBuilderStepper() {
         const result = await response.json()
         console.log('Submitted data:', result)
         const { task_id, container_name } = result
-        const logPath = `${data.location}${data.location.endsWith('/') ? '' : '/'}${container_name}_log.stdout`
+        const stdoutLogPath = `${data.location}${data.location.endsWith('/') ? '' : '/'}${container_name}_log.stdout`
         const stderrLogPath = `${data.location}${data.location.endsWith('/') ? '' : '/'}${container_name}_log.stderr`
-        console.log('logPath:', logPath)
+        console.log('stdoutLogPath:', stdoutLogPath)
         console.log('stderrLogPath:', stderrLogPath)
-        startPolling(data.endpoint, logPath, task_id)
-        startPollingStderr(data.endpoint, stderrLogPath, task_id)
+        startPollingStdout(container_name, data.endpoint, task_id)
+        startPollingStderr(container_name, data.endpoint, task_id)
 
         toast({
             title: 'Success',
