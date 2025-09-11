@@ -12,6 +12,17 @@ import {
 import { DashboardIcon, GlobeIcon, PersonIcon } from '@radix-ui/react-icons';
 import { debounce } from 'lodash';
 
+const navLinks = [
+  { href: '/', label: 'Dashboard', Icon: DashboardIcon },
+  { href: '/image-builder', label: 'Image Builder', Icon: GlobeIcon },
+  { href: '/image-manager', label: 'Image Manager', Icon: FolderIcon },
+  { href: '/job-composer', label: 'Job Composer', Icon: EditIcon },
+  { href: '/task-manager', label: 'Task Manager', Icon: TaskIcon },
+  { href: '/users', label: 'Users', Icon: UsersIcon },
+  { href: '/profile', label: 'Profile', Icon: PersonIcon },
+  { href: '/settings', label: 'Settings', Icon: SettingsIcon }
+];
+
 export function SideNav({
   initialIsAuthenticated
 }: {
@@ -88,17 +99,6 @@ export function SideNav({
   if (!isAuthenticated) {
     return null;
   }
-
-  const navLinks = [
-    { href: '/', label: 'Dashboard', Icon: DashboardIcon },
-    { href: '/image-builder', label: 'Image Builder', Icon: GlobeIcon },
-    { href: '/image-manager', label: 'Image Manager', Icon: FolderIcon },
-    { href: '/job-composer', label: 'Job Composer', Icon: EditIcon },
-    { href: '/task-manager', label: 'Task Manager', Icon: TaskIcon },
-    { href: '/users', label: 'Users', Icon: UsersIcon },
-    { href: '/profile', label: 'Profile', Icon: PersonIcon },
-    { href: '/settings', label: 'Settings', Icon: SettingsIcon }
-  ];
 
   return (
     <nav className="grid items-start px-4 text-sm font-medium">
