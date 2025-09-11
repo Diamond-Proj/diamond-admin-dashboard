@@ -46,6 +46,11 @@ export function SettingsForm() {
       setIsLoading(true);
       const response = await fetch('/api/list_all_endpoints');
       if (!response.ok) {
+        toast({
+          title: 'Error',
+          description: 'Failed to fetch endpoint list. Please try again.',
+          variant: 'destructive'
+        });
         throw new Error('Failed to fetch endpoints');
       }
       const data = await response.json();
