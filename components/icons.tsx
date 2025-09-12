@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 export function UsersIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
@@ -49,7 +51,7 @@ export function EditIcon(props: React.SVGProps<SVGSVGElement>) {
       height="24"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="#000000"
+      stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -90,9 +92,9 @@ export function SearchIcon(props: React.SVGProps<SVGSVGElement>) {
 
 export function Spinner() {
   return (
-    <div className="absolute right-0 top-0 bottom-0 flex items-center justify-center">
+    <div className="absolute bottom-0 right-0 top-0 flex items-center justify-center">
       <svg
-        className="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-700"
+        className="-ml-1 mr-3 h-5 w-5 animate-spin text-gray-700"
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"
@@ -115,14 +117,22 @@ export function Spinner() {
   );
 }
 
-export function Logo() {
+export function Logo({
+  width = 40,
+  height = 40,
+  className
+}: {
+  width?: number;
+  height?: number;
+  className?: string;
+}) {
   return (
-    <img
-      src="/Diamond logo.png"
+    <Image
+      src="/Diamond_Logo.png"
       alt="Diamond Logo"
-      width="32"
-      height="32"
-      className="text-gray-100"
+      width={width}
+      height={height}
+      className={className}
     />
   );
 }

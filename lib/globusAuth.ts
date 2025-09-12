@@ -1,6 +1,6 @@
 import { authorization } from '@globus/sdk';
 // Import getSDKOptions using a proper path
-import type { Environment } from '@globus/sdk/dist/esm/core/global';
+//import type { Environment } from '@globus/sdk/dist/esm/core/global';
 
 // Get client ID from environment variable
 const GLOBUS_CLIENT_ID = process.env.NEXT_PUBLIC_GLOBUS_CLIENT_ID;

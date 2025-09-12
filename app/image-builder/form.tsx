@@ -49,17 +49,20 @@ export function ImageManagerForm() {
   >([]);
 
   useEffect(() => {
+    let isMounted = true;
     async function fetchEndpoints() {
       try {
         const response = await fetch('/api/list_active_endpoints');
         const data = await response.json();
-        setEndpoints(data);
+        if (isMounted) setEndpoints(data);
       } catch (error) {
         console.error('Error fetching endpoints:', error);
       }
     }
     fetchEndpoints();
-    console.log('Endpoints:', endpoints);
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {

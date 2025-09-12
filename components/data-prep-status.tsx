@@ -159,7 +159,7 @@ export function DataPrepStatus({ initialIsAuthenticated }: DataPrepStatusProps) 
     <div className="flex items-center">
       <HoverCard openDelay={100} closeDelay={200}>
         <HoverCardTrigger asChild>
-          <div className="flex items-center bg-white dark:bg-gray-800 rounded-full py-1 px-3 shadow-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-help">
+          <div className="flex items-center bg-white dark:bg-gray-800 rounded-full py-1 px-3 shadow-xs border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-help">
             <div 
               className={`w-2.5 h-2.5 rounded-full mr-2 ${
                 dataPrepStatus === 'loading' ? 'bg-yellow-400' : 
