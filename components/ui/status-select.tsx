@@ -15,7 +15,7 @@ export const StatusSelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      'relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+      'relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-hidden data-disabled:pointer-events-none data-disabled:opacity-50',
       status === "online" 
         ? "text-green-600 dark:text-green-400 hover:bg-green-50/80 hover:text-green-700 dark:hover:bg-green-950/20 dark:hover:text-green-300 focus:bg-green-100 focus:text-green-800 dark:focus:bg-green-900/30 dark:focus:text-green-200"
         : "text-red-600 dark:text-red-400 hover:bg-red-50/80 hover:text-red-700 dark:hover:bg-red-950/20 dark:hover:text-red-300 focus:bg-red-100 focus:text-red-800 dark:focus:bg-red-900/30 dark:focus:text-red-200",

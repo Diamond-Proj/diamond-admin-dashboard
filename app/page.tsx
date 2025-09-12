@@ -1,22 +1,24 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { getUserProfile, updateUserProfile } from '@/lib/taskHandlers';
 
-export default function DashboardPage({
-  searchParams
-}: {
-  searchParams: { q: string; offset: string };
-}) {
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { getUserProfile, updateUserProfile } from '@/lib/taskHandlers';
+import { DataPrepStatus } from '@/components/data-prep-status';
+import { SetupGuide } from '@/components/dashboard/setup-guide';
+import { DashboardStatsCards } from '@/components/dashboard/dashboard-stats';
+import { RecentActivity } from '@/components/dashboard/recent-activity';
+import { QuickActions } from '@/components/dashboard/quick-actions';
+import { AlertCircle, ExternalLink } from 'lucide-react';
+
+export default function DashboardPage() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [userInfo, setUserInfo] = useState<any>(null);
-  const router = useRouter();
 
   useEffect(() => {
     // Check authentication status from cookies client-side
     const checkAuth = () => {
       const cookies = document.cookie.split(';');
-      
+
       const authCookies = [
         'is_authenticated',
         'tokens',
@@ -27,22 +29,22 @@ export default function DashboardPage({
         'email',
         'primary_identity'
       ];
-      
-      const hasAuthCookie = cookies.some(cookie => {
+
+      const hasAuthCookie = cookies.some((cookie) => {
         const cookieName = cookie.trim().split('=')[0];
         return authCookies.includes(cookieName);
       });
-      
+
       setIsAuthenticated(hasAuthCookie);
-      
+
       // If authenticated, get user info from cookies
       if (hasAuthCookie) {
         const cookieObj: Record<string, string> = {};
-        cookies.forEach(cookie => {
+        cookies.forEach((cookie) => {
           const [name, value] = cookie.trim().split('=');
           if (name) cookieObj[name] = decodeURIComponent(value || '');
         });
-        
+
         setUserInfo({
           name: cookieObj['name'],
           email: cookieObj['email'],
@@ -55,7 +57,7 @@ export default function DashboardPage({
     // Check auth only once when component mounts
     checkAuth();
   }, []);
-  
+
   // Update user profile once when authenticated and user info is available
   useEffect(() => {
     const checkAndUpdateProfile = async () => {
@@ -68,13 +70,16 @@ export default function DashboardPage({
           });
           console.log('profile', profile);
           // If the profile is not found, create it or if any of the fields are different, update it
-          if (!profile.profile || profile.profile.institution !== userInfo.institution) {
+          if (
+            !profile.profile ||
+            profile.profile.institution !== userInfo.institution
+          ) {
             console.log('updating profile');
             await updateUserProfile({
               identity_id: userInfo.primary_identity,
               name: userInfo.name,
               email: userInfo.email,
-              institution: userInfo.institution,
+              institution: userInfo.institution
             });
             console.log('profile updated');
           }
@@ -83,99 +88,107 @@ export default function DashboardPage({
         }
       }
     };
-    
+
     checkAndUpdateProfile();
   }, [isAuthenticated, userInfo]);
 
   // Show loading state while checking authentication
   if (isAuthenticated === null) {
     return (
-      <main className="flex flex-1 flex-col p-4 md:p-6 items-center justify-center">
+      <main className="flex flex-1 flex-col items-center justify-center p-4 md:p-6">
         <div className="text-center">
           <p>Loading dashboard...</p>
         </div>
       </main>
     );
   }
-  
-  return (
-    <>
+
+  if (!isAuthenticated) {
+    return (
       <main className="flex flex-1 flex-col p-4 md:p-6">
-        <div className="flex items-center mb-8">
-          <h1 className="font-semibold text-lg md:text-2xl">Dashboard</h1>
-        </div>
-        <div className="w-full mb-4">
-          {/* <Search value={searchParams.q} /> */}
-        </div>
-        <div className="w-full mb-4">
-          {isAuthenticated ? (
-            <div className="card p-6">
-              <h2 className="text-xl font-semibold mb-4">Authentication Status</h2>
-              <div className="bg-success p-3 rounded-md mb-6">
-                <p className="text-success font-medium">
-                  ✓ You are successfully authenticated
-                </p>
-              </div>
-              
-              {/* Globus Compute Endpoint Setup Information */}
-              <div className="mb-6">
-                <h3 className="text-lg font-medium mb-2">Globus Compute Endpoint Setup</h3>
-                <div className="bg-info p-4 rounded-md">
-                  <p className="mb-2 text-info font-medium">
-                    <strong>Important:</strong> Before using Diamond services, you need to create a <a href="https://globus-compute.readthedocs.io/en/2.6.0/endpoints.html" target="_blank" rel="noopener noreferrer">Globus Compute endpoint</a> on your HPC machine.
-                  </p>
-                  <p className="mb-2">
-                    Install Globus Compute Endpoint package PyPi package:
-                  </p>
-                  <div className="card-muted p-3 rounded font-mono text-sm mb-3">
-                    python3 -m pipx install globus-compute-endpoint
-                  </div>
-                  <p className="mb-2">
-                    To create an endpoint, run the following command on your HPC machine:
-                  </p>
-                  <div className="card-muted p-3 rounded font-mono text-sm mb-3">
-                    globus-compute-endpoint configure &lt;endpoint-name&gt;
-                  </div>
-                  <p className="mb-2">
-                    After creating your endpoint, start it with:
-                  </p>
-                  <div className="card-muted p-3 rounded font-mono text-sm mb-3">
-                    globus-compute-endpoint start &lt;endpoint-name&gt;
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Replace &lt;endpoint-name&gt; with a unique name for your endpoint. This step is required to connect your HPC resources with Diamond.
-                  </p>
-                </div>
-              </div>
-              
-              {/* Welcome message and getting started information */}
-              <div>
-                <h3 className="text-lg font-medium mb-2">Getting Started</h3>
-                <div className="card-muted p-4 rounded-md">
-                  <p className="mb-3">
-                    Welcome to Diamond! You can now use the navigation menu to access various features:
-                  </p>
-                  <ul className="list-disc pl-5 space-y-2">
-                    <li><strong>Image Builder</strong> - Create custom container images for your HPC workloads</li>
-                    <li><strong>Image Manager</strong> - Manage your existing container images</li>
-                    <li><strong>Job Composer</strong> - Create and submit jobs to HPC resources</li>
-                    <li><strong>Task Manager</strong> - Monitor and manage your running tasks</li>
-                  </ul>
-                </div>
-              </div>
+        <div className="mb-4 w-full">
+          <div className="card p-6">
+            <h2 className="mb-4 text-xl font-semibold">
+              Welcome to Diamond HPC Platform
+            </h2>
+            <div className="bg-warning rounded-md p-4">
+              <p className="text-warning-foreground">
+                Please sign in to access your dashboard and start managing your
+                HPC workloads.
+              </p>
             </div>
-          ) : (
-            <div className="card p-6">
-              <h2 className="text-xl font-semibold mb-4">Authentication Status</h2>
-              <div className="bg-warning p-3 rounded-md">
-                <p className="text-warning">
-                  You are not authenticated. Please sign in to access the dashboard.
-                </p>
-              </div>
-            </div>
-          )}
+          </div>
         </div>
       </main>
-    </>
+    );
+  }
+
+  return (
+    <main className="flex flex-1 flex-col space-y-6 p-4 md:p-6">
+      {/* Welcome Header */}
+      <div className="flex flex-col justify-between md:flex-row md:items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            Welcome back, {userInfo?.name?.split(' ')[0] || 'User'}
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            {"Here's what's happening with your HPC workloads today"}
+          </p>
+        </div>
+        <div className="mt-4 md:mt-0">
+          <DataPrepStatus initialIsAuthenticated={isAuthenticated} />
+        </div>
+      </div>
+
+      {/* Setup Guide - Expandable */}
+      <SetupGuide />
+
+      {/* System Status Cards */}
+      <DashboardStatsCards />
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* Recent Activity */}
+        <RecentActivity />
+
+        {/* Quick Actions */}
+        <QuickActions />
+      </div>
+
+      {/* Getting Started Section */}
+      <div className="rounded-lg border border-blue-200 bg-linear-to-r from-blue-50 to-indigo-50 p-6 dark:border-blue-800 dark:from-blue-900/20 dark:to-indigo-900/20">
+        <div className="flex items-start space-x-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500">
+            <AlertCircle className="h-5 w-5 text-white" />
+          </div>
+          <div className="flex-1">
+            <h3 className="mb-2 text-lg font-semibold text-blue-900 dark:text-blue-100">
+              New to Diamond HPC?
+            </h3>
+            <p className="mb-4 text-blue-800 dark:text-blue-200">
+              Get started with our platform in just a few steps. Set up your
+              compute endpoint and submit your first job.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/profile"
+                className="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+              >
+                Setup Profile
+              </Link>
+              <Link
+                href="https://docs.diamondhpc.ai/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center rounded-lg border border-blue-200 bg-white px-4 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-gray-50 dark:border-blue-700 dark:bg-gray-800 dark:text-blue-400 dark:hover:bg-gray-700"
+              >
+                View Documentation
+                <ExternalLink className="ml-1 h-3 w-3" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }
