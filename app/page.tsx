@@ -10,13 +10,7 @@ import { RecentActivity } from '@/components/dashboard/recent-activity';
 import { QuickActions } from '@/components/dashboard/quick-actions';
 import { AlertCircle, ExternalLink } from 'lucide-react';
 
-export default function DashboardPage({
-  searchParams
-}: {
-  searchParams: { q: string; offset: string };
-}) {
-  console.log('searchParams', searchParams);
-
+export default function DashboardPage() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [userInfo, setUserInfo] = useState<any>(null);
 

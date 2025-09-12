@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
     const currentDateTime = new Date().toISOString();
     
     // Get git commit SHA for deployment
-    let gitCommitSha = process.env.VERCEL_GIT_COMMIT_SHA;
+    const gitCommitSha = process.env.VERCEL_GIT_COMMIT_SHA;
     let healthData;
 
     if (gitCommitSha && typeof gitCommitSha === 'string' && gitCommitSha.length === 40) {
