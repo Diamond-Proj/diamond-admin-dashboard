@@ -5,7 +5,6 @@ import { NavItem } from './nav-item';
 import {
   SettingsIcon,
   EditIcon,
-  UsersIcon,
   FolderIcon,
   TaskIcon
 } from '@/components/icons';
@@ -18,7 +17,6 @@ const navLinks = [
   { href: '/image-manager', label: 'Image Manager', Icon: FolderIcon },
   { href: '/job-composer', label: 'Job Composer', Icon: EditIcon },
   { href: '/task-manager', label: 'Task Manager', Icon: TaskIcon },
-  { href: '/users', label: 'Users', Icon: UsersIcon },
   { href: '/profile', label: 'Profile', Icon: PersonIcon },
   { href: '/settings', label: 'Settings', Icon: SettingsIcon }
 ];
