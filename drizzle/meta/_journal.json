@@ -8,6 +8,20 @@
       "when": 1742333374947,
       "tag": "0000_parallel_runaways",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1758094301021,
+      "tag": "0001_keen_vengeance",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1758126361267,
+      "tag": "0002_furry_adam_warlock",
+      "breakpoints": true
     }
   ]
 }

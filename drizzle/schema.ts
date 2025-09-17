@@ -11,6 +11,7 @@ export const endpoints = pgTable("endpoints", {
 	partitions: json(),
 	accounts: json(),
 	endpointStatus: varchar("endpoint_status"),
+	diamondDir: text("diamond_dir"),
 }, (table) => [
 	foreignKey({
 			columns: [table.identityId],
@@ -27,11 +28,11 @@ export const profile = pgTable("profile", {
 });
 
 export const container = pgTable("container", {
+	name: varchar().primaryKey().notNull(),
 	containerTaskId: varchar("container_task_id"),
 	containerStatus: varchar("container_status"),
 	identityId: varchar("identity_id", { length: 255 }),
 	baseImage: varchar("base_image"),
-	name: varchar().primaryKey().notNull(),
 	location: varchar(),
 	description: text(),
 	dependencies: text(),
