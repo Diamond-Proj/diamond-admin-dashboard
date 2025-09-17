@@ -72,6 +72,9 @@ export const task = pgTable(
     taskCreateTime: timestamp('task_create_time', {
       mode: 'string'
     }).defaultNow(),
+    taskStatusChangedTime: timestamp('task_status_changed_time', {
+      mode: 'string'
+    }).defaultNow(),
     logPath: varchar('log_path'),
     endpointId: varchar('endpoint_id'),
     batchJobId: varchar('batch_job_id'),
