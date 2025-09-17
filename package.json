@@ -18,11 +18,11 @@
     "format": "prettier --write .",
     "shadcn:add": "npx shadcn@latest add",
     "shadcn:init": "npx shadcn@latest init",
-    "db:generate": "npx drizzle-kit generate --config=lib/drizzle.config.ts",
-    "db:pull": "npx drizzle-kit pull --config=lib/drizzle.config.ts",
-    "db:migrate": "npx drizzle-kit migrate --config=lib/drizzle.config.ts",
+    "db:generate": "npx drizzle-kit generate",
+    "db:pull": "npx drizzle-kit pull",
+    "db:migrate": "npx drizzle-kit migrate",
     "db:studio": "npx drizzle-kit studio",
-    "db:push": "npx drizzle-kit push --config=lib/drizzle.config.ts",
+    "db:push": "npx drizzle-kit push",
     "db:up": "npx drizzle-kit up"
   },
   "dependencies": {
