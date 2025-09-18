@@ -1,6 +1,7 @@
 'use client';
 import { MoonIcon, SunIcon, DesktopIcon } from '@radix-ui/react-icons';
 import { useTheme } from 'next-themes';
+import { useState, useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -12,38 +13,52 @@ import {
 
 export default function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const [themeIcon, setThemeIcon] = useState<React.ReactElement | null>(null);
 
-  const getThemeIcon = () => {
+  useEffect(() => {
     switch (theme) {
       case 'light':
-        return <SunIcon className="h-[1.2rem] w-[1.2rem]" />;
+        setThemeIcon(<SunIcon className="h-[1.2rem] w-[1.2rem]" />);
+        break;
       case 'dark':
-        return <MoonIcon className="h-[1.2rem] w-[1.2rem]" />;
+        setThemeIcon(<MoonIcon className="h-[1.2rem] w-[1.2rem]" />);
+        break;
       case 'system':
-        return <DesktopIcon className="h-[1.2rem] w-[1.2rem]" />;
+        setThemeIcon(<DesktopIcon className="h-[1.2rem] w-[1.2rem]" />);
+        break;
       default:
-        return <DesktopIcon className="h-[1.2rem] w-[1.2rem]" />;
+        setThemeIcon(<DesktopIcon className="h-[1.2rem] w-[1.2rem]" />);
+        break;
     }
-  };
+  }, [theme]);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon">
-          {getThemeIcon()}
+        <Button variant="outline" size="icon" className="cursor-pointer">
+          {themeIcon}
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" side="top">
-        <DropdownMenuItem onClick={() => setTheme('light')}>
+        <DropdownMenuItem
+          className="cursor-pointer"
+          onClick={() => setTheme('light')}
+        >
           <SunIcon className="mr-2 h-4 w-4" />
           Light
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('dark')}>
+        <DropdownMenuItem
+          className="cursor-pointer"
+          onClick={() => setTheme('dark')}
+        >
           <MoonIcon className="mr-2 h-4 w-4" />
           Dark
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('system')}>
+        <DropdownMenuItem
+          className="cursor-pointer"
+          onClick={() => setTheme('system')}
+        >
           <DesktopIcon className="mr-2 h-4 w-4" />
           System
         </DropdownMenuItem>

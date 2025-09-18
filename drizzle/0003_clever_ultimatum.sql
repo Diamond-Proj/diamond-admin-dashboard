@@ -1,0 +1,1 @@
+ALTER TABLE "task" ADD COLUMN "task_status_changed_time" timestamp DEFAULT now();

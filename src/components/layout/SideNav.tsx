@@ -1,16 +1,15 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { NavItem } from './nav-item';
 import {
   SettingsIcon,
   EditIcon,
-  UsersIcon,
   FolderIcon,
   TaskIcon
 } from '@/components/icons';
 import { DashboardIcon, GlobeIcon, PersonIcon } from '@radix-ui/react-icons';
-import { debounce } from 'lodash';
+import { debounce } from '@/lib/debounce';
 
 const navLinks = [
   { href: '/', label: 'Dashboard', Icon: DashboardIcon },
@@ -18,7 +17,6 @@ const navLinks = [
   { href: '/image-manager', label: 'Image Manager', Icon: FolderIcon },
   { href: '/job-composer', label: 'Job Composer', Icon: EditIcon },
   { href: '/task-manager', label: 'Task Manager', Icon: TaskIcon },
-  { href: '/users', label: 'Users', Icon: UsersIcon },
   { href: '/profile', label: 'Profile', Icon: PersonIcon },
   { href: '/settings', label: 'Settings', Icon: SettingsIcon }
 ];
@@ -33,31 +31,32 @@ export function SideNav({
   );
   const [isLoading, setIsLoading] = useState(!initialIsAuthenticated);
 
-  const checkAuth = useCallback(
-    debounce(() => {
-      const cookies = document.cookie.split(';');
-      const authCookies = [
-        'is_authenticated',
-        'tokens',
-        'access_token',
-        'id_token',
-        'refresh_token',
-        'name',
-        'email',
-        'primary_identity'
-      ];
+  const checkAuth = useMemo(
+    () =>
+      debounce(() => {
+        const cookies = document.cookie.split(';');
+        const authCookies = [
+          'is_authenticated',
+          'tokens',
+          'access_token',
+          'id_token',
+          'refresh_token',
+          'name',
+          'email',
+          'primary_identity'
+        ];
 
-      const hasAuthCookie = cookies.some((cookie) => {
-        const cookieName = cookie.trim().split('=')[0];
-        return authCookies.includes(cookieName);
-      });
+        const hasAuthCookie = cookies.some((cookie) => {
+          const cookieName = cookie.trim().split('=')[0];
+          return authCookies.includes(cookieName);
+        });
 
-      if (hasAuthCookie !== isAuthenticated || isLoading) {
-        console.log('Navigation: Auth status changed to', hasAuthCookie);
-        setIsAuthenticated(hasAuthCookie);
-        setIsLoading(false);
-      }
-    }, 300),
+        if (hasAuthCookie !== isAuthenticated || isLoading) {
+          console.log('Navigation: Auth status changed to', hasAuthCookie);
+          setIsAuthenticated(hasAuthCookie);
+          setIsLoading(false);
+        }
+      }, 300),
     [isAuthenticated, isLoading]
   );
 
