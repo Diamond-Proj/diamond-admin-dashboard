@@ -9,7 +9,7 @@ import {
   TaskIcon
 } from '@/components/icons';
 import { DashboardIcon, GlobeIcon, PersonIcon } from '@radix-ui/react-icons';
-import { debounce } from 'lodash';
+import { debounce } from '@/lib/debounce';
 
 const navLinks = [
   { href: '/', label: 'Dashboard', Icon: DashboardIcon },
