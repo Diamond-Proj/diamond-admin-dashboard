@@ -6,12 +6,11 @@ import Link from 'next/link';
 
 import { is_authenticated } from '@/lib/authUtils';
 
+import { ThemeProvider } from 'next-themes';
 import { Logo } from '@/components/icons';
 import { Toaster } from '@/components/ui/toaster';
-
 import { AuthStatus } from '@/components/auth-status';
-import ThemeToggle from '@/components/layout/ThemeToggle/theme-toggle';
-import ThemeProvider from '@/components/layout/ThemeToggle/theme-provider';
+import ThemeToggle from '@/components/layout/theme-toggle';
 
 import { SideNav } from '@/components/layout/SideNav';
 
