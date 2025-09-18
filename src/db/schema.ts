@@ -5,7 +5,8 @@ import {
   json,
   timestamp,
   foreignKey,
-  primaryKey
+  primaryKey,
+  boolean
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -51,7 +52,8 @@ export const container = pgTable(
     dependencies: text(),
     environment: text(),
     commands: text(),
-    endpointId: varchar('endpoint_id')
+    endpointId: varchar('endpoint_id'),
+    isPublic: boolean('is_public').default(false)
   },
   (table) => [
     foreignKey({
