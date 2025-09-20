@@ -1,17 +1,18 @@
 import { relations } from "drizzle-orm/relations";
-import { profile, endpoints, container, task } from "./schema";
+import { profile, task, container, dataset, endpoints } from "./schema";
 
-export const endpointsRelations = relations(endpoints, ({one}) => ({
+export const taskRelations = relations(task, ({one}) => ({
 	profile: one(profile, {
-		fields: [endpoints.identityId],
+		fields: [task.identityId],
 		references: [profile.identityId]
 	}),
 }));
 
 export const profileRelations = relations(profile, ({many}) => ({
-	endpoints: many(endpoints),
-	containers: many(container),
 	tasks: many(task),
+	containers: many(container),
+	datasets: many(dataset),
+	endpoints: many(endpoints),
 }));
 
 export const containerRelations = relations(container, ({one}) => ({
@@ -21,9 +22,16 @@ export const containerRelations = relations(container, ({one}) => ({
 	}),
 }));
 
-export const taskRelations = relations(task, ({one}) => ({
+export const datasetRelations = relations(dataset, ({one}) => ({
 	profile: one(profile, {
-		fields: [task.identityId],
+		fields: [dataset.identityId],
+		references: [profile.identityId]
+	}),
+}));
+
+export const endpointsRelations = relations(endpoints, ({one}) => ({
+	profile: one(profile, {
+		fields: [endpoints.identityId],
 		references: [profile.identityId]
 	}),
 }));
