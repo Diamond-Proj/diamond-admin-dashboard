@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import {
   BarChart3,
   Activity,
@@ -13,68 +13,25 @@ import {
   XCircle,
   CheckCircle
 } from 'lucide-react';
+import { type DashboardStats } from '@/components/dashboard/dashboard.types';
 
-export interface DashboardStats {
-  jobs: {
-    completed: number;
-    running: number;
-    failed: number;
-  };
-  endpoints: {
-    online: number;
-    offline: number;
-  };
-  datasets: {
-    public: number;
-    private: number;
-  };
-  images: {
-    public: number;
-    private: number;
-  };
-}
-
-export function DashboardStatsCards() {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Simulate API call delay
-    setTimeout(() => {
-      const mockStats: DashboardStats = {
-        jobs: {
-          completed: 1198,
-          running: 23,
-          failed: 26
-        },
-        endpoints: {
-          online: 8,
-          offline: 2
-        },
-        datasets: {
-          public: 45,
-          private: 123
-        },
-        images: {
-          public: 32,
-          private: 67
-        }
-      };
-      setStats(mockStats);
-      setLoading(false);
-    }, 500);
-  }, []);
-
+export function DashboardStatsCards({
+  stats,
+  loading
+}: {
+  stats: DashboardStats | null;
+  loading: boolean;
+}) {
   // Calculate totals and percentages
-  const jobsTotal = stats
-    ? stats.jobs.completed + stats.jobs.running + stats.jobs.failed
+  const tasksTotal = stats
+    ? stats.tasks.completed + stats.tasks.running + stats.tasks.failed
     : 0;
-  const jobsCompletionRate =
-    stats && jobsTotal > 0 ? (stats.jobs.completed / jobsTotal) * 100 : 0;
-  const jobsRunningRate =
-    stats && jobsTotal > 0 ? (stats.jobs.running / jobsTotal) * 100 : 0;
-  const jobsFailureRate =
-    stats && jobsTotal > 0 ? (stats.jobs.failed / jobsTotal) * 100 : 0;
+  const tasksCompletionRate =
+    stats && tasksTotal > 0 ? (stats.tasks.completed / tasksTotal) * 100 : 0;
+  const tasksRunningRate =
+    stats && tasksTotal > 0 ? (stats.tasks.running / tasksTotal) * 100 : 0;
+  const tasksFailureRate =
+    stats && tasksTotal > 0 ? (stats.tasks.failed / tasksTotal) * 100 : 0;
 
   const endpointsTotal = stats
     ? stats.endpoints.online + stats.endpoints.offline
@@ -108,19 +65,22 @@ export function DashboardStatsCards() {
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-      {/* Jobs Card */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-xs dark:border-gray-700 dark:bg-gray-800">
+      {/* Tasks Card */}
+      <Link
+        href="/task-manager"
+        className="group cursor-pointer rounded-lg border border-gray-200 bg-white p-6 shadow-xs transition-all duration-300 hover:scale-105 hover:border-blue-300 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:hover:border-blue-600"
+      >
         <div className="mb-3 flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-              Jobs
+            <p className="text-sm font-medium text-gray-600 transition-colors group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-400">
+              Tasks
             </p>
-            <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-              {loading ? '---' : jobsTotal.toLocaleString()}
+            <p className="text-3xl font-bold text-gray-900 transition-colors group-hover:text-blue-600 dark:text-gray-100 dark:group-hover:text-blue-400">
+              {loading ? '---' : tasksTotal.toLocaleString()}
             </p>
           </div>
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
-            <BarChart3 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 transition-colors group-hover:bg-blue-200 dark:bg-blue-900 dark:group-hover:bg-blue-800">
+            <BarChart3 className="h-5 w-5 text-blue-600 transition-transform group-hover:scale-110 dark:text-blue-400" />
           </div>
         </div>
 
@@ -134,17 +94,17 @@ export function DashboardStatsCards() {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                {loading ? '---' : stats?.jobs.completed}
+                {loading ? '---' : stats?.tasks.completed}
               </span>
               <span className="text-sm text-gray-500 dark:text-gray-400">
-                {loading ? '(-%%)' : `(${jobsCompletionRate.toFixed(1)}%)`}
+                {loading ? '(-%%)' : `(${tasksCompletionRate.toFixed(1)}%)`}
               </span>
             </div>
           </div>
           <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
             <div
-              className="h-2 rounded-full bg-green-500"
-              style={{ width: `${jobsCompletionRate}%` }}
+              className="h-2 rounded-full bg-green-500 transition-all duration-300"
+              style={{ width: `${tasksCompletionRate}%` }}
             ></div>
           </div>
 
@@ -157,17 +117,17 @@ export function DashboardStatsCards() {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                {loading ? '--' : stats?.jobs.running}
+                {loading ? '--' : stats?.tasks.running}
               </span>
               <span className="text-sm text-gray-500 dark:text-gray-400">
-                {loading ? '(-%%)' : `(${jobsRunningRate.toFixed(1)}%)`}
+                {loading ? '(-%%)' : `(${tasksRunningRate.toFixed(1)}%)`}
               </span>
             </div>
           </div>
           <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
             <div
-              className="h-2 rounded-full bg-yellow-500"
-              style={{ width: `${jobsRunningRate}%` }}
+              className="h-2 rounded-full bg-yellow-500 transition-all duration-300"
+              style={{ width: `${tasksRunningRate}%` }}
             ></div>
           </div>
 
@@ -180,35 +140,38 @@ export function DashboardStatsCards() {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                {loading ? '--' : stats?.jobs.failed}
+                {loading ? '--' : stats?.tasks.failed}
               </span>
               <span className="text-sm text-gray-500 dark:text-gray-400">
-                {loading ? '(-%%)' : `(${jobsFailureRate.toFixed(1)}%)`}
+                {loading ? '(-%%)' : `(${tasksFailureRate.toFixed(1)}%)`}
               </span>
             </div>
           </div>
           <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
             <div
-              className="h-2 rounded-full bg-red-500"
-              style={{ width: `${jobsFailureRate}%` }}
+              className="h-2 rounded-full bg-red-500 transition-all duration-300"
+              style={{ width: `${tasksFailureRate}%` }}
             ></div>
           </div>
         </div>
-      </div>
+      </Link>
 
       {/* Endpoints Card */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-xs dark:border-gray-700 dark:bg-gray-800">
+      <Link
+        href="/settings"
+        className="group cursor-pointer rounded-lg border border-gray-200 bg-white p-6 shadow-xs transition-all duration-300 hover:scale-105 hover:border-green-300 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:hover:border-green-600"
+      >
         <div className="mb-3 flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            <p className="text-sm font-medium text-gray-600 transition-colors group-hover:text-green-600 dark:text-gray-400 dark:group-hover:text-green-400">
               Endpoints
             </p>
-            <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            <p className="text-3xl font-bold text-gray-900 transition-colors group-hover:text-green-600 dark:text-gray-100 dark:group-hover:text-green-400">
               {loading ? '--' : endpointsTotal}
             </p>
           </div>
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
-            <Server className="h-5 w-5 text-green-600 dark:text-green-400" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 transition-colors group-hover:bg-green-200 dark:bg-green-900 dark:group-hover:bg-green-800">
+            <Server className="h-5 w-5 text-green-600 transition-transform group-hover:scale-110 dark:text-green-400" />
           </div>
         </div>
 
@@ -231,7 +194,7 @@ export function DashboardStatsCards() {
           </div>
           <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
             <div
-              className="h-2 rounded-full bg-green-500"
+              className="h-2 rounded-full bg-green-500 transition-all duration-300"
               style={{ width: `${endpointsOnlineRate}%` }}
             ></div>
           </div>
@@ -254,26 +217,29 @@ export function DashboardStatsCards() {
           </div>
           <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
             <div
-              className="h-2 rounded-full bg-red-500"
+              className="h-2 rounded-full bg-red-500 transition-all duration-300"
               style={{ width: `${endpointsOfflineRate}%` }}
             ></div>
           </div>
         </div>
-      </div>
+      </Link>
 
       {/* Datasets Card */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-xs dark:border-gray-700 dark:bg-gray-800">
+      <Link
+        href="/datasets"
+        className="group cursor-pointer rounded-lg border border-gray-200 bg-white p-6 shadow-xs transition-all duration-300 hover:scale-105 hover:border-purple-300 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:hover:border-purple-600"
+      >
         <div className="mb-3 flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            <p className="text-sm font-medium text-gray-600 transition-colors group-hover:text-purple-600 dark:text-gray-400 dark:group-hover:text-purple-400">
               Datasets
             </p>
-            <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            <p className="text-3xl font-bold text-gray-900 transition-colors group-hover:text-purple-600 dark:text-gray-100 dark:group-hover:text-purple-400">
               {loading ? '--' : datasetsTotal}
             </p>
           </div>
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900">
-            <Database className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100 transition-colors group-hover:bg-purple-200 dark:bg-purple-900 dark:group-hover:bg-purple-800">
+            <Database className="h-5 w-5 text-purple-600 transition-transform group-hover:scale-110 dark:text-purple-400" />
           </div>
         </div>
 
@@ -296,7 +262,7 @@ export function DashboardStatsCards() {
           </div>
           <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
             <div
-              className="h-2 rounded-full bg-blue-500"
+              className="h-2 rounded-full bg-blue-500 transition-all duration-300"
               style={{ width: `${datasetsPublicRate}%` }}
             ></div>
           </div>
@@ -319,26 +285,29 @@ export function DashboardStatsCards() {
           </div>
           <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
             <div
-              className="h-2 rounded-full bg-gray-500"
+              className="h-2 rounded-full bg-gray-500 transition-all duration-300"
               style={{ width: `${datasetsPrivateRate}%` }}
             ></div>
           </div>
         </div>
-      </div>
+      </Link>
 
       {/* Images Card */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-xs dark:border-gray-700 dark:bg-gray-800">
+      <Link
+        href="/images"
+        className="group cursor-pointer rounded-lg border border-gray-200 bg-white p-6 shadow-xs transition-all duration-300 hover:scale-105 hover:border-orange-300 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:hover:border-orange-600"
+      >
         <div className="mb-3 flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+            <p className="text-sm font-medium text-gray-600 transition-colors group-hover:text-orange-600 dark:text-gray-400 dark:group-hover:text-orange-400">
               Images
             </p>
-            <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            <p className="text-3xl font-bold text-gray-900 transition-colors group-hover:text-orange-600 dark:text-gray-100 dark:group-hover:text-orange-400">
               {loading ? '--' : imagesTotal}
             </p>
           </div>
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900">
-            <Container className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100 transition-colors group-hover:bg-orange-200 dark:bg-orange-900 dark:group-hover:bg-orange-800">
+            <Container className="h-5 w-5 text-orange-600 transition-transform group-hover:scale-110 dark:text-orange-400" />
           </div>
         </div>
 
@@ -361,7 +330,7 @@ export function DashboardStatsCards() {
           </div>
           <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
             <div
-              className="h-2 rounded-full bg-blue-500"
+              className="h-2 rounded-full bg-blue-500 transition-all duration-300"
               style={{ width: `${imagesPublicRate}%` }}
             ></div>
           </div>
@@ -384,12 +353,12 @@ export function DashboardStatsCards() {
           </div>
           <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
             <div
-              className="h-2 rounded-full bg-gray-500"
+              className="h-2 rounded-full bg-gray-500 transition-all duration-300"
               style={{ width: `${imagesPrivateRate}%` }}
             ></div>
           </div>
         </div>
-      </div>
+      </Link>
     </div>
   );
 }
