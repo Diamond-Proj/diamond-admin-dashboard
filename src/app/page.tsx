@@ -1,18 +1,30 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import Link from 'next/link';
+import { AlertCircle, ExternalLink } from 'lucide-react';
+
+import type {
+  DashboardStats,
+  RecentTask,
+  UserInfo,
+  StatsResponse
+} from '@/components/dashboard/dashboard.types';
+
 import { getUserProfile, updateUserProfile } from '@/lib/taskHandlers';
+
 import { DataPrepStatus } from '@/components/data-prep-status';
 import { SetupGuide } from '@/components/dashboard/setup-guide';
 import { DashboardStatsCards } from '@/components/dashboard/dashboard-stats';
 import { RecentActivity } from '@/components/dashboard/recent-activity';
 import { QuickActions } from '@/components/dashboard/quick-actions';
-import { AlertCircle, ExternalLink } from 'lucide-react';
 
 export default function DashboardPage() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [userInfo, setUserInfo] = useState<any>(null);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [recentTasks, setRecentTasks] = useState<RecentTask[]>([]);
+  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     // Check authentication status from cookies client-side
@@ -57,6 +69,42 @@ export default function DashboardPage() {
     // Check auth only once when component mounts
     checkAuth();
   }, []);
+
+  // Fetch stats data
+  useEffect(() => {
+    if (isAuthenticated) {
+      startTransition(async () => {
+        try {
+          const response = await fetch('/api/stats', {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (!response.ok) {
+            console.error(`Server error: ${response.statusText}`);
+            return;
+          }
+
+          const data: StatsResponse = await response.json();
+          console.log('Fetched stats from /api/stats API:', data);
+
+          setStats({
+            tasks: data.tasks,
+            endpoints: data.endpoints,
+            datasets: data.datasets,
+            images: data.images
+          });
+
+          setRecentTasks(data.recent_tasks || []);
+        } catch (error) {
+          console.error('Error fetching stats:', error);
+        }
+      });
+    }
+  }, [isAuthenticated]);
 
   // Update user profile once when authenticated and user info is available
   useEffect(() => {
@@ -144,12 +192,12 @@ export default function DashboardPage() {
       <SetupGuide />
 
       {/* System Status Cards */}
-      <DashboardStatsCards />
+      <DashboardStatsCards stats={stats} loading={isPending} />
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Recent Activity */}
-        <RecentActivity />
+        <RecentActivity recentTasks={recentTasks} loading={isPending} />
 
         {/* Quick Actions */}
         <QuickActions />
