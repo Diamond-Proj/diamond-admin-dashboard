@@ -36,6 +36,13 @@
       "when": 1758234455348,
       "tag": "0004_groovy_frank_castle",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1758333849165,
+      "tag": "0005_special_elektra",
+      "breakpoints": true
     }
   ]
 }
