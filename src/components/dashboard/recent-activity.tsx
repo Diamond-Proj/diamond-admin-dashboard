@@ -21,30 +21,30 @@ const getActivityIcon = (status: RecentTask['status']) => {
 const getActivityColor = (status: RecentTask['status']) => {
   switch (status) {
     case 'COMPLETED':
-      return 'bg-green-500';
+      return 'bg-gradient-to-br from-green-500 to-green-600';
     case 'PENDING':
-      return 'bg-gray-500';
+      return 'bg-gradient-to-br from-gray-500 to-gray-600';
     case 'RUNNING':
-      return 'bg-blue-500';
+      return 'bg-gradient-to-br from-blue-500 to-blue-600';
     case 'FAILED':
-      return 'bg-red-500';
+      return 'bg-gradient-to-br from-red-500 to-red-600';
     default:
-      return 'bg-gray-500';
+      return 'bg-gradient-to-br from-gray-500 to-gray-600';
   }
 };
 
 const getStatusBadgeStyle = (status: RecentTask['status']) => {
   switch (status) {
     case 'COMPLETED':
-      return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800';
+      return 'bg-green-100 text-green-800 border-green-200 shadow-sm dark:bg-green-900/30 dark:text-green-400 dark:border-green-800';
     case 'PENDING':
-      return 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/30 dark:text-gray-400 dark:border-gray-700';
+      return 'bg-gray-100 text-gray-800 border-gray-200 shadow-sm dark:bg-gray-900/30 dark:text-gray-400 dark:border-gray-700';
     case 'RUNNING':
-      return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800';
+      return 'bg-blue-100 text-blue-800 border-blue-200 shadow-sm dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800';
     case 'FAILED':
-      return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800';
+      return 'bg-red-100 text-red-800 border-red-200 shadow-sm dark:bg-red-900/30 dark:text-red-400 dark:border-red-800';
     default:
-      return 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/30 dark:text-gray-400 dark:border-gray-700';
+      return 'bg-gray-100 text-gray-800 border-gray-200 shadow-sm dark:bg-gray-900/30 dark:text-gray-400 dark:border-gray-700';
   }
 };
 
@@ -94,26 +94,26 @@ export function RecentActivity({
   loading: boolean;
 }) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-xs dark:border-gray-700 dark:bg-gray-800">
-      <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">
+    <div className="max-h-150 overflow-y-auto overscroll-contain rounded-xl border border-gray-200/60 bg-white p-6 shadow-sm dark:border-gray-700/60 dark:bg-gray-800">
+      <h3 className="mb-6 text-lg font-semibold text-gray-900 dark:text-gray-100">
         Recent Activity
       </h3>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3">
         {/* Loading skeleton */}
         {loading && (
           <>
             {[...Array(4)].map((_, i) => (
               <div
                 key={i}
-                className="flex animate-pulse items-start space-x-3 rounded-lg border border-gray-100 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800"
+                className="flex animate-pulse items-start space-x-4 rounded-xl border border-gray-100 bg-gray-50/50 p-4 dark:border-gray-700 dark:bg-gray-800/50"
               >
-                <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-600"></div>
-                <div className="flex-1 space-y-2">
+                <div className="h-10 w-10 rounded-xl bg-gray-200 dark:bg-gray-600"></div>
+                <div className="flex-1 space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="h-4 w-32 rounded bg-gray-200 dark:bg-gray-600"></div>
-                    <div className="h-5 w-16 rounded-full bg-gray-200 dark:bg-gray-600"></div>
+                    <div className="h-6 w-16 rounded-full bg-gray-200 dark:bg-gray-600"></div>
                   </div>
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     <div className="h-3 w-48 rounded bg-gray-200 dark:bg-gray-600"></div>
                     <div className="h-3 w-36 rounded bg-gray-200 dark:bg-gray-600"></div>
                   </div>
@@ -125,9 +125,9 @@ export function RecentActivity({
 
         {/* No recent tasks found */}
         {!loading && recentTasks.length === 0 && (
-          <div className="py-8 text-center">
-            <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
-              <Clock className="h-6 w-6 text-gray-400" />
+          <div className="py-12 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-700">
+              <Clock className="h-8 w-8 text-gray-400" />
             </div>
             <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
               No recent tasks found
@@ -144,23 +144,23 @@ export function RecentActivity({
           recentTasks.map((task) => (
             <div
               key={task.task_id}
-              className="dark:hover:bg-gray-750 flex items-start space-x-3 rounded-lg border border-gray-100 bg-gray-50 p-3 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800"
+              className="group flex items-start space-x-4 rounded-xl border border-gray-100/60 bg-gray-50/50 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-gray-200 hover:bg-white hover:shadow-md dark:border-gray-700/60 dark:bg-gray-800/50 dark:hover:border-gray-600 dark:hover:bg-gray-700/50"
             >
               <div
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white ${getActivityColor(
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:shadow-md ${getActivityColor(
                   task.status
                 )}`}
               >
                 {getActivityIcon(task.status)}
               </div>
 
-              <div className="min-w-0 flex-1 space-y-2">
-                <div className="flex flex-col space-y-1 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-                  <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
+              <div className="min-w-0 flex-1 space-y-3">
+                <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+                  <p className="truncate text-sm font-semibold text-gray-900 transition-colors duration-300 group-hover:text-gray-700 dark:text-gray-100 dark:group-hover:text-gray-200">
                     {task.name}
                   </p>
                   <span
-                    className={`inline-flex shrink-0 items-center rounded-full border px-2 py-1 text-xs font-medium ${getStatusBadgeStyle(
+                    className={`inline-flex shrink-0 items-center rounded-full border px-3 py-1 text-xs font-medium transition-all duration-300 group-hover:scale-105 ${getStatusBadgeStyle(
                       task.status
                     )}`}
                   >
@@ -181,7 +181,7 @@ export function RecentActivity({
                   </div>
                   <div className="flex items-center">
                     <span className="mr-1 font-medium">Task ID:</span>
-                    <span className="font-mono text-xs break-all">
+                    <span className="font-mono text-xs break-all opacity-70 transition-opacity duration-300 group-hover:opacity-100">
                       {task.task_id}
                     </span>
                   </div>

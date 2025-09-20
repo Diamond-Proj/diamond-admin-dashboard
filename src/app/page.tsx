@@ -204,13 +204,13 @@ export default function DashboardPage() {
       </div>
 
       {/* Getting Started Section */}
-      <div className="rounded-lg border border-blue-200 bg-linear-to-r from-blue-50 to-indigo-50 p-6 dark:border-blue-800 dark:from-blue-900/20 dark:to-indigo-900/20">
+      <div className="rounded-xl border border-blue-200/60 bg-gradient-to-br from-blue-50 to-indigo-50/80 p-6 shadow-sm dark:border-blue-800/60 dark:from-blue-900/20 dark:to-indigo-900/10">
         <div className="flex items-start space-x-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500">
-            <AlertCircle className="h-5 w-5 text-white" />
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-md">
+            <AlertCircle className="h-6 w-6 text-white" />
           </div>
           <div className="flex-1">
-            <h3 className="mb-2 text-lg font-semibold text-blue-900 dark:text-blue-100">
+            <h3 className="mb-3 text-lg font-semibold text-blue-900 dark:text-blue-100">
               New to Diamond HPC?
             </h3>
             <p className="mb-4 text-blue-800 dark:text-blue-200">
@@ -220,18 +220,31 @@ export default function DashboardPage() {
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/profile"
-                className="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+                className="group inline-flex items-center rounded-xl bg-blue-600 px-6 py-3 text-sm font-medium text-white shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-lg"
               >
                 Setup Profile
+                <svg
+                  className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
               </Link>
               <Link
                 href="https://docs.diamondhpc.ai/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center rounded-lg border border-blue-200 bg-white px-4 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-gray-50 dark:border-blue-700 dark:bg-gray-800 dark:text-blue-400 dark:hover:bg-gray-700"
+                className="group inline-flex items-center rounded-xl border border-blue-200 bg-white/80 px-6 py-3 text-sm font-medium text-blue-600 shadow-md backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-white hover:shadow-lg dark:border-blue-700 dark:bg-gray-800/80 dark:text-blue-400 dark:hover:bg-gray-700"
               >
                 View Documentation
-                <ExternalLink className="ml-1 h-3 w-3" />
+                <ExternalLink className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
               </Link>
             </div>
           </div>
