@@ -9,6 +9,7 @@ import {
   TaskIcon
 } from '@/components/icons';
 import { DashboardIcon, GlobeIcon, PersonIcon } from '@radix-ui/react-icons';
+import { Database } from 'lucide-react';
 import { debounce } from '@/lib/debounce';
 
 const navLinks = [
@@ -17,6 +18,7 @@ const navLinks = [
   { href: '/image-manager', label: 'Image Manager', Icon: FolderIcon },
   { href: '/job-composer', label: 'Job Composer', Icon: EditIcon },
   { href: '/task-manager', label: 'Task Manager', Icon: TaskIcon },
+  { href: '/datasets', label: 'Data Manager', Icon: Database },
   { href: '/profile', label: 'Profile', Icon: PersonIcon },
   { href: '/settings', label: 'Settings', Icon: SettingsIcon }
 ];
@@ -85,7 +87,7 @@ export function SideNav({
   if (isLoading) {
     return (
       <div className="grid items-start gap-2 px-4 text-sm font-medium">
-        {[...Array(7)].map((_, i) => (
+        {[...Array(navLinks.length)].map((_, i) => (
           <div
             key={i}
             className="h-10 animate-pulse rounded-md bg-gray-200 dark:bg-gray-700"
