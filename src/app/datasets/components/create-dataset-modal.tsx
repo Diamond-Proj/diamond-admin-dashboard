@@ -274,57 +274,56 @@ export function CreateDatasetModal({
                 Machine Name *
               </label>
               <div className="relative" ref={dropdownRef}>
-                  <button
-                    type="button"
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    disabled={isLoading}
-                    className={`flex w-full cursor-pointer items-center justify-between rounded-lg border bg-white px-3 py-2 text-gray-900 transition-all duration-200 hover:border-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 focus:outline-none dark:bg-gray-700 dark:text-gray-100 dark:hover:border-gray-500 dark:focus:border-purple-400 ${
-                      errors.machine_name
-                        ? 'border-red-500'
-                        : 'border-gray-300 dark:border-gray-600'
-                    }`}
+                <button
+                  type="button"
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  disabled={isLoading}
+                  className={`flex w-full cursor-pointer items-center justify-between rounded-lg border bg-white px-3 py-2 text-gray-900 transition-all duration-200 hover:border-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 focus:outline-none dark:bg-gray-700 dark:text-gray-100 dark:hover:border-gray-500 dark:focus:border-purple-400 ${
+                    errors.machine_name
+                      ? 'border-red-500'
+                      : 'border-gray-300 dark:border-gray-600'
+                  }`}
+                >
+                  <span
+                    className={
+                      formData.machine_name
+                        ? ''
+                        : 'text-gray-500 dark:text-gray-400'
+                    }
                   >
-                    <span
-                      className={
-                        formData.machine_name
-                          ? ''
-                          : 'text-gray-500 dark:text-gray-400'
-                      }
-                    >
-                      {formData.machine_name || 'Select a machine'}
-                    </span>
-                    <ChevronDown
-                      className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
-                        isDropdownOpen ? 'rotate-180' : ''
-                      }`}
-                    />
-                  </button>
+                    {formData.machine_name || 'Select a machine'}
+                  </span>
+                  <ChevronDown
+                    className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
+                      isDropdownOpen ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
 
-                  {isDropdownOpen && (
-                    <div className="absolute top-full left-0 z-10 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-700">
-                      {VALID_MACHINES.map((machine) => (
-                        <button
-                          key={machine}
-                          type="button"
-                          onClick={() => handleMachineSelect(machine)}
-                          className={`w-full cursor-pointer px-4 py-3 text-left transition-colors duration-150 first:rounded-t-lg last:rounded-b-lg hover:bg-gray-50 dark:hover:bg-gray-600 ${
-                            formData.machine_name === machine
-                              ? 'bg-purple-50 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300'
-                              : 'text-gray-900 dark:text-gray-100'
-                          }`}
-                        >
-                          {machine}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                {errors.machine_name && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.machine_name}
-                  </p>
+                {isDropdownOpen && (
+                  <div className="absolute top-full left-0 z-10 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-700">
+                    {VALID_MACHINES.map((machine) => (
+                      <button
+                        key={machine}
+                        type="button"
+                        onClick={() => handleMachineSelect(machine)}
+                        className={`w-full cursor-pointer px-4 py-3 text-left transition-colors duration-150 first:rounded-t-lg last:rounded-b-lg hover:bg-gray-50 dark:hover:bg-gray-600 ${
+                          formData.machine_name === machine
+                            ? 'bg-purple-50 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300'
+                            : 'text-gray-900 dark:text-gray-100'
+                        }`}
+                      >
+                        {machine}
+                      </button>
+                    ))}
+                  </div>
                 )}
               </div>
+              {errors.machine_name && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.machine_name}
+                </p>
+              )}
             </div>
           </div>
 
