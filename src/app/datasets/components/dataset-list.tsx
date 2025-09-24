@@ -50,7 +50,7 @@ export function DatasetList({ datasets, loading }: DatasetListProps) {
 
 function DatasetListItem({ dataset }: { dataset: DisplayDataset }) {
   const { toast } = useToast();
-  const [copiedItem, setCopiedItem] = useState<'path' | 'uuid' | null>(null);
+  const [copiedItem, setCopiedItem] = useState<'globus_path' | 'system_path' | 'uuid' | null>(null);
 
   const resetCopiedItem = useMemo(
     () =>
@@ -60,7 +60,7 @@ function DatasetListItem({ dataset }: { dataset: DisplayDataset }) {
     []
   );
 
-  const copyToClipboard = async (text: string, type: 'path' | 'uuid') => {
+  const copyToClipboard = async (text: string, type: 'globus_path' | 'system_path' | 'uuid') => {
     try {
       await navigator.clipboard.writeText(text);
 
@@ -68,6 +68,12 @@ function DatasetListItem({ dataset }: { dataset: DisplayDataset }) {
       setCopiedItem(type);
 
       // Show toast notification
+      const typeLabels = {
+        globus_path: 'Globus path',
+        system_path: 'System path',
+        uuid: 'Collection UUID'
+      };
+
       toast({
         description: (
           <div className="flex items-center gap-2">
@@ -75,7 +81,7 @@ function DatasetListItem({ dataset }: { dataset: DisplayDataset }) {
               <Check className="h-3 w-3 text-white" />
             </div>
             <span className="font-medium">
-              {type === 'path' ? 'Dataset path' : 'Collection UUID'} copied!
+              {typeLabels[type]} copied!
             </span>
           </div>
         ),
@@ -163,22 +169,48 @@ function DatasetListItem({ dataset }: { dataset: DisplayDataset }) {
             <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
               <div className="min-w-0 flex-1">
                 <span className="block text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
-                  Dataset Path
+                  Globus Path
                 </span>
                 <span className="mt-1 block truncate font-mono text-sm text-gray-700 dark:text-gray-300">
-                  {dataset.dataset_path}
+                  {dataset.globus_path}
                 </span>
               </div>
               <button
-                onClick={() => copyToClipboard(dataset.dataset_path, 'path')}
+                onClick={() => copyToClipboard(dataset.globus_path, 'globus_path')}
                 className={`ml-3 cursor-pointer rounded-md p-2 transition-all duration-200 ${
-                  copiedItem === 'path'
+                  copiedItem === 'globus_path'
                     ? 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400'
                     : 'text-gray-400 hover:bg-gray-200 hover:text-gray-600 dark:hover:bg-gray-600 dark:hover:text-gray-300'
                 }`}
-                title={copiedItem === 'path' ? 'Copied!' : 'Copy path'}
+                title={copiedItem === 'globus_path' ? 'Copied!' : 'Copy Globus path'}
               >
-                {copiedItem === 'path' ? (
+                {copiedItem === 'globus_path' ? (
+                  <Check className="h-4 w-4 animate-pulse" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+
+            <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
+              <div className="min-w-0 flex-1">
+                <span className="block text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                  System Path
+                </span>
+                <span className="mt-1 block truncate font-mono text-sm text-gray-700 dark:text-gray-300">
+                  {dataset.system_path}
+                </span>
+              </div>
+              <button
+                onClick={() => copyToClipboard(dataset.system_path, 'system_path')}
+                className={`ml-3 cursor-pointer rounded-md p-2 transition-all duration-200 ${
+                  copiedItem === 'system_path'
+                    ? 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400'
+                    : 'text-gray-400 hover:bg-gray-200 hover:text-gray-600 dark:hover:bg-gray-600 dark:hover:text-gray-300'
+                }`}
+                title={copiedItem === 'system_path' ? 'Copied!' : 'Copy system path'}
+              >
+                {copiedItem === 'system_path' ? (
                   <Check className="h-4 w-4 animate-pulse" />
                 ) : (
                   <Copy className="h-4 w-4" />

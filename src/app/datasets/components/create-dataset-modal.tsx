@@ -17,7 +17,8 @@ interface CreateDatasetModalProps {
 
 interface DatasetFormData {
   collection_uuid: string;
-  dataset_path: string;
+  globus_path: string;
+  system_path: string;
   machine_name: string;
   description: string;
   size: string;
@@ -35,7 +36,8 @@ export function CreateDatasetModal({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<DatasetFormData>({
     collection_uuid: '',
-    dataset_path: '',
+    globus_path: '',
+    system_path: '',
     machine_name: '',
     description: '',
     size: '',
@@ -64,8 +66,11 @@ export function CreateDatasetModal({
     if (!formData.collection_uuid.trim()) {
       newErrors.collection_uuid = 'Collection UUID is required';
     }
-    if (!formData.dataset_path.trim()) {
-      newErrors.dataset_path = 'Dataset path is required';
+    if (!formData.globus_path.trim()) {
+      newErrors.globus_path = 'Globus path is required';
+    }
+    if (!formData.system_path.trim()) {
+      newErrors.system_path = 'System path is required';
     }
     if (!formData.machine_name.trim()) {
       newErrors.machine_name = 'Machine name is required';
@@ -93,7 +98,8 @@ export function CreateDatasetModal({
 
       const payload = {
         collection_uuid: formData.collection_uuid.trim(),
-        dataset_path: formData.dataset_path.trim(),
+        globus_path: formData.globus_path.trim(),
+        system_path: formData.system_path.trim(),
         machine_name: formData.machine_name,
         dataset_metadata: JSON.stringify(metadata)
       };
@@ -124,7 +130,8 @@ export function CreateDatasetModal({
 
       setFormData({
         collection_uuid: '',
-        dataset_path: '',
+        globus_path: '',
+        system_path: '',
         machine_name: '',
         description: '',
         size: '',
@@ -216,32 +223,57 @@ export function CreateDatasetModal({
               </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Dataset Path *
-                </label>
-                <Input
-                  value={formData.dataset_path}
-                  onChange={(e) =>
-                    handleInputChange('dataset_path', e.target.value)
-                  }
-                  placeholder="e.g., /home/user/data"
-                  className={errors.dataset_path ? 'border-red-500' : ''}
-                  disabled={isLoading}
-                />
-                {errors.dataset_path && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.dataset_path}
-                  </p>
-                )}
-              </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Globus Path *
+              </label>
+              <Input
+                value={formData.globus_path}
+                onChange={(e) =>
+                  handleInputChange('globus_path', e.target.value)
+                }
+                placeholder="e.g., /data/project1"
+                className={errors.globus_path ? 'border-red-500' : ''}
+                disabled={isLoading}
+              />
+              {errors.globus_path && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.globus_path}
+                </p>
+              )}
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Path within the Globus collection
+              </p>
+            </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Machine Name *
-                </label>
-                <div className="relative" ref={dropdownRef}>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                System Path *
+              </label>
+              <Input
+                value={formData.system_path}
+                onChange={(e) =>
+                  handleInputChange('system_path', e.target.value)
+                }
+                placeholder="e.g., /home/user/data"
+                className={errors.system_path ? 'border-red-500' : ''}
+                disabled={isLoading}
+              />
+              {errors.system_path && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.system_path}
+                </p>
+              )}
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                File system path on the compute machine
+              </p>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Machine Name *
+              </label>
+              <div className="relative" ref={dropdownRef}>
                   <button
                     type="button"
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}

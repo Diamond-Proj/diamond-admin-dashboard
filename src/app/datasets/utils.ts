@@ -12,7 +12,8 @@ export function transformDataset(dataset: Dataset): DisplayDataset {
   return {
     id: dataset.id,
     collection_uuid: dataset.collection_uuid,
-    dataset_path: dataset.dataset_path,
+    globus_path: dataset.globus_path,
+    system_path: dataset.system_path,
     public: dataset.public,
     machine_name: dataset.machine_name,
     description: metadata.description || 'No description available',

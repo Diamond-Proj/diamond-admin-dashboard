@@ -14,7 +14,8 @@ const mockDatasets: DisplayDataset[] = [
   {
     id: 1,
     collection_uuid: 'abc123-def456-ghi789-jkl012',
-    dataset_path: '/data/climate/temperature_2024',
+    globus_path: '/data/climate/temperature_2024',
+    system_path: '/home/researcher/climate/temp_data',
     public: true,
     machine_name: 'Delta@NCSA',
     description:
@@ -25,7 +26,8 @@ const mockDatasets: DisplayDataset[] = [
   {
     id: 2,
     collection_uuid: 'def456-ghi789-jkl012-mno345',
-    dataset_path: '/private/sales/analytics_q3_2024',
+    globus_path: '/private/sales/analytics_q3_2024',
+    system_path: '/scratch/business/sales_analytics',
     public: false,
     machine_name: 'Frontera@NCSA',
     description:
@@ -36,7 +38,8 @@ const mockDatasets: DisplayDataset[] = [
   {
     id: 3,
     collection_uuid: 'ghi789-jkl012-mno345-pqr678',
-    dataset_path: '/public/code/opensource_metrics',
+    globus_path: '/public/code/opensource_metrics',
+    system_path: '/shared/code_analysis/metrics',
     public: true,
     machine_name: 'Lonestar6@TACC',
     description:
@@ -47,7 +50,8 @@ const mockDatasets: DisplayDataset[] = [
   {
     id: 4,
     collection_uuid: 'jkl012-mno345-pqr678-stu901',
-    dataset_path: '/research/genomics/dna_sequences',
+    globus_path: '/research/genomics/dna_sequences',
+    system_path: '/work/biodata/genomics',
     public: false,
     machine_name: 'Anvil@RCAC',
     description:
@@ -58,7 +62,8 @@ const mockDatasets: DisplayDataset[] = [
   {
     id: 5,
     collection_uuid: 'mno345-pqr678-stu901-vwx234',
-    dataset_path: '/public/demographics/census_2024',
+    globus_path: '/public/demographics/census_2024',
+    system_path: '/data/census/2024_data',
     public: true,
     machine_name: 'System@TACC',
     description:
@@ -127,7 +132,8 @@ export default function DatasetsPage() {
 
       const matchesSearch =
         dataset.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        dataset.dataset_path.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        dataset.globus_path.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        dataset.system_path.toLowerCase().includes(searchTerm.toLowerCase()) ||
         dataset.machine_name.toLowerCase().includes(searchTerm.toLowerCase());
 
       return matchesFilter && matchesSearch;
