@@ -10,68 +10,68 @@ import { DisplayDataset, Dataset } from './datasets.types';
 import { transformDataset } from './utils';
 
 // Mock data for testing
-const mockDatasets: DisplayDataset[] = [
-  {
-    id: 1,
-    collection_uuid: 'abc123-def456-ghi789-jkl012',
-    globus_path: '/data/climate/temperature_2024',
-    system_path: '/home/researcher/climate/temp_data',
-    public: true,
-    machine_name: 'Delta@NCSA',
-    description:
-      'Comprehensive climate data including temperature, precipitation, and atmospheric readings from global weather stations across North America',
-    size: '2.4 GB',
-    format: 'CSV, JSON'
-  },
-  {
-    id: 2,
-    collection_uuid: 'def456-ghi789-jkl012-mno345',
-    globus_path: '/private/sales/analytics_q3_2024',
-    system_path: '/scratch/business/sales_analytics',
-    public: false,
-    machine_name: 'Frontera@NCSA',
-    description:
-      'Private dataset containing quarterly sales data, customer segments, and revenue analytics for business intelligence',
-    size: '890 MB',
-    format: 'Excel, CSV'
-  },
-  {
-    id: 3,
-    collection_uuid: 'ghi789-jkl012-mno345-pqr678',
-    globus_path: '/public/code/opensource_metrics',
-    system_path: '/shared/code_analysis/metrics',
-    public: true,
-    machine_name: 'Lonestar6@TACC',
-    description:
-      'Analysis of code quality metrics, commit patterns, and contributor statistics from open source projects',
-    size: '1.8 GB',
-    format: 'JSON, Parquet'
-  },
-  {
-    id: 4,
-    collection_uuid: 'jkl012-mno345-pqr678-stu901',
-    globus_path: '/research/genomics/dna_sequences',
-    system_path: '/work/biodata/genomics',
-    public: false,
-    machine_name: 'Anvil@RCAC',
-    description:
-      'Genomic sequencing data for research purposes including DNA sequences and protein structures',
-    size: '5.2 GB',
-    format: 'FASTA, HDF5'
-  },
-  {
-    id: 5,
-    collection_uuid: 'mno345-pqr678-stu901-vwx234',
-    globus_path: '/public/demographics/census_2024',
-    system_path: '/data/census/2024_data',
-    public: true,
-    machine_name: 'System@TACC',
-    description:
-      'Public demographic data including population growth, age distribution, and urbanization trends',
-    size: '450 MB',
-    format: 'CSV, XML'
-  }
-];
+// const mockDatasets: DisplayDataset[] = [
+//   {
+//     id: 1,
+//     collection_uuid: 'abc123-def456-ghi789-jkl012',
+//     globus_path: '/data/climate/temperature_2024',
+//     system_path: '/home/researcher/climate/temp_data',
+//     public: true,
+//     machine_name: 'Delta@NCSA',
+//     description:
+//       'Comprehensive climate data including temperature, precipitation, and atmospheric readings from global weather stations across North America',
+//     size: '2.4 GB',
+//     format: 'CSV, JSON'
+//   },
+//   {
+//     id: 2,
+//     collection_uuid: 'def456-ghi789-jkl012-mno345',
+//     globus_path: '/private/sales/analytics_q3_2024',
+//     system_path: '/scratch/business/sales_analytics',
+//     public: false,
+//     machine_name: 'Frontera@NCSA',
+//     description:
+//       'Private dataset containing quarterly sales data, customer segments, and revenue analytics for business intelligence',
+//     size: '890 MB',
+//     format: 'Excel, CSV'
+//   },
+//   {
+//     id: 3,
+//     collection_uuid: 'ghi789-jkl012-mno345-pqr678',
+//     globus_path: '/public/code/opensource_metrics',
+//     system_path: '/shared/code_analysis/metrics',
+//     public: true,
+//     machine_name: 'Lonestar6@TACC',
+//     description:
+//       'Analysis of code quality metrics, commit patterns, and contributor statistics from open source projects',
+//     size: '1.8 GB',
+//     format: 'JSON, Parquet'
+//   },
+//   {
+//     id: 4,
+//     collection_uuid: 'jkl012-mno345-pqr678-stu901',
+//     globus_path: '/research/genomics/dna_sequences',
+//     system_path: '/work/biodata/genomics',
+//     public: false,
+//     machine_name: 'Anvil@RCAC',
+//     description:
+//       'Genomic sequencing data for research purposes including DNA sequences and protein structures',
+//     size: '5.2 GB',
+//     format: 'FASTA, HDF5'
+//   },
+//   {
+//     id: 5,
+//     collection_uuid: 'mno345-pqr678-stu901-vwx234',
+//     globus_path: '/public/demographics/census_2024',
+//     system_path: '/data/census/2024_data',
+//     public: true,
+//     machine_name: 'System@TACC',
+//     description:
+//       'Public demographic data including population growth, age distribution, and urbanization trends',
+//     size: '450 MB',
+//     format: 'CSV, XML'
+//   }
+// ];
 
 export default function DatasetsPage() {
   const [datasets, setDatasets] = useState<DisplayDataset[]>([]);
@@ -85,27 +85,28 @@ export default function DatasetsPage() {
       setLoading(true);
 
       // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setDatasets(mockDatasets);
+      // await new Promise((resolve) => setTimeout(resolve, 1000));
+      // setDatasets(mockDatasets);
 
-      // const response = await fetch('/api/datasets', {
-      //   method: 'GET',
-      //   credentials: 'include',
-      //   headers: {
-      //     'Content-Type': 'application/json'
-      //   }
-      // });
+      const response = await fetch('/api/datasets', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
 
-      // if (!response.ok) {
-      //   throw new Error('Failed to fetch datasets');
-      // }
+      if (!response.ok) {
+        console.error('Failed to fetch datasets:', await response.text());
+        throw new Error('Failed to fetch datasets');
+      }
 
-      // const data = await response.json();
-      // const transformedDatasets = data.datasets.map((dataset: Dataset) =>
-      //   transformDataset(dataset)
-      // );
+      const data = await response.json();
+      const transformedDatasets = data.datasets.map((dataset: Dataset) =>
+        transformDataset(dataset)
+      );
 
-      // setDatasets(transformedDatasets);
+      setDatasets(transformedDatasets);
     } catch (error) {
       console.error('Error fetching datasets:', error);
       setDatasets([]);

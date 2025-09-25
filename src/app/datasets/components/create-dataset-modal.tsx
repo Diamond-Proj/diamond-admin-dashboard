@@ -170,7 +170,7 @@ export function CreateDatasetModal({
 
   const modalContent = (
     <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black/10 p-4 backdrop-blur-sm">
-      <div className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white shadow-xl dark:bg-gray-800">
+      <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-lg bg-white shadow-xl dark:bg-gray-800">
         <div className="flex items-center justify-between border-b border-gray-200 p-6 dark:border-gray-700">
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-purple-100 p-2 dark:bg-purple-900">
@@ -199,131 +199,132 @@ export function CreateDatasetModal({
             <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
               Required Information
             </h3>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Collection UUID *
-              </label>
-              <Input
-                value={formData.collection_uuid}
-                onChange={(e) =>
-                  handleInputChange('collection_uuid', e.target.value)
-                }
-                placeholder="e.g., abc123-def456-ghi789"
-                className={errors.collection_uuid ? 'border-red-500' : ''}
-                disabled={isLoading}
-              />
-              {errors.collection_uuid && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.collection_uuid}
-                </p>
-              )}
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                The Globus collection UUID where your data is stored
-              </p>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Globus Path *
-              </label>
-              <Input
-                value={formData.globus_path}
-                onChange={(e) =>
-                  handleInputChange('globus_path', e.target.value)
-                }
-                placeholder="e.g., /data/project1"
-                className={errors.globus_path ? 'border-red-500' : ''}
-                disabled={isLoading}
-              />
-              {errors.globus_path && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.globus_path}
-                </p>
-              )}
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Path within the Globus collection
-              </p>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                System Path *
-              </label>
-              <Input
-                value={formData.system_path}
-                onChange={(e) =>
-                  handleInputChange('system_path', e.target.value)
-                }
-                placeholder="e.g., /home/user/data"
-                className={errors.system_path ? 'border-red-500' : ''}
-                disabled={isLoading}
-              />
-              {errors.system_path && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.system_path}
-                </p>
-              )}
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                File system path on the compute machine
-              </p>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Machine Name *
-              </label>
-              <div className="relative" ref={dropdownRef}>
-                <button
-                  type="button"
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div>
+                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Collection UUID *
+                </label>
+                <Input
+                  value={formData.collection_uuid}
+                  onChange={(e) =>
+                    handleInputChange('collection_uuid', e.target.value)
+                  }
+                  placeholder="e.g., abc123-def456-ghi789"
+                  className={errors.collection_uuid ? 'border-red-500' : ''}
                   disabled={isLoading}
-                  className={`flex w-full cursor-pointer items-center justify-between rounded-lg border bg-white px-3 py-2 text-gray-900 transition-all duration-200 hover:border-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 focus:outline-none dark:bg-gray-700 dark:text-gray-100 dark:hover:border-gray-500 dark:focus:border-purple-400 ${
-                    errors.machine_name
-                      ? 'border-red-500'
-                      : 'border-gray-300 dark:border-gray-600'
-                  }`}
-                >
-                  <span
-                    className={
-                      formData.machine_name
-                        ? ''
-                        : 'text-gray-500 dark:text-gray-400'
-                    }
-                  >
-                    {formData.machine_name || 'Select a machine'}
-                  </span>
-                  <ChevronDown
-                    className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
-                      isDropdownOpen ? 'rotate-180' : ''
-                    }`}
-                  />
-                </button>
+                />
+                {errors.collection_uuid && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.collection_uuid}
+                  </p>
+                )}
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  The Globus collection UUID where your data is stored
+                </p>
+              </div>
 
-                {isDropdownOpen && (
-                  <div className="absolute top-full left-0 z-10 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-700">
-                    {VALID_MACHINES.map((machine) => (
-                      <button
-                        key={machine}
-                        type="button"
-                        onClick={() => handleMachineSelect(machine)}
-                        className={`w-full cursor-pointer px-4 py-3 text-left transition-colors duration-150 first:rounded-t-lg last:rounded-b-lg hover:bg-gray-50 dark:hover:bg-gray-600 ${
-                          formData.machine_name === machine
-                            ? 'bg-purple-50 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300'
-                            : 'text-gray-900 dark:text-gray-100'
-                        }`}
-                      >
-                        {machine}
-                      </button>
-                    ))}
-                  </div>
+              <div>
+                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Globus Path *
+                </label>
+                <Input
+                  value={formData.globus_path}
+                  onChange={(e) =>
+                    handleInputChange('globus_path', e.target.value)
+                  }
+                  placeholder="e.g., /data/project1"
+                  className={errors.globus_path ? 'border-red-500' : ''}
+                  disabled={isLoading}
+                />
+                {errors.globus_path && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.globus_path}
+                  </p>
+                )}
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  Path within the Globus collection
+                </p>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  System Path *
+                </label>
+                <Input
+                  value={formData.system_path}
+                  onChange={(e) =>
+                    handleInputChange('system_path', e.target.value)
+                  }
+                  placeholder="e.g., /home/user/data"
+                  className={errors.system_path ? 'border-red-500' : ''}
+                  disabled={isLoading}
+                />
+                {errors.system_path && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.system_path}
+                  </p>
+                )}
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  File system path on the compute machine
+                </p>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Machine Name *
+                </label>
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    disabled={isLoading}
+                    className={`flex w-full cursor-pointer items-center justify-between rounded-lg border bg-white px-3 py-2 text-gray-900 transition-all duration-200 hover:border-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 focus:outline-none dark:bg-gray-700 dark:text-gray-100 dark:hover:border-gray-500 dark:focus:border-purple-400 ${
+                      errors.machine_name
+                        ? 'border-red-500'
+                        : 'border-gray-300 dark:border-gray-600'
+                    }`}
+                  >
+                    <span
+                      className={
+                        formData.machine_name
+                          ? ''
+                          : 'text-gray-500 dark:text-gray-400'
+                      }
+                    >
+                      {formData.machine_name || 'Select a machine'}
+                    </span>
+                    <ChevronDown
+                      className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
+                        isDropdownOpen ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </button>
+
+                  {isDropdownOpen && (
+                    <div className="absolute top-full left-0 z-10 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-700">
+                      {VALID_MACHINES.map((machine) => (
+                        <button
+                          key={machine}
+                          type="button"
+                          onClick={() => handleMachineSelect(machine)}
+                          className={`w-full cursor-pointer px-4 py-3 text-left transition-colors duration-150 first:rounded-t-lg last:rounded-b-lg hover:bg-gray-50 dark:hover:bg-gray-600 ${
+                            formData.machine_name === machine
+                              ? 'bg-purple-50 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300'
+                              : 'text-gray-900 dark:text-gray-100'
+                          }`}
+                        >
+                          {machine}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {errors.machine_name && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.machine_name}
+                  </p>
                 )}
               </div>
-              {errors.machine_name && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.machine_name}
-                </p>
-              )}
             </div>
           </div>
 
