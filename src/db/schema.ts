@@ -87,7 +87,8 @@ export const dataset = pgTable(
       cache: 1
     }),
     collectionUuid: varchar('collection_uuid').notNull(),
-    datasetPath: varchar('dataset_path').notNull(),
+    globusPath: varchar('globus_path').notNull(),
+    systemPath: varchar('system_path').notNull(),
     public: boolean().default(false).notNull(),
     machineName: varchar('machine_name').notNull(),
     datasetMetadata: text('dataset_metadata'),
