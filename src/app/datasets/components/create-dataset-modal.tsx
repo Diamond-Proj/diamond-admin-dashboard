@@ -7,22 +7,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
-import { VALID_MACHINES } from '../utils';
+import { VALID_MACHINES } from '@/app/datasets/utils';
+import {
+  CreateDatasetRequest,
+  DatasetFormData,
+  CreateDatasetApiResponse
+} from '@/app/datasets/datasets.types';
 
 interface CreateDatasetModalProps {
   isOpen: boolean;
   onClose: () => void;
   onDatasetCreated: () => void;
-}
-
-interface DatasetFormData {
-  collection_uuid: string;
-  globus_path: string;
-  system_path: string;
-  machine_name: string;
-  description: string;
-  size: string;
-  format: string;
 }
 
 export function CreateDatasetModal({
@@ -39,6 +34,7 @@ export function CreateDatasetModal({
     globus_path: '',
     system_path: '',
     machine_name: '',
+    dataset_name: '',
     description: '',
     size: '',
     format: ''
@@ -96,11 +92,12 @@ export function CreateDatasetModal({
         format: formData.format.trim() || 'Unknown'
       };
 
-      const payload = {
+      const payload: CreateDatasetRequest = {
         collection_uuid: formData.collection_uuid.trim(),
         globus_path: formData.globus_path.trim(),
         system_path: formData.system_path.trim(),
         machine_name: formData.machine_name,
+        dataset_name: formData.dataset_name.trim() || undefined,
         dataset_metadata: JSON.stringify(metadata)
       };
 
@@ -118,7 +115,7 @@ export function CreateDatasetModal({
         throw new Error(errorData.error || 'Failed to create dataset');
       }
 
-      const result = await response.json();
+      const result: CreateDatasetApiResponse = await response.json();
 
       onDatasetCreated();
 
@@ -133,6 +130,7 @@ export function CreateDatasetModal({
         globus_path: '',
         system_path: '',
         machine_name: '',
+        dataset_name: '',
         description: '',
         size: '',
         format: ''
@@ -199,6 +197,7 @@ export function CreateDatasetModal({
             <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
               Required Information
             </h3>
+
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -330,8 +329,25 @@ export function CreateDatasetModal({
 
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-              Optional Metadata
+              Optional Information
             </h3>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Dataset Name
+              </label>
+              <Input
+                value={formData.dataset_name}
+                onChange={(e) =>
+                  handleInputChange('dataset_name', e.target.value)
+                }
+                placeholder="e.g., My Research Dataset"
+                disabled={isLoading}
+              />
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                A human-readable name for your dataset
+              </p>
+            </div>
 
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">

@@ -6,7 +6,7 @@ import { CreateDatasetModal } from './components/create-dataset-modal';
 import { DatasetStats } from './components/dataset-stats';
 import { DatasetControls } from './components/dataset-controls';
 import { DatasetList } from './components/dataset-list';
-import { DisplayDataset, Dataset } from './datasets.types';
+import { DisplayDataset, Dataset, DatasetsApiResponse } from './datasets.types';
 import { transformDataset } from './utils';
 
 // Mock data for testing
@@ -101,7 +101,7 @@ export default function DatasetsPage() {
         throw new Error('Failed to fetch datasets');
       }
 
-      const data = await response.json();
+      const data: DatasetsApiResponse = await response.json();
       const transformedDatasets = data.datasets.map((dataset: Dataset) =>
         transformDataset(dataset)
       );
