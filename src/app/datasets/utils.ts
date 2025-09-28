@@ -16,6 +16,7 @@ export function transformDataset(dataset: Dataset): DisplayDataset {
     system_path: dataset.system_path,
     public: dataset.public,
     machine_name: dataset.machine_name,
+    dataset_name: dataset.dataset_name || `Dataset ${dataset.id}`,
     description: metadata.description || 'No description available',
     size: metadata.size || 'Unknown',
     format: metadata.format || 'Unknown'
@@ -29,4 +30,4 @@ export const VALID_MACHINES = [
   'Anvil@RCAC',
   'System@TACC',
   'System@NCSA'
-];
+] as const;
