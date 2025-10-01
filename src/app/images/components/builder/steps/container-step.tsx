@@ -34,7 +34,7 @@ export function ContainerStep({ formData, onUpdate }: ContainerStepProps) {
       <div className="space-y-4">
         <div className="mb-3 flex items-center gap-2">
           <MapPin className="text-primary h-5 w-5" />
-          <h4 className="text-lg font-semibold">Build Location</h4>
+          <h4 className="text-lg font-semibold">Build Location (Optional)</h4>
         </div>
 
         <Input

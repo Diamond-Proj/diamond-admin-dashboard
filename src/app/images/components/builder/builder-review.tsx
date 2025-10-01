@@ -24,7 +24,7 @@ export function BuilderReview({ formData }: BuilderReviewProps) {
       icon: <Container className="text-primary h-5 w-5" />,
       items: [
         { label: 'Container Name', value: formData.containerName },
-        { label: 'Build Location', value: formData.location },
+        { label: 'Build Location', value: formData.location || 'Default' },
         { label: 'Base Image', value: formData.baseImage }
       ]
     },

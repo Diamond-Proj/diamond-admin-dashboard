@@ -79,9 +79,7 @@ export function ImageBuilderModal({
       case 0: // Endpoint step
         return formData.endpoint && formData.partition && formData.account;
       case 1: // Container step
-        return (
-          formData.containerName && formData.location && formData.baseImage
-        );
+        return formData.containerName && formData.baseImage;
       case 2: // Build step
         return true;
       case 3: // Review step

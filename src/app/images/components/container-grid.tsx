@@ -114,22 +114,6 @@ export function ContainerGrid({
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case 'completed':
-      case 'active':
-        return 'border-l-green-500 bg-green-50/50 dark:bg-green-950/30 hover:bg-green-50/70 dark:hover:bg-green-950/40';
-      case 'building':
-      case 'pending':
-        return 'border-l-blue-500 bg-blue-50/50 dark:bg-blue-950/30 hover:bg-blue-50/70 dark:hover:bg-blue-950/40';
-      case 'failed':
-      case 'error':
-        return 'border-l-red-500 bg-red-50/50 dark:bg-red-950/30 hover:bg-red-50/70 dark:hover:bg-red-950/40';
-      default:
-        return 'border-l-gray-500 bg-gray-50/50 dark:bg-gray-950/30 hover:bg-gray-50/70 dark:hover:bg-gray-950/40';
-    }
-  };
-
   const getStatusBadgeColor = (status: string) => {
     switch (status?.toLowerCase()) {
       case 'completed':
@@ -148,21 +132,23 @@ export function ContainerGrid({
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {[...Array(6)].map((_, i) => (
-          <div key={i} className="animate-pulse">
-            <div className="bg-card dark:bg-card space-y-4 rounded-lg border p-6 dark:border-gray-800">
-              <div className="flex items-center gap-3">
-                <div className="bg-muted dark:bg-muted h-12 w-12 rounded-lg"></div>
-                <div className="flex-1 space-y-2">
-                  <div className="bg-muted dark:bg-muted h-4 w-3/4 rounded"></div>
-                  <div className="bg-muted dark:bg-muted h-3 w-1/2 rounded"></div>
+      <div className="space-y-4">
+        {[...Array(3)].map((_, i) => (
+          <div
+            key={i}
+            className="animate-pulse rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800"
+          >
+            <div className="flex items-start gap-4">
+              <div className="bg-muted dark:bg-muted h-12 w-12 rounded-lg"></div>
+              <div className="flex-1 space-y-3">
+                <div className="bg-muted dark:bg-muted h-4 w-3/4 rounded"></div>
+                <div className="bg-muted dark:bg-muted h-3 w-1/2 rounded"></div>
+                <div className="space-y-2">
+                  <div className="bg-muted dark:bg-muted h-3 w-full rounded"></div>
+                  <div className="bg-muted dark:bg-muted h-3 w-2/3 rounded"></div>
                 </div>
               </div>
-              <div className="space-y-2">
-                <div className="bg-muted dark:bg-muted h-3 w-full rounded"></div>
-                <div className="bg-muted dark:bg-muted ml-auto h-8 w-20 rounded"></div>
-              </div>
+              <div className="bg-muted dark:bg-muted h-8 w-16 rounded"></div>
             </div>
           </div>
         ))}
@@ -185,7 +171,7 @@ export function ContainerGrid({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div className="flex flex-col gap-4">
       {Object.entries(containersData).map(([containerName, data]) => (
         <ContainerItem
           key={containerName}
@@ -193,7 +179,6 @@ export function ContainerGrid({
           data={data}
           deletingContainers={deletingContainers}
           deleteContainer={deleteContainer}
-          getStatusColor={getStatusColor}
           getStatusIcon={getStatusIcon}
           getStatusBadgeColor={getStatusBadgeColor}
         />

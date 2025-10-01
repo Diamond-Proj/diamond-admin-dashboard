@@ -1,14 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  Container,
-  MapPin,
-  Trash2,
-  AlertTriangle,
-  Package,
-  Hash
-} from 'lucide-react';
+import { Trash2, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ContainerData } from '@/app/images/types';
 
@@ -17,7 +10,7 @@ export default function ContainerItem({
   data,
   deletingContainers,
   deleteContainer,
-  getStatusColor,
+
   getStatusIcon,
   getStatusBadgeColor
 }: {
@@ -25,7 +18,6 @@ export default function ContainerItem({
   data: ContainerData;
   deletingContainers: Set<string>;
   deleteContainer: (name: string, taskId: string) => void;
-  getStatusColor: (status: string) => string;
   getStatusIcon: (status: string) => React.ReactNode;
   getStatusBadgeColor: (status: string) => string;
 }) {
@@ -46,86 +38,61 @@ export default function ContainerItem({
 
   return (
     <>
-      <div
-        className={`bg-card dark:bg-card rounded-xl border border-l-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:border-gray-800 dark:hover:shadow-xl ${getStatusColor(data.status)}`}
-      >
-        <div className="p-6">
-          {/* Header */}
-          <div className="mb-4 flex items-start gap-4">
-            <div className="bg-primary/10 dark:bg-primary/20 flex-shrink-0 rounded-lg p-3">
-              <Container className="text-primary h-6 w-6" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h3
-                className="mb-2 truncate text-lg font-semibold"
-                title={containerName}
-              >
+      <div className="group rounded-xl border border-gray-200/60 bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-gray-300/80 hover:shadow-lg dark:border-gray-700/60 dark:bg-gray-800 dark:hover:border-gray-600/80">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            {/* Header */}
+            <div className="mb-3 flex items-center gap-3">
+              <h3 className="text-xl font-semibold text-gray-900 transition-colors duration-200 group-hover:text-red-600 dark:text-gray-100 dark:group-hover:text-red-400">
                 {containerName}
               </h3>
               <div className="flex items-center gap-2">
-                {getStatusIcon(data.status)}
                 <span
-                  className={`rounded-full px-2 py-1 text-xs font-medium capitalize ${getStatusBadgeColor(data.status)}`}
+                  className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${getStatusBadgeColor(data.status)}`}
                 >
+                  {getStatusIcon(data.status)}
                   {data.status || 'Unknown'}
                 </span>
               </div>
             </div>
-          </div>
 
-          {/* Container Details */}
-          <div className="mb-6 space-y-3">
-            {/* Base Image */}
-            {data.base_image && (
-              <div className="text-muted-foreground flex items-center gap-2 rounded-md text-sm">
-                <Package className="h-4 w-4 flex-shrink-0" />
-                <span className="text-muted-foreground text-sm font-bold">
-                  Base Image:
-                </span>
-                <span
-                  className="truncate font-mono text-sm"
-                  title={data.base_image}
-                >
-                  {data.base_image}
-                </span>
-              </div>
-            )}
-
-            {/* Task ID */}
-            {data.container_task_id && (
-              <div className="text-muted-foreground flex items-center gap-2 rounded-md text-sm">
-                <Hash className="h-4 w-4 flex-shrink-0" />
-                <span className="text-muted-foreground text-sm font-bold">
-                  Task ID:
-                </span>
-                <span
-                  className="truncate font-mono text-sm"
-                  title={data.container_task_id}
-                >
-                  {data.container_task_id}
-                </span>
-              </div>
-            )}
-
-            {/* Location */}
-            {data.location && (
-              <div className="text-muted-foreground flex items-center gap-2 rounded-md text-sm">
-                <MapPin className="h-4 w-4 flex-shrink-0" />
-                <span className="text-muted-foreground text-sm font-bold">
-                  Location:
-                </span>
-                <span
-                  className="truncate font-mono text-sm"
-                  title={data.location}
-                >
-                  {data.location}
-                </span>
-              </div>
-            )}
+            {/* Container Details Grid */}
+            <div className="mb-4 grid grid-cols-1 gap-4 text-sm md:grid-cols-3">
+              {data.base_image && (
+                <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
+                  <span className="block text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                    Base Image
+                  </span>
+                  <span className="mt-1 block font-mono text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    {data.base_image}
+                  </span>
+                </div>
+              )}
+              {data.container_task_id && (
+                <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
+                  <span className="block text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                    Task ID
+                  </span>
+                  <span className="mt-1 block font-mono text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    {data.container_task_id}
+                  </span>
+                </div>
+              )}
+              {data.location && (
+                <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
+                  <span className="block text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                    Location
+                  </span>
+                  <span className="mt-1 block font-mono text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    {data.location}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end">
+          <div className="ml-6">
             <Button
               variant="destructive"
               size="sm"

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Server, Cpu, User, Calendar } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { BuilderFormData, Endpoint } from '@/app/images/types';
-import { VirtualSelect } from './virtual-select';
+import { VirtualSelect } from '@/components/ui/virtual-select';
 
 interface EndpointStepProps {
   formData: Partial<BuilderFormData>;
@@ -15,12 +15,14 @@ export function EndpointStep({ formData, onUpdate }: EndpointStepProps) {
   const [endpoints, setEndpoints] = useState<Endpoint[]>([]);
   const [partitions, setPartitions] = useState<string[]>([]);
   const [accounts, setAccounts] = useState<string[]>([]);
+  const [isLoadingEndpoints, setIsLoadingEndpoints] = useState(false);
   const [isLoadingPartitions, setIsLoadingPartitions] = useState(false);
   const [isLoadingAccounts, setIsLoadingAccounts] = useState(false);
 
   // Fetch all available endpoints on component mount
   useEffect(() => {
     const fetchEndpoints = async () => {
+      setIsLoadingEndpoints(true);
       try {
         const response = await fetch('/api/list_all_endpoints', {
           method: 'GET',
@@ -36,6 +38,8 @@ export function EndpointStep({ formData, onUpdate }: EndpointStepProps) {
       } catch (error) {
         console.error('Error fetching endpoints:', error);
         setEndpoints([]);
+      } finally {
+        setIsLoadingEndpoints(false);
       }
     };
     fetchEndpoints();
@@ -104,6 +108,32 @@ export function EndpointStep({ formData, onUpdate }: EndpointStepProps) {
 
   const isEndpointSelected = !!formData.endpoint;
 
+  // Filter only online endpoints and create options for VirtualSelect
+  const onlineEndpoints = endpoints.filter(
+    (endpoint) => endpoint.endpoint_status === 'online'
+  );
+  const endpointOptions = onlineEndpoints.map(
+    (endpoint) => `${endpoint.endpoint_name} (${endpoint.endpoint_status})`
+  );
+
+  // Get selected endpoint name for display
+  const selectedEndpoint = endpoints.find(
+    (ep) => ep.endpoint_uuid === formData.endpoint
+  );
+  const selectedEndpointDisplay = selectedEndpoint
+    ? `${selectedEndpoint.endpoint_name} (${selectedEndpoint.endpoint_status})`
+    : undefined;
+
+  const handleEndpointSelect = (displayName: string) => {
+    // Find the endpoint UUID from the display name
+    const endpoint = onlineEndpoints.find(
+      (ep) => `${ep.endpoint_name} (${ep.endpoint_status})` === displayName
+    );
+    if (endpoint) {
+      onUpdate({ endpoint: endpoint.endpoint_uuid });
+    }
+  };
+
   return (
     <div className="space-y-8">
       {/* Grid Layout for large screens */}
@@ -126,65 +156,23 @@ export function EndpointStep({ formData, onUpdate }: EndpointStepProps) {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-              {endpoints.map((endpoint) => {
-                const isOnline = endpoint.endpoint_status === 'online';
-                const isSelected = formData.endpoint === endpoint.endpoint_uuid;
+            <div className="space-y-4">
+              <VirtualSelect
+                options={endpointOptions}
+                selected={selectedEndpointDisplay}
+                onSelect={handleEndpointSelect}
+                placeholder="Choose an HPC endpoint"
+                loading={isLoadingEndpoints}
+              />
 
-                return (
-                  <div
-                    key={endpoint.endpoint_uuid}
-                    onClick={
-                      isOnline
-                        ? () => onUpdate({ endpoint: endpoint.endpoint_uuid })
-                        : undefined
-                    }
-                    className={`group rounded-xl border-2 p-3 transition-all ${
-                      isOnline
-                        ? `cursor-pointer hover:shadow-lg ${
-                            isSelected
-                              ? 'border-blue-500 bg-blue-50 shadow-md'
-                              : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
-                          }`
-                        : 'cursor-not-allowed border-gray-200 bg-gray-50 opacity-60'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="relative flex-shrink-0">
-                        <div
-                          className={`h-3 w-3 rounded-full ${
-                            isOnline
-                              ? 'bg-green-500 shadow-green-200'
-                              : 'bg-gray-400'
-                          }`}
-                        />
-                        {isOnline && (
-                          <div className="absolute inset-0 h-3 w-3 animate-pulse rounded-full bg-green-400 opacity-75" />
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h5
-                          className={`truncate text-sm font-medium ${
-                            isOnline ? 'text-gray-900' : 'text-gray-500'
-                          }`}
-                        >
-                          {endpoint.endpoint_name}
-                          {!isOnline && ' (offline)'}
-                        </h5>
-                        <div className="mt-1 flex items-center gap-2">
-                          <span
-                            className={`text-xs capitalize ${
-                              isOnline ? 'text-green-600' : 'text-gray-400'
-                            }`}
-                          >
-                            {endpoint.endpoint_status}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              {!isLoadingEndpoints &&
+                endpoints.length > 0 &&
+                onlineEndpoints.length === 0 && (
+                  <p className="text-sm text-amber-600">
+                    No online endpoints available. Please contact your
+                    administrator.
+                  </p>
+                )}
             </div>
           </div>
 

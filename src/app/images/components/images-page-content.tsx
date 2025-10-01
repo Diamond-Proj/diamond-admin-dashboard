@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { ContainerGrid } from './container-grid';
 import { ImageBuilderModal } from './image-builder-modal';
@@ -23,8 +22,8 @@ export function ImagesPageContent({ isAuthenticated }: ImagesPageContentProps) {
     <div className="space-y-6">
       {/* Action Bar */}
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-        <div className="mb-8 flex flex-col gap-2">
-          <h1 className="text-foreground text-3xl font-bold md:text-4xl">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-foreground text-3xl font-bold">
             Container Images
           </h1>
           <p className="text-muted-foreground text-lg">
@@ -32,14 +31,13 @@ export function ImagesPageContent({ isAuthenticated }: ImagesPageContentProps) {
           </p>
         </div>
 
-        <Button
+        <button
           onClick={() => setIsBuilderOpen(true)}
-          className="flex cursor-pointer items-center gap-2"
-          size="lg"
+          className="group flex cursor-pointer items-center gap-2 rounded-lg bg-gradient-to-r from-red-600 to-red-700 px-6 py-3 font-medium text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:from-red-700 hover:to-red-800 hover:shadow-md focus:ring-2 focus:ring-red-500/50 focus:outline-none"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
           Build New Image
-        </Button>
+        </button>
       </div>
 
       {/* Container Grid */}

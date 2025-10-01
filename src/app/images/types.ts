@@ -11,7 +11,7 @@ export interface BuilderFormData {
   account: string;
   reservation?: string;
   containerName: string;
-  location: string;
+  location?: string;
   baseImage: string;
   dependencies?: string;
   environment?: string;
@@ -45,7 +45,7 @@ export interface ImageBuilderPayload {
   endpoint: string;
   partition: string;
   name: string; // Container name
-  location: string;
+  location?: string;
   base_image: string;
   dependencies: string;
   environment: string;
