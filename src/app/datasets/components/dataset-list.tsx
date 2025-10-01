@@ -50,7 +50,9 @@ export function DatasetList({ datasets, loading }: DatasetListProps) {
 
 function DatasetListItem({ dataset }: { dataset: DisplayDataset }) {
   const { toast } = useToast();
-  const [copiedItem, setCopiedItem] = useState<'globus_path' | 'system_path' | 'uuid' | null>(null);
+  const [copiedItem, setCopiedItem] = useState<
+    'globus_path' | 'system_path' | 'uuid' | null
+  >(null);
 
   const resetCopiedItem = useMemo(
     () =>
@@ -60,7 +62,10 @@ function DatasetListItem({ dataset }: { dataset: DisplayDataset }) {
     []
   );
 
-  const copyToClipboard = async (text: string, type: 'globus_path' | 'system_path' | 'uuid') => {
+  const copyToClipboard = async (
+    text: string,
+    type: 'globus_path' | 'system_path' | 'uuid'
+  ) => {
     try {
       await navigator.clipboard.writeText(text);
 
@@ -80,9 +85,7 @@ function DatasetListItem({ dataset }: { dataset: DisplayDataset }) {
             <div className="flex h-5 w-5 items-center justify-center rounded-full bg-green-500">
               <Check className="h-3 w-3 text-white" />
             </div>
-            <span className="font-medium">
-              {typeLabels[type]} copied!
-            </span>
+            <span className="font-medium">{typeLabels[type]} copied!</span>
           </div>
         ),
         duration: 2000,
@@ -114,7 +117,7 @@ function DatasetListItem({ dataset }: { dataset: DisplayDataset }) {
         <div className="flex-1">
           <div className="mb-3 flex items-center gap-3">
             <h3 className="text-xl font-semibold text-gray-900 transition-colors duration-200 group-hover:text-purple-600 dark:text-gray-100 dark:group-hover:text-purple-400">
-              Dataset {dataset.id}
+              {dataset.dataset_name}
             </h3>
             <div className="flex items-center gap-2">
               {dataset.public ? (
@@ -176,13 +179,17 @@ function DatasetListItem({ dataset }: { dataset: DisplayDataset }) {
                 </span>
               </div>
               <button
-                onClick={() => copyToClipboard(dataset.globus_path, 'globus_path')}
+                onClick={() =>
+                  copyToClipboard(dataset.globus_path, 'globus_path')
+                }
                 className={`ml-3 cursor-pointer rounded-md p-2 transition-all duration-200 ${
                   copiedItem === 'globus_path'
                     ? 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400'
                     : 'text-gray-400 hover:bg-gray-200 hover:text-gray-600 dark:hover:bg-gray-600 dark:hover:text-gray-300'
                 }`}
-                title={copiedItem === 'globus_path' ? 'Copied!' : 'Copy Globus path'}
+                title={
+                  copiedItem === 'globus_path' ? 'Copied!' : 'Copy Globus path'
+                }
               >
                 {copiedItem === 'globus_path' ? (
                   <Check className="h-4 w-4 animate-pulse" />
@@ -202,13 +209,17 @@ function DatasetListItem({ dataset }: { dataset: DisplayDataset }) {
                 </span>
               </div>
               <button
-                onClick={() => copyToClipboard(dataset.system_path, 'system_path')}
+                onClick={() =>
+                  copyToClipboard(dataset.system_path, 'system_path')
+                }
                 className={`ml-3 cursor-pointer rounded-md p-2 transition-all duration-200 ${
                   copiedItem === 'system_path'
                     ? 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400'
                     : 'text-gray-400 hover:bg-gray-200 hover:text-gray-600 dark:hover:bg-gray-600 dark:hover:text-gray-300'
                 }`}
-                title={copiedItem === 'system_path' ? 'Copied!' : 'Copy system path'}
+                title={
+                  copiedItem === 'system_path' ? 'Copied!' : 'Copy system path'
+                }
               >
                 {copiedItem === 'system_path' ? (
                   <Check className="h-4 w-4 animate-pulse" />
