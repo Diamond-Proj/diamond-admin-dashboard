@@ -67,7 +67,7 @@ export function DashboardStatsCards({
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
       {/* Tasks Card */}
       <Link
-        href="/task-manager"
+        href="/tasks"
         className="group relative overflow-hidden rounded-xl border border-gray-200/60 bg-white p-6 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-blue-300/80 hover:shadow-xl hover:shadow-blue-500/10 dark:border-gray-700/60 dark:bg-gray-800 dark:hover:border-blue-600/80 dark:hover:shadow-blue-500/20"
       >
         {/* Gradient overlay on hover */}

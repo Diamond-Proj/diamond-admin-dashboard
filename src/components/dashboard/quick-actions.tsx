@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { Container, Database, ChevronRight } from 'lucide-react';
-import { EditIcon, TaskIcon } from '@/components/icons';
+import { Container, Database, ChevronRight, Settings } from 'lucide-react';
+import { TaskIcon } from '@/components/icons';
 
 export function QuickActions() {
   return (
@@ -53,30 +53,9 @@ export function QuickActions() {
           </div>
         </Link>
 
-        {/* Task Composer - HPC job creation and submission */}
+        {/* Tasks - Job status monitoring and management */}
         <Link
-          href="/job-composer"
-          className="group flex w-full items-center rounded-xl bg-gradient-to-r from-purple-50 to-purple-50/70 p-4 text-left transition-all duration-300 hover:-translate-x-1 hover:from-purple-100 hover:to-purple-100/80 hover:shadow-md dark:from-purple-900/20 dark:to-purple-900/10 dark:hover:from-purple-900/40 dark:hover:to-purple-900/30"
-        >
-          <div className="mr-4 flex h-10 w-10 items-center justify-center rounded-xl bg-purple-500 shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:shadow-md">
-            <EditIcon className="h-5 w-5 text-white" />
-          </div>
-          <div className="flex-1">
-            <p className="font-semibold text-gray-900 transition-colors duration-300 group-hover:text-purple-700 dark:text-gray-100 dark:group-hover:text-purple-300">
-              Task Composer
-            </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Create and submit HPC jobs
-            </p>
-          </div>
-          <div className="opacity-0 transition-all duration-300 group-hover:translate-x-2 group-hover:opacity-100">
-            <ChevronRight className="h-5 w-5 text-purple-500" />
-          </div>
-        </Link>
-
-        {/* Task Manager - Job status monitoring and management */}
-        <Link
-          href="/task-manager"
+          href="/tasks"
           className="group flex w-full items-center rounded-xl bg-gradient-to-r from-orange-50 to-orange-50/70 p-4 text-left transition-all duration-300 hover:-translate-x-1 hover:from-orange-100 hover:to-orange-100/80 hover:shadow-md dark:from-orange-900/20 dark:to-orange-900/10 dark:hover:from-orange-900/40 dark:hover:to-orange-900/30"
         >
           <div className="mr-4 flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500 shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:shadow-md">
@@ -84,14 +63,35 @@ export function QuickActions() {
           </div>
           <div className="flex-1">
             <p className="font-semibold text-gray-900 transition-colors duration-300 group-hover:text-orange-700 dark:text-gray-100 dark:group-hover:text-orange-300">
-              Task Manager
+              Tasks
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Monitor job status
+              Monitor and manage HPC tasks
             </p>
           </div>
           <div className="opacity-0 transition-all duration-300 group-hover:translate-x-2 group-hover:opacity-100">
             <ChevronRight className="h-5 w-5 text-orange-500" />
+          </div>
+        </Link>
+
+        {/* Settings - Application configuration */}
+        <Link
+          href="/settings"
+          className="group flex w-full items-center rounded-xl bg-gradient-to-r from-gray-50 to-gray-50/70 p-4 text-left transition-all duration-300 hover:-translate-x-1 hover:from-gray-100 hover:to-gray-100/80 hover:shadow-md dark:from-gray-900/20 dark:to-gray-900/10 dark:hover:from-gray-900/40 dark:hover:to-gray-900/30"
+        >
+          <div className="mr-4 flex h-10 w-10 items-center justify-center rounded-xl bg-gray-500 shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:shadow-md">
+            <Settings className="h-5 w-5 text-white" />
+          </div>
+          <div className="flex-1">
+            <p className="font-semibold text-gray-900 transition-colors duration-300 group-hover:text-gray-700 dark:text-gray-100 dark:group-hover:text-gray-300">
+              Settings
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Configure application preferences
+            </p>
+          </div>
+          <div className="opacity-0 transition-all duration-300 group-hover:translate-x-2 group-hover:opacity-100">
+            <ChevronRight className="h-5 w-5 text-gray-500" />
           </div>
         </Link>
       </div>

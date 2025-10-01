@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { NavItem } from './nav-item';
-import { SettingsIcon, EditIcon, TaskIcon } from '@/components/icons';
+import { SettingsIcon, TaskIcon } from '@/components/icons';
 import { DashboardIcon, PersonIcon } from '@radix-ui/react-icons';
 import { Database, Container } from 'lucide-react';
 import { debounce } from '@/lib/debounce';
@@ -11,8 +11,7 @@ const navLinks = [
   { href: '/', label: 'Dashboard', Icon: DashboardIcon },
   { href: '/images', label: 'Images', Icon: Container },
   { href: '/datasets', label: 'Datasets', Icon: Database },
-  { href: '/job-composer', label: 'Task Composer', Icon: EditIcon },
-  { href: '/task-manager', label: 'Task Manager', Icon: TaskIcon },
+  { href: '/tasks', label: 'Tasks', Icon: TaskIcon },
   { href: '/profile', label: 'Profile', Icon: PersonIcon },
   { href: '/settings', label: 'Settings', Icon: SettingsIcon }
 ];
