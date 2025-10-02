@@ -106,12 +106,13 @@ export function TaskSubmissionModal({
       });
       const data = await response.json();
       setPartitions(data);
+      // setPartitions(['partition1', 'partition2']); // Temporary hardcode for testing
     } catch (error) {
       console.error('Error fetching partitions:', error);
     } finally {
       setLoading((prev) => ({ ...prev, partitions: false }));
     }
-  }, [formData]);
+  }, [formData.endpoint]);
 
   const fetchAccounts = useCallback(async () => {
     if (!formData.endpoint) return;
@@ -126,12 +127,13 @@ export function TaskSubmissionModal({
       });
       const data = await response.json();
       setAccounts(data);
+      // setAccounts(['test', 'test1', 'test2']); // Temporary hardcode for testing
     } catch (error) {
       console.error('Error fetching accounts:', error);
     } finally {
       setLoading((prev) => ({ ...prev, accounts: false }));
     }
-  }, [formData]);
+  }, [formData.endpoint]);
 
   const fetchContainers = async () => {
     setLoading((prev) => ({ ...prev, containers: true }));
@@ -386,22 +388,42 @@ export function TaskSubmissionModal({
               </div>
 
               {/* Account */}
-              <div>
+              <div className="md:row-span-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Account *
                 </label>
-                <div className="mt-1">
+                <div className="mt-1 space-y-6">
                   <VirtualSelect
                     options={accounts}
-                    selected={formData.account}
+                    selected={
+                      accounts.includes(formData.account)
+                        ? formData.account
+                        : ''
+                    }
                     onSelect={(value) =>
                       setFormData((prev) => ({ ...prev, account: value }))
                     }
                     placeholder="Select account"
                     loading={loading.accounts}
                     disabled={!formData.endpoint}
-                    className={errors.account ? 'border-red-500' : ''}
                   />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Account Manual Input
+                    </label>
+                    <Input
+                      placeholder="Or enter account manually"
+                      value={formData.account || ''}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          account: e.target.value
+                        }))
+                      }
+                      disabled={!formData.endpoint}
+                      className={`mt-1 ${errors.account ? 'border-red-500' : ''}`}
+                    />
+                  </div>
                 </div>
                 {errors.account && (
                   <p className="mt-1 text-sm text-red-600">{errors.account}</p>
@@ -491,7 +513,7 @@ export function TaskSubmissionModal({
               </div>
 
               {/* Time Duration */}
-              <div className="md:col-span-2">
+              <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Time Duration (HH:MM:SS) *
                 </label>
