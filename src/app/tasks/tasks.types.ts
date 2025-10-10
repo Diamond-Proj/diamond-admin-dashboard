@@ -20,7 +20,8 @@ export interface Task {
     endpoint_id: string;
     task_create_time: string;
   };
-  result: string;
+  result?: string | null;
+  error?: string | null;
 }
 
 export interface TasksApiResponse {

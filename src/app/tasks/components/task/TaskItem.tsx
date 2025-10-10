@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Trash2, AlertTriangle } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Trash2, AlertTriangle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Task } from '../../tasks.types';
 
@@ -19,6 +19,35 @@ export default function TaskItem({
   getStatusBadgeColor: (status: string) => string;
 }) {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [logViewer, setLogViewer] = useState<{ type: 'stdout' | 'stderr'; path: string } | null>(null);
+  const [logContent, setLogContent] = useState('');
+  const [logLoading, setLogLoading] = useState(false);
+  const [logError, setLogError] = useState<string | null>(null);
+  const logPollingRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleViewLog = (logType: 'stdout' | 'stderr') => {
+    const logPath = logType === 'stdout' ? task.result : task.error;
+    if (!logPath) {
+      return;
+    }
+
+    setLogViewer({ type: logType, path: logPath });
+    setLogContent('');
+    setLogError(null);
+    setLogLoading(true);
+
+  };
+
+  const handleCloseLogViewer = () => {
+    if (logPollingRef.current) {
+      clearInterval(logPollingRef.current);
+      logPollingRef.current = null;
+    }
+    setLogViewer(null);
+    setLogContent('');
+    setLogError(null);
+    setLogLoading(false);
+  };
 
   const handleDeleteClick = () => {
     setShowConfirmDialog(true);
@@ -32,6 +61,63 @@ export default function TaskItem({
   const handleCancelDelete = () => {
     setShowConfirmDialog(false);
   };
+
+  useEffect(() => {
+    if (!logViewer) {
+      if (logPollingRef.current) {
+        clearInterval(logPollingRef.current);
+        logPollingRef.current = null;
+      }
+      return;
+    }
+
+    let isActive = true;
+
+    const fetchTaskLog = async () => {
+      try {
+        const params = new URLSearchParams({
+          task_id: task.task_id,
+          endpoint_id: task.details.endpoint_id,
+          log_path: logViewer.path
+        });
+
+        const response = await fetch(`/api/get_task_log?${params.toString()}`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch task log');
+        }
+
+        const data = await response.json();
+        if (!isActive) return;
+        setLogContent(data.log_content ?? '');
+        setLogError(null);
+      } catch (error) {
+        if (!isActive) return;
+        console.error('Error fetching task log:', error);
+        setLogError('Failed to load log content.');
+      } finally {
+        if (!isActive) return;
+        setLogLoading(false);
+      }
+    };
+
+    fetchTaskLog();
+    logPollingRef.current = setInterval(fetchTaskLog, 5000);
+
+    return () => {
+      isActive = false;
+      if (logPollingRef.current) {
+        clearInterval(logPollingRef.current);
+        logPollingRef.current = null;
+      }
+    };
+  }, [logViewer, task.details.endpoint_id, task.task_id]);
 
   return (
     <>
@@ -81,16 +167,44 @@ export default function TaskItem({
               </div>
             </div>
 
-            {/* Result/Log Path */}
-            {task.result && (
+            {(task.result || task.error) && (
               <div className="border-t border-gray-100 pt-4 dark:border-gray-700">
-                <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
-                  <span className="block text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
-                    Log Path
-                  </span>
-                  <span className="mt-1 block font-mono text-sm text-gray-700 dark:text-gray-300">
-                    {task.result}
-                  </span>
+                <div className="space-y-3">
+                  <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
+                    <span className="block text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                      Stdout Log
+                    </span>
+                    {task.result ? (
+                      <button
+                        onClick={() => handleViewLog('stdout')}
+                        className="mt-1 block w-full text-left font-mono text-sm text-blue-600 underline underline-offset-4 transition-colors hover:text-blue-500 dark:text-blue-300 dark:hover:text-blue-200 break-all"
+                      >
+                        {task.result}
+                      </button>
+                    ) : (
+                      <span className="mt-1 block text-sm text-muted-foreground">
+                        Not available
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
+                    <span className="block text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                      Stderr Log
+                    </span>
+                    {task.error ? (
+                      <button
+                        onClick={() => handleViewLog('stderr')}
+                        className="mt-1 block w-full text-left font-mono text-sm text-blue-600 underline underline-offset-4 transition-colors hover:text-blue-500 dark:text-blue-300 dark:hover:text-blue-200 break-all"
+                      >
+                        {task.error}
+                      </button>
+                    ) : (
+                      <span className="mt-1 block text-sm text-muted-foreground">
+                        Not available
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -111,6 +225,47 @@ export default function TaskItem({
           </div>
         </div>
       </div>
+
+      {logViewer && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4 dark:bg-black/70">
+          <div className="bg-background dark:bg-background w-full max-w-3xl rounded-lg border shadow-xl dark:border-gray-800">
+            <div className="p-6 space-y-4">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-lg font-semibold">
+                    {logViewer.type === 'stdout' ? 'Stdout Log Output' : 'Stderr Log Output'}
+                  </h3>
+                  <p className="text-muted-foreground mt-1 text-xs break-all">
+                    Path: {logViewer.path}
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCloseLogViewer}
+                  className="cursor-pointer"
+                >
+                  Close
+                </Button>
+              </div>
+              <div className="bg-muted/30 dark:bg-muted/20 min-h-[240px] max-h-[60vh] overflow-y-auto rounded-md p-4">
+                {logLoading ? (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Loading log...
+                  </div>
+                ) : logError ? (
+                  <p className="text-sm text-red-500 dark:text-red-400">{logError}</p>
+                ) : (
+                  <pre className="whitespace-pre-wrap break-words font-mono text-xs text-foreground dark:text-gray-100">
+                    {logContent || 'Log is empty.'}
+                  </pre>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Confirmation Dialog */}
       {showConfirmDialog && (
