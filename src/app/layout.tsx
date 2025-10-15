@@ -13,6 +13,7 @@ import { AuthStatus } from '@/components/auth-status';
 import ThemeToggle from '@/components/layout/theme-toggle';
 
 import { SideNav } from '@/components/layout/SideNav';
+import { EndpointOnboarding } from '@/components/onboarding/endpoint-onboarding';
 
 export const metadata: Metadata = {
   title: 'Diamond Admin Dashboard',
@@ -94,6 +95,9 @@ export default async function RootLayout({
 
             {/* Toast notifications */}
             <Toaster />
+
+            {/* Onboarding */}
+            <EndpointOnboarding isAuthenticated={isAuthenticated} />
           </div>
         </ThemeProvider>
       </body>
