@@ -43,7 +43,7 @@ export function DatasetControls({
 
   return (
     <div className="mb-8 rounded-xl border border-gray-200/60 bg-white p-6 shadow-sm dark:border-gray-700/60 dark:bg-gray-800">
-      <div className="flex flex-col gap-4 sm:flex-row">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center">
         {/* Search */}
         <div className="relative">
           <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400 transition-colors duration-200" />
