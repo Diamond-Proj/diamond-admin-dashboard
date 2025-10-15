@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Database } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { CreateDatasetModal } from './create-dataset-modal';
 import { DatasetStats } from './dataset-stats';
 import { DatasetControls } from './dataset-controls';
@@ -80,16 +80,21 @@ export function DatasetsPageContent() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="mb-8">
-        <div className="mb-4 flex items-center gap-3">
-          <Database className="h-8 w-8 text-purple-600 dark:text-purple-400" />
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-            Datasets
-          </h1>
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-foreground text-3xl font-bold">Datasets</h1>
+          <p className="text-muted-foreground text-lg">
+            Manage and explore your Diamond data collections
+          </p>
         </div>
-        <p className="text-gray-600 dark:text-gray-400">
-          Manage and explore your Diamond data collections
-        </p>
+
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="group flex cursor-pointer items-center gap-2 rounded-lg bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-3 font-medium text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:from-purple-700 hover:to-purple-800 hover:shadow-md focus:ring-2 focus:ring-purple-500/50 focus:outline-none"
+        >
+          <Plus className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
+          Create Dataset
+        </button>
       </div>
 
       {/* Stats Summary */}
@@ -101,7 +106,6 @@ export function DatasetsPageContent() {
         setSearchTerm={setSearchTerm}
         filter={filter}
         setFilter={setFilter}
-        onCreateDataset={() => setShowCreateModal(true)}
       />
 
       {/* Datasets List */}
