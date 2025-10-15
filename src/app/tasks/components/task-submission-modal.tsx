@@ -35,7 +35,7 @@ export function TaskSubmissionModal({
     task: '',
     num_of_nodes: 1,
     time_duration: '',
-    dataset: ''
+    dataset_id: ''
   });
 
   const [endpoints, setEndpoints] = useState<Endpoint[]>([]);
@@ -214,7 +214,7 @@ export function TaskSubmissionModal({
 
     setLoading((prev) => ({ ...prev, submit: true }));
     try {
-      const payload = {
+      const payload: TaskSubmissionData = {
         endpoint: formData.endpoint,
         taskName: formData.taskName,
         partition: formData.partition,
@@ -223,7 +223,8 @@ export function TaskSubmissionModal({
         container: formData.container,
         task: formData.task || undefined,
         num_of_nodes: formData.num_of_nodes,
-        time_duration: formData.time_duration
+        time_duration: formData.time_duration,
+        dataset_id: formData.dataset_id || undefined
       };
 
       const response = await fetch('/api/submit_task', {
@@ -258,7 +259,7 @@ export function TaskSubmissionModal({
       task: '',
       num_of_nodes: 1,
       time_duration: '',
-      dataset: ''
+      dataset_id: ''
     });
     setErrors({});
   };
@@ -274,9 +275,9 @@ export function TaskSubmissionModal({
   };
 
   const getSelectedDatasetDisplay = () => {
-    if (!formData.dataset) return 'No dataset';
+    if (!formData.dataset_id) return 'No dataset';
     const dataset = datasets.find(
-      (ds) => ds.id.toString() === formData.dataset
+      (ds) => ds.id.toString() === formData.dataset_id
     );
     return dataset ? dataset.dataset_name || dataset.globus_path : '';
   };
@@ -465,7 +466,10 @@ export function TaskSubmissionModal({
                     selected={getSelectedDatasetDisplay()}
                     onSelect={(displayName) => {
                       const id = datasetMap.get(displayName);
-                      setFormData((prev) => ({ ...prev, dataset: id || '' }));
+                      setFormData((prev) => ({
+                        ...prev,
+                        dataset_id: id || ''
+                      }));
                     }}
                     placeholder="Select dataset"
                     loading={loading.datasets}

@@ -8,7 +8,7 @@ export interface TaskSubmissionData {
   task?: string;
   num_of_nodes?: number;
   time_duration: string;
-  dataset?: string;
+  dataset_id?: string;
 }
 
 export interface Task {
