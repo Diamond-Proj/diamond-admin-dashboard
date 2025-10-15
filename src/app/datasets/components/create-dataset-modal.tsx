@@ -71,6 +71,9 @@ export function CreateDatasetModal({
     if (!formData.machine_name.trim()) {
       newErrors.machine_name = 'Machine name is required';
     }
+    if (!formData.dataset_name.trim()) {
+      newErrors.dataset_name = 'Dataset name is required';
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -97,7 +100,7 @@ export function CreateDatasetModal({
         globus_path: formData.globus_path.trim(),
         system_path: formData.system_path.trim(),
         machine_name: formData.machine_name,
-        dataset_name: formData.dataset_name.trim() || undefined,
+        dataset_name: formData.dataset_name.trim(),
         dataset_metadata: JSON.stringify(metadata)
       };
 
@@ -197,6 +200,29 @@ export function CreateDatasetModal({
             <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
               Required Information
             </h3>
+
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Dataset Name *
+              </label>
+              <Input
+                value={formData.dataset_name}
+                onChange={(e) =>
+                  handleInputChange('dataset_name', e.target.value)
+                }
+                placeholder="e.g., My Research Dataset"
+                className={errors.dataset_name ? 'border-red-500' : ''}
+                disabled={isLoading}
+              />
+              {errors.dataset_name && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.dataset_name}
+                </p>
+              )}
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                A human-readable name for your dataset
+              </p>
+            </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
@@ -331,23 +357,6 @@ export function CreateDatasetModal({
             <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
               Optional Information
             </h3>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Dataset Name
-              </label>
-              <Input
-                value={formData.dataset_name}
-                onChange={(e) =>
-                  handleInputChange('dataset_name', e.target.value)
-                }
-                placeholder="e.g., My Research Dataset"
-                disabled={isLoading}
-              />
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                A human-readable name for your dataset
-              </p>
-            </div>
 
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
