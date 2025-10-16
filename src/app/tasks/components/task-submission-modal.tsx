@@ -74,11 +74,15 @@ export function TaskSubmissionModal({
       const data = await response.json();
       setEndpoints(data);
 
-      // Create options and mapping for VirtualSelect
+      // Filter only online endpoints and create options and mapping for VirtualSelect
+      const onlineEndpoints = data.filter(
+        (ep: Endpoint) => ep.endpoint_status === 'online'
+      );
+
       const options: string[] = [];
       const map = new Map<string, string>();
 
-      data.forEach((ep: Endpoint) => {
+      onlineEndpoints.forEach((ep: Endpoint) => {
         const displayName = `${ep.endpoint_name} (${ep.endpoint_status})`;
         options.push(displayName);
         map.set(displayName, ep.endpoint_uuid);
