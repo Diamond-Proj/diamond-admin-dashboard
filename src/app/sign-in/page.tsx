@@ -25,7 +25,7 @@ export default async function SignInPage() {
         <div className="flex flex-col items-center">
           <div className="relative mb-4 h-32 w-32">
             <Image
-              src="/Diamond logo.png"
+              src="/Diamond_Logo.png"
               alt="Diamond Logo"
               fill
               style={{ objectFit: 'contain' }}
