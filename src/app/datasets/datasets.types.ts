@@ -29,7 +29,7 @@ export interface CreateDatasetRequest {
   globus_path: string;
   system_path: string;
   machine_name: string;
-  dataset_name?: string;
+  dataset_name: string;
   dataset_metadata?: string;
 }
 
