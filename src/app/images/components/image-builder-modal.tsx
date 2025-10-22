@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { X, ChevronLeft, ChevronRight, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BuilderSteps } from './builder/builder-steps';
@@ -12,6 +12,7 @@ import {
   ImageBuilderPayload,
   ImageBuilderResponse
 } from '@/app/images/types';
+import { isPerlmutterHost } from '@/app/utils/hosts';
 
 interface ImageBuilderModalProps {
   isOpen: boolean;
@@ -19,7 +20,7 @@ interface ImageBuilderModalProps {
   onSuccess: () => void;
 }
 
-const STEPS = [
+const DEFAULT_STEPS = [
   {
     id: 'endpoint',
     title: 'Endpoint & Resources',
@@ -41,6 +42,19 @@ const STEPS = [
     id: 'review',
     title: 'Review & Build',
     description: 'Review your configuration before starting the build process'
+  }
+];
+
+const PERLMUTTER_STEPS = [
+  {
+    id: 'endpoint',
+    title: 'Perlmutter Image',
+    description: 'Select the endpoint and enter the Shifter image to pull'
+  },
+  {
+    id: 'review',
+    title: 'Review & Pull',
+    description: 'Review your configuration before submitting the pull job'
   }
 ];
 
@@ -70,19 +84,39 @@ export function ImageBuilderModal({
     }
   }, [isOpen]);
 
-  const updateFormData = (stepData: Partial<BuilderFormData>) => {
+  const updateFormData = useCallback((stepData: Partial<BuilderFormData>) => {
     setFormData((prev) => ({ ...prev, ...stepData }));
-  };
+  }, []);
+
+  const isPerlmutter = isPerlmutterHost(formData.endpointHost);
+
+  const steps = useMemo(
+    () => (isPerlmutter ? PERLMUTTER_STEPS : DEFAULT_STEPS),
+    [isPerlmutter]
+  );
+
+  useEffect(() => {
+    const lastIndex = steps.length - 1;
+    if (currentStep > lastIndex) {
+      setCurrentStep(Math.max(0, lastIndex));
+    }
+  }, [currentStep, steps]);
+
+  const currentStepConfig = steps[currentStep];
+  const currentStepId = currentStepConfig?.id;
+  const isReviewStep = currentStepId === 'review';
 
   const canProceed = () => {
-    switch (currentStep) {
-      case 0: // Endpoint step
-        return formData.endpoint && formData.partition && formData.account;
-      case 1: // Container step
-        return formData.containerName && formData.baseImage;
-      case 2: // Build step
-        return true;
-      case 3: // Review step
+    switch (currentStepId) {
+      case 'endpoint':
+        if (isPerlmutter) {
+          return Boolean(formData.endpoint && formData.baseImage);
+        }
+        return Boolean(formData.endpoint && formData.partition && formData.account);
+      case 'container':
+        return Boolean(formData.containerName && formData.baseImage);
+      case 'build':
+      case 'review':
         return true;
       default:
         return false;
@@ -90,7 +124,7 @@ export function ImageBuilderModal({
   };
 
   const handleNext = () => {
-    if (currentStep < STEPS.length - 1) {
+    if (currentStep < steps.length - 1) {
       setCurrentStep((prev) => prev + 1);
     }
   };
@@ -105,15 +139,19 @@ export function ImageBuilderModal({
     setIsSubmitting(true);
 
     try {
+      const containerName = isPerlmutter
+        ? formData.baseImage || ''
+        : formData.containerName || '';
+
       const payload: ImageBuilderPayload = {
         endpoint: formData.endpoint || '',
-        partition: formData.partition || '',
-        name: formData.containerName || '',
-        location: formData.location || '',
+        partition: isPerlmutter ? '' : formData.partition || '',
+        name: containerName,
+        location: isPerlmutter ? '' : formData.location || '',
         base_image: formData.baseImage || '',
-        dependencies: formData.dependencies || '',
-        environment: formData.environment || '',
-        commands: formData.commands || '',
+        dependencies: isPerlmutter ? '' : formData.dependencies || '',
+        environment: isPerlmutter ? '' : formData.environment || '',
+        commands: isPerlmutter ? '' : formData.commands || '',
         account: formData.account || '',
         reservation: formData.reservation || ''
       };
@@ -170,7 +208,7 @@ export function ImageBuilderModal({
               Image Builder
             </h2>
             <p className="text-gray-600 dark:text-gray-300">
-              {showLogs ? 'Build in Progress' : STEPS[currentStep]?.description}
+              {showLogs ? 'Build in Progress' : currentStepConfig?.description}
             </p>
           </div>
           <Button
@@ -188,17 +226,17 @@ export function ImageBuilderModal({
           <div className="border-b border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
             <div className="mb-2 flex items-center justify-between">
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Step {currentStep + 1} of {STEPS.length}
+                Step {currentStep + 1} of {steps.length}
               </span>
               <span className="text-sm text-gray-500 dark:text-gray-400">
-                {Math.round(((currentStep + 1) / STEPS.length) * 100)}%
+                {Math.round(((currentStep + 1) / steps.length) * 100)}%
               </span>
             </div>
             <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
               <div
                 className="h-2 rounded-full bg-rose-600 transition-all duration-300"
                 style={{
-                  width: `${((currentStep + 1) / STEPS.length) * 100}%`
+                  width: `${((currentStep + 1) / steps.length) * 100}%`
                 }}
               />
             </div>
@@ -216,15 +254,15 @@ export function ImageBuilderModal({
             />
           ) : (
             <div className="p-6">
-              {currentStep < 3 ? (
+              {isReviewStep ? (
+                <BuilderReview formData={formData as BuilderFormData} />
+              ) : currentStepId ? (
                 <BuilderSteps
-                  step={currentStep}
+                  stepId={currentStepId}
                   formData={formData}
                   onUpdate={updateFormData}
                 />
-              ) : (
-                <BuilderReview formData={formData as BuilderFormData} />
-              )}
+              ) : null}
             </div>
           )}
         </div>
@@ -242,7 +280,7 @@ export function ImageBuilderModal({
               Previous
             </Button>
 
-            {currentStep < STEPS.length - 1 ? (
+            {currentStep < steps.length - 1 ? (
               <Button
                 onClick={handleNext}
                 disabled={!canProceed()}
