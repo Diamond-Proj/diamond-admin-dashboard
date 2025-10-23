@@ -1,8 +1,10 @@
 'use client';
 
-import { Package, Settings, Terminal } from 'lucide-react';
+import { useEffect } from 'react';
+import { Package, Settings, Terminal, Info } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { BuilderFormData } from '@/app/images/types';
+import { isPerlmutterHost } from '@/app/utils/hosts';
 
 interface BuildStepProps {
   formData: Partial<BuilderFormData>;
@@ -33,6 +35,50 @@ make install
 # RUN chmod +x /opt/myapp/run.sh`;
 
 export function BuildStep({ formData, onUpdate }: BuildStepProps) {
+  const isPerlmutter = isPerlmutterHost(formData.endpointHost);
+
+  useEffect(() => {
+    if (
+      !isPerlmutter ||
+      (!formData.dependencies && !formData.environment && !formData.commands)
+    ) {
+      return;
+    }
+
+    onUpdate({
+      dependencies: '',
+      environment: '',
+      commands: ''
+    });
+  }, [
+    formData.commands,
+    formData.dependencies,
+    formData.environment,
+    isPerlmutter,
+    onUpdate
+  ]);
+
+  if (isPerlmutter) {
+    return (
+      <div className="rounded-lg border border-blue-200 bg-blue-50 p-6 text-sm text-blue-900 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-100">
+        <div className="flex items-start gap-3">
+          <div className="rounded-full bg-blue-500/90 p-1.5 text-white">
+            <Info className="h-4 w-4" />
+          </div>
+          <div>
+            <p className="font-medium">
+              No additional build configuration is needed for Perlmutter.
+            </p>
+            <p className="mt-1 text-xs opacity-90">
+              The build job will simply pull the specified Shifter image on the
+              target system.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       {/* Dependencies */}
