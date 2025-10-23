@@ -131,9 +131,6 @@ function DatasetListItem({ dataset }: { dataset: DisplayDataset }) {
                   Private
                 </div>
               )}
-              <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700 dark:bg-green-900/50 dark:text-green-300">
-                Active
-              </span>
             </div>
           </div>
 

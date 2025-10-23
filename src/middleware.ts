@@ -10,22 +10,26 @@ export async function middleware(request: NextRequest) {
     '/_next/static',
     '/_next/image',
     '/favicon.ico',
-    '/Diamond logo.png',
+    '/Diamond_Logo.png',
     '/Diamond logo transparent.png'
   ];
-  
+
   // Check if the current path matches any of the public routes
-  const isPublicRoute = publicRoutes.some(route => 
-    request.nextUrl.pathname === route || 
-    request.nextUrl.pathname.startsWith(route)
+  const isPublicRoute = publicRoutes.some(
+    (route) =>
+      request.nextUrl.pathname === route ||
+      request.nextUrl.pathname.startsWith(route)
   );
-  
+
   // Skip auth check for public routes
   if (isPublicRoute) {
-    console.log('Skipping auth check for public route:', request.nextUrl.pathname);
+    console.log(
+      'Skipping auth check for public route:',
+      request.nextUrl.pathname
+    );
     return NextResponse.next();
   }
-  
+
   // For all other routes, perform authentication check
   console.log('Authenticating request for:', request.nextUrl.pathname);
   return await auth(request);

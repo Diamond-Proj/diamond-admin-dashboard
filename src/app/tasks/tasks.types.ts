@@ -11,7 +11,7 @@ export interface TaskSubmissionData {
   task?: string;
   num_of_nodes?: number;
   time_duration: string;
-  dataset?: string;
+  dataset_id?: string;
 }
 
 export interface Task {
@@ -23,8 +23,8 @@ export interface Task {
     endpoint_id: string;
     task_create_time: string;
   };
-  result?: string | null;
-  error?: string | null;
+  result: string | null;
+  error: string | null;
 }
 
 export interface TasksApiResponse {
