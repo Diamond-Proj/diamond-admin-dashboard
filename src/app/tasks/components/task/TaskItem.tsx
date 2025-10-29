@@ -146,7 +146,7 @@ export default function TaskItem({
                   Endpoint
                 </span>
                 <span className="mt-1 block font-mono text-sm font-semibold text-gray-900 dark:text-gray-100">
-                  {task.details.endpoint_id}
+                  {task.details.endpoint_name}
                 </span>
               </div>
               <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
@@ -294,7 +294,7 @@ export default function TaskItem({
                   <p className="text-muted-foreground text-xs">
                     <span className="font-bold">Endpoint:</span>{' '}
                     <span className="font-mono">
-                      {task.details.endpoint_id}
+                      {task.details.endpoint_name}
                     </span>
                   </p>
                   <p className="text-muted-foreground text-xs">

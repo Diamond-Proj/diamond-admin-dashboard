@@ -6,7 +6,7 @@ import { TasksList } from './tasks-list';
 import { TaskSubmissionModal } from './task-submission-modal';
 import { TaskControls } from './task-controls';
 import { TaskStats } from './task-stats';
-import { Task, TasksApiResponse } from '../tasks.types';
+import { Task, TasksApiResponse, Endpoint } from '../tasks.types';
 import { useToast } from '@/components/ui/use-toast';
 
 interface TasksPageContentProps {
@@ -16,6 +16,7 @@ interface TasksPageContentProps {
 export function TasksPageContent({ isAuthenticated }: TasksPageContentProps) {
   const [isSubmissionOpen, setIsSubmissionOpen] = useState(false);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [endpoints, setEndpoints] = useState<Endpoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<
     'all' | 'completed' | 'pending' | 'running' | 'failed'
@@ -24,6 +25,18 @@ export function TasksPageContent({ isAuthenticated }: TasksPageContentProps) {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [deletingTasks, setDeletingTasks] = useState<Set<string>>(new Set());
   const { toast } = useToast();
+
+  const fetchEndpoints = useCallback(async () => {
+    try {
+      const response = await fetch('/api/list_all_endpoints', {
+        credentials: 'include'
+      });
+      const data = await response.json();
+      setEndpoints(data);
+    } catch (error) {
+      console.error('Error fetching endpoints:', error);
+    }
+  }, []);
 
   const fetchTasks = useCallback(async () => {
     try {
@@ -42,7 +55,19 @@ export function TasksPageContent({ isAuthenticated }: TasksPageContentProps) {
 
       const data: TasksApiResponse = await response.json();
       const tasksArray = Object.values(data);
-      setTasks(tasksArray);
+      const tasksArrayNew = tasksArray.map(task => {
+        const endpoint = endpoints.find(
+          ep => ep.endpoint_uuid === task.details.endpoint_id
+        );
+        return {
+          ...task,
+          details: {
+            ...task.details,
+            endpoint_name: endpoint?.endpoint_name || 'Unknown'
+          }
+        };
+      });
+      setTasks(tasksArrayNew);
     } catch (error) {
       console.error('Error fetching tasks:', error);
       toast({
@@ -54,15 +79,21 @@ export function TasksPageContent({ isAuthenticated }: TasksPageContentProps) {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, endpoints]);
 
   useEffect(() => {
     if (isAuthenticated) {
+      fetchEndpoints();
+    }
+  }, [isAuthenticated, fetchEndpoints]);
+
+  useEffect(() => {
+    if (isAuthenticated && endpoints.length > 0) {
       fetchTasks();
       const intervalId = setInterval(fetchTasks, 10000);
       return () => clearInterval(intervalId);
     }
-  }, [isAuthenticated, refreshTrigger, fetchTasks]);
+  }, [isAuthenticated, endpoints.length, refreshTrigger, fetchTasks]);
 
   const handleSubmissionSuccess = () => {
     setIsSubmissionOpen(false);
