@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Server, Cpu, User, Calendar } from 'lucide-react';
+import { Server, Cpu, User, Calendar, Box, Info } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { BuilderFormData, Endpoint } from '@/app/images/types';
 import { VirtualSelect } from '@/components/ui/virtual-select';
+import { isPerlmutterHost } from '@/app/utils/hosts';
 
 interface EndpointStepProps {
   formData: Partial<BuilderFormData>;
@@ -123,6 +124,14 @@ export function EndpointStep({ formData, onUpdate }: EndpointStepProps) {
   const selectedEndpointDisplay = selectedEndpoint
     ? `${selectedEndpoint.endpoint_name} (${selectedEndpoint.endpoint_status})`
     : undefined;
+  const isPerlmutterSelected = isPerlmutterHost(selectedEndpoint?.endpoint_host);
+
+  const handlePerlmutterBaseImageChange = (value: string) => {
+    onUpdate({
+      baseImage: value,
+      containerName: value
+    });
+  };
 
   const handleEndpointSelect = (displayName: string) => {
     // Find the endpoint UUID from the display name
@@ -130,7 +139,19 @@ export function EndpointStep({ formData, onUpdate }: EndpointStepProps) {
       (ep) => `${ep.endpoint_name} (${ep.endpoint_status})` === displayName
     );
     if (endpoint) {
-      onUpdate({ endpoint: endpoint.endpoint_uuid });
+      onUpdate({
+        endpoint: endpoint.endpoint_uuid,
+        endpointHost: endpoint.endpoint_host,
+        partition: '',
+        account: '',
+        reservation: '',
+        location: '',
+        containerName: '',
+        baseImage: '',
+        dependencies: '',
+        environment: '',
+        commands: ''
+      });
     }
   };
 
@@ -177,170 +198,222 @@ export function EndpointStep({ formData, onUpdate }: EndpointStepProps) {
           </div>
 
           {/* Partition Selection */}
-          <div className="space-y-6">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100">
-                <Cpu className="h-5 w-5 text-purple-600" />
+          {!isPerlmutterSelected && (
+            <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100">
+                  <Cpu className="h-5 w-5 text-purple-600" />
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900">
+                    Partition
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    Choose compute partition
+                  </p>
+                </div>
               </div>
-              <div>
-                <h4 className="text-lg font-semibold text-gray-900">
-                  Partition
-                </h4>
-                <p className="text-sm text-gray-600">
-                  Choose compute partition
-                </p>
+
+              {!isEndpointSelected ? (
+                <div className="rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 p-8 text-center">
+                  <Cpu className="mx-auto mb-3 h-8 w-8 text-gray-400" />
+                  <p className="mb-1 text-sm font-medium text-gray-600">
+                    Select an endpoint first
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Partitions will be available after endpoint selection
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {partitions.length > 0 ? (
+                    <VirtualSelect
+                      options={partitions}
+                      selected={formData.partition}
+                      onSelect={(partition) => onUpdate({ partition })}
+                      placeholder="Choose a partition"
+                      loading={isLoadingPartitions}
+                    />
+                  ) : (
+                    <div className="space-y-3">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Partition Name
+                      </label>
+                      <Input
+                        placeholder="Enter partition name"
+                        value={formData.partition || ''}
+                        onChange={(e) => onUpdate({ partition: e.target.value })}
+                        className="h-11 rounded-lg border-gray-300 shadow-sm focus:border-blue-400 focus:ring-blue-100"
+                      />
+                      {!isLoadingPartitions && (
+                        <p className="text-xs text-gray-500">
+                          No available partitions found for this endpoint
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+        {isPerlmutterSelected && (
+          <>
+            {/* Base Image Selection */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+                  <Box className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900">
+                    Shifter Base Image
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    Provide the image reference to pull on Perlmutter
+                  </p>
+                </div>
               </div>
+
+              <Input
+                placeholder="registry/image:tag"
+                value={formData.baseImage || ''}
+                onChange={(e) => handlePerlmutterBaseImageChange(e.target.value)}
+                className="h-11 rounded-lg border-gray-300 shadow-sm focus:border-blue-400 focus:ring-blue-100"
+              />
             </div>
 
-            {!isEndpointSelected ? (
-              <div className="rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 p-8 text-center">
-                <Cpu className="mx-auto mb-3 h-8 w-8 text-gray-400" />
-                <p className="mb-1 text-sm font-medium text-gray-600">
-                  Select an endpoint first
-                </p>
-                <p className="text-xs text-gray-500">
-                  Partitions will be available after endpoint selection
-                </p>
+          </>
+        )}
+      </div>
+
+      {/* Right Column */}
+      <div className="space-y-8">
+        {!isPerlmutterSelected && (
+          <>
+            {/* Account Selection */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100">
+                  <User className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900">
+                    HPC Account
+                  </h4>
+                  <p className="text-sm text-gray-600">Your compute account</p>
+                </div>
               </div>
-            ) : (
-              <div className="space-y-4">
-                {partitions.length > 0 ? (
-                  <VirtualSelect
-                    options={partitions}
-                    selected={formData.partition}
-                    onSelect={(partition) => onUpdate({ partition })}
-                    placeholder="Choose a partition"
-                    loading={isLoadingPartitions}
-                  />
-                ) : (
+
+              {!isEndpointSelected ? (
+                <div className="rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 p-8 text-center">
+                  <User className="mx-auto mb-3 h-8 w-8 text-gray-400" />
+                  <p className="mb-1 text-sm font-medium text-gray-600">
+                    Select an endpoint first
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Accounts will be available after endpoint selection
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {accounts.length > 0 && (
+                    <VirtualSelect
+                      options={accounts}
+                      selected={formData.account}
+                      onSelect={(account) => onUpdate({ account })}
+                      placeholder="Choose an account"
+                      loading={isLoadingAccounts}
+                    />
+                  )}
+
                   <div className="space-y-3">
                     <label className="block text-sm font-medium text-gray-700">
-                      Partition Name
+                      {accounts.length > 0 ? 'Or enter manually' : 'Account Name'}
                     </label>
                     <Input
-                      placeholder="Enter partition name"
-                      value={formData.partition || ''}
-                      onChange={(e) => onUpdate({ partition: e.target.value })}
+                      placeholder="Enter account name"
+                      value={formData.account || ''}
+                      onChange={(e) => onUpdate({ account: e.target.value })}
                       className="h-11 rounded-lg border-gray-300 shadow-sm focus:border-blue-400 focus:ring-blue-100"
                     />
-                    {!isLoadingPartitions && (
+                    {accounts.length === 0 && !isLoadingAccounts && (
                       <p className="text-xs text-gray-500">
-                        No available partitions found for this endpoint
+                        No available accounts found for this endpoint
                       </p>
                     )}
                   </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Right Column */}
-        <div className="space-y-8">
-          {/* Account Selection */}
-          <div className="space-y-6">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100">
-                <User className="h-5 w-5 text-green-600" />
-              </div>
-              <div>
-                <h4 className="text-lg font-semibold text-gray-900">
-                  HPC Account
-                </h4>
-                <p className="text-sm text-gray-600">Your compute account</p>
-              </div>
+                </div>
+              )}
             </div>
 
-            {!isEndpointSelected ? (
-              <div className="rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 p-8 text-center">
-                <User className="mx-auto mb-3 h-8 w-8 text-gray-400" />
-                <p className="mb-1 text-sm font-medium text-gray-600">
-                  Select an endpoint first
-                </p>
-                <p className="text-xs text-gray-500">
-                  Accounts will be available after endpoint selection
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {accounts.length > 0 && (
-                  <VirtualSelect
-                    options={accounts}
-                    selected={formData.account}
-                    onSelect={(account) => onUpdate({ account })}
-                    placeholder="Choose an account"
-                    loading={isLoadingAccounts}
-                  />
-                )}
-
-                <div className="space-y-3">
-                  <label className="block text-sm font-medium text-gray-700">
-                    {accounts.length > 0 ? 'Or enter manually' : 'Account Name'}
-                  </label>
-                  <Input
-                    placeholder="Enter account name"
-                    value={formData.account || ''}
-                    onChange={(e) => onUpdate({ account: e.target.value })}
-                    className="h-11 rounded-lg border-gray-300 shadow-sm focus:border-blue-400 focus:ring-blue-100"
-                  />
-                  {accounts.length === 0 && !isLoadingAccounts && (
-                    <p className="text-xs text-gray-500">
-                      No available accounts found for this endpoint
-                    </p>
-                  )}
+            {/* Reservation (Optional) */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100">
+                  <Calendar className="h-5 w-5 text-orange-600" />
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900">
+                    Reservation
+                    <span className="ml-2 text-sm font-normal text-gray-500">
+                      (Optional)
+                    </span>
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    Reserved compute resources
+                  </p>
                 </div>
               </div>
-            )}
-          </div>
 
-          {/* Reservation (Optional) */}
-          <div className="space-y-6">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100">
-                <Calendar className="h-5 w-5 text-orange-600" />
+              {!isEndpointSelected ? (
+                <div className="rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 p-8 text-center">
+                  <Calendar className="mx-auto mb-3 h-8 w-8 text-gray-400" />
+                  <p className="mb-1 text-sm font-medium text-gray-600">
+                    Select an endpoint first
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Reservations can be specified after endpoint selection
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Reservation Name
+                  </label>
+                  <Input
+                    placeholder="Enter reservation name (optional)"
+                    value={formData.reservation || ''}
+                    onChange={(e) => onUpdate({ reservation: e.target.value })}
+                    className="h-11 rounded-lg border-gray-300 shadow-sm focus:border-blue-400 focus:ring-blue-100"
+                  />
+                  <p className="text-xs text-gray-500">
+                    Leave empty if no reservation is required
+                  </p>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {isPerlmutterSelected && (
+          <div className="rounded-lg border border-blue-200 bg-blue-50 p-5 text-sm text-blue-900 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-100">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-white">
+                <Info className="h-4 w-4" />
               </div>
               <div>
-                <h4 className="text-lg font-semibold text-gray-900">
-                  Reservation
-                  <span className="ml-2 text-sm font-normal text-gray-500">
-                    (Optional)
-                  </span>
-                </h4>
-                <p className="text-sm text-gray-600">
-                  Reserved compute resources
+                <p className="font-medium">Perlmutter Shifter Workflow</p>
+                <p className="mt-1 opacity-90">
+                  Account, reservation, and additional build commands are not
+                  required. We will submit a pull job for the selected base image.
                 </p>
               </div>
             </div>
-
-            {!isEndpointSelected ? (
-              <div className="rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 p-8 text-center">
-                <Calendar className="mx-auto mb-3 h-8 w-8 text-gray-400" />
-                <p className="mb-1 text-sm font-medium text-gray-600">
-                  Select an endpoint first
-                </p>
-                <p className="text-xs text-gray-500">
-                  Reservations can be specified after endpoint selection
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <label className="block text-sm font-medium text-gray-700">
-                  Reservation Name
-                </label>
-                <Input
-                  placeholder="Enter reservation name (optional)"
-                  value={formData.reservation || ''}
-                  onChange={(e) => onUpdate({ reservation: e.target.value })}
-                  className="h-11 rounded-lg border-gray-300 shadow-sm focus:border-blue-400 focus:ring-blue-100"
-                />
-                <p className="text-xs text-gray-500">
-                  Leave empty if no reservation is required
-                </p>
-              </div>
-            )}
           </div>
-        </div>
+        )}
       </div>
     </div>
+  </div>
   );
 }

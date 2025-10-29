@@ -13,6 +13,7 @@ import {
   DatasetsApiResponse,
   Dataset
 } from '../tasks.types';
+import { isPerlmutterHost } from '@/app/utils/hosts';
 
 interface TaskSubmissionModalProps {
   isOpen: boolean;
@@ -27,8 +28,11 @@ export function TaskSubmissionModal({
 }: TaskSubmissionModalProps) {
   const [formData, setFormData] = useState<TaskSubmissionData>({
     endpoint: '',
+    endpointHost: '',
     taskName: '',
     partition: '',
+    qos: '',
+    constraint: '',
     account: '',
     reservation: '',
     container: '',
@@ -40,6 +44,8 @@ export function TaskSubmissionModal({
 
   const [endpoints, setEndpoints] = useState<Endpoint[]>([]);
   const [partitions, setPartitions] = useState<string[]>([]);
+  const [qosOptions, setQosOptions] = useState<string[]>([]);
+  const [constraintOptions, setConstraintOptions] = useState<string[]>([]);
   const [accounts, setAccounts] = useState<string[]>([]);
   const [containers, setContainers] = useState<string[]>([]);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
@@ -60,10 +66,13 @@ export function TaskSubmissionModal({
     accounts: false,
     containers: false,
     datasets: false,
-    submit: false
+    submit: false,
+    perlmutterOptions: false
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const isPerlmutterSelected = isPerlmutterHost(formData.endpointHost);
 
   const fetchEndpoints = async () => {
     setLoading((prev) => ({ ...prev, endpoints: true }));
@@ -98,7 +107,10 @@ export function TaskSubmissionModal({
   };
 
   const fetchPartitions = useCallback(async () => {
-    if (!formData.endpoint) return;
+    if (!formData.endpoint || isPerlmutterHost(formData.endpointHost)) {
+      setPartitions([]);
+      return;
+    }
 
     setLoading((prev) => ({ ...prev, partitions: true }));
     try {
@@ -116,7 +128,7 @@ export function TaskSubmissionModal({
     } finally {
       setLoading((prev) => ({ ...prev, partitions: false }));
     }
-  }, [formData.endpoint]);
+  }, [formData.endpoint, formData.endpointHost]);
 
   const fetchAccounts = useCallback(async () => {
     if (!formData.endpoint) return;
@@ -136,6 +148,32 @@ export function TaskSubmissionModal({
       console.error('Error fetching accounts:', error);
     } finally {
       setLoading((prev) => ({ ...prev, accounts: false }));
+    }
+  }, [formData.endpoint]);
+
+  const fetchPerlmutterOptions = useCallback(async () => {
+    if (!formData.endpoint) return;
+
+    setLoading((prev) => ({ ...prev, perlmutterOptions: true }));
+    try {
+      const response = await fetch('/api/list_qos_constraint', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ endpoint: formData.endpoint })
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setQosOptions(data.qos || []);
+      setConstraintOptions(data.constraints || []);
+    } catch (error) {
+      console.error('Error fetching QoS/constraint options:', error);
+      setQosOptions([]);
+      setConstraintOptions([]);
+    } finally {
+      setLoading((prev) => ({ ...prev, perlmutterOptions: false }));
     }
   }, [formData.endpoint]);
 
@@ -192,18 +230,37 @@ export function TaskSubmissionModal({
   }, [isOpen]);
 
   useEffect(() => {
-    if (formData.endpoint) {
+    if (!formData.endpoint) return;
+
+    if (isPerlmutterSelected) {
+      setPartitions([]);
+      fetchPerlmutterOptions();
+    } else {
+      setQosOptions([]);
+      setConstraintOptions([]);
       fetchPartitions();
-      fetchAccounts();
     }
-  }, [formData.endpoint, fetchPartitions, fetchAccounts]);
+    fetchAccounts();
+  }, [
+    formData.endpoint,
+    formData.endpointHost,
+    isPerlmutterSelected,
+    fetchPartitions,
+    fetchAccounts,
+    fetchPerlmutterOptions
+  ]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.taskName.trim()) newErrors.taskName = 'Task name is required';
     if (!formData.endpoint) newErrors.endpoint = 'Endpoint is required';
-    if (!formData.partition) newErrors.partition = 'Partition is required';
+    if (isPerlmutterSelected) {
+      if (!formData.qos) newErrors.qos = 'QoS is required';
+      if (!formData.constraint) newErrors.constraint = 'Constraint is required';
+    } else if (!formData.partition) {
+      newErrors.partition = 'Partition is required';
+    }
     if (!formData.account) newErrors.account = 'Account is required';
     if (!formData.container) newErrors.container = 'Container is required';
     if (!formData.time_duration)
@@ -221,7 +278,11 @@ export function TaskSubmissionModal({
       const payload: TaskSubmissionData = {
         endpoint: formData.endpoint,
         taskName: formData.taskName,
-        partition: formData.partition,
+        partition: isPerlmutterSelected
+          ? undefined
+          : formData.partition || undefined,
+        qos: isPerlmutterSelected ? formData.qos : undefined,
+        constraint: isPerlmutterSelected ? formData.constraint : undefined,
         account: formData.account,
         reservation: formData.reservation || undefined,
         container: formData.container,
@@ -255,8 +316,11 @@ export function TaskSubmissionModal({
   const resetForm = () => {
     setFormData({
       endpoint: '',
+      endpointHost: '',
       taskName: '',
       partition: '',
+      qos: '',
+      constraint: '',
       account: '',
       reservation: '',
       container: '',
@@ -265,6 +329,9 @@ export function TaskSubmissionModal({
       time_duration: '',
       dataset_id: ''
     });
+    setPartitions([]);
+    setQosOptions([]);
+    setConstraintOptions([]);
     setErrors({});
   };
 
@@ -349,12 +416,22 @@ export function TaskSubmissionModal({
                     onSelect={(displayName) => {
                       const uuid = endpointMap.get(displayName);
                       if (uuid) {
+                        const endpointDetails = endpoints.find(
+                          (ep) => ep.endpoint_uuid === uuid
+                        );
                         setFormData((prev) => ({
                           ...prev,
                           endpoint: uuid,
+                          endpointHost: endpointDetails?.endpoint_host || '',
                           partition: '',
+                          qos: '',
+                          constraint: '',
                           account: ''
                         }));
+                        setPartitions([]);
+                        setQosOptions([]);
+                        setConstraintOptions([]);
+                        setErrors({});
                       }
                     }}
                     placeholder="Select endpoint"
@@ -368,29 +445,129 @@ export function TaskSubmissionModal({
               </div>
 
               {/* Partition */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Partition *
-                </label>
-                <div className="mt-1">
-                  <VirtualSelect
-                    options={partitions}
-                    selected={formData.partition}
-                    onSelect={(value) =>
-                      setFormData((prev) => ({ ...prev, partition: value }))
-                    }
-                    placeholder="Select partition"
-                    loading={loading.partitions}
-                    disabled={!formData.endpoint}
-                    className={errors.partition ? 'border-red-500' : ''}
-                  />
+              {!isPerlmutterSelected && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Partition *
+                  </label>
+                  <div className="mt-1">
+                    <VirtualSelect
+                      options={partitions}
+                      selected={formData.partition}
+                      onSelect={(value) =>
+                        setFormData((prev) => ({ ...prev, partition: value }))
+                      }
+                      placeholder="Select partition"
+                      loading={loading.partitions}
+                      disabled={!formData.endpoint}
+                      className={errors.partition ? 'border-red-500' : ''}
+                    />
+                  </div>
+                  {errors.partition && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.partition}
+                    </p>
+                  )}
                 </div>
-                {errors.partition && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.partition}
-                  </p>
-                )}
-              </div>
+              )}
+
+              {/* QoS */}
+              {isPerlmutterSelected && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    QoS *
+                  </label>
+                  <div className="mt-1 space-y-4">
+                    <VirtualSelect
+                      options={qosOptions}
+                      selected={
+                        qosOptions.includes(formData.qos || '')
+                          ? formData.qos
+                          : ''
+                      }
+                      onSelect={(value) =>
+                        setFormData((prev) => ({ ...prev, qos: value }))
+                      }
+                      placeholder="Select QoS"
+                      loading={loading.perlmutterOptions}
+                      disabled={!formData.endpoint}
+                      className={errors.qos ? 'border-red-500' : ''}
+                    />
+                    <Input
+                      placeholder="Enter QoS manually (e.g., regular)"
+                      value={formData.qos || ''}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          qos: e.target.value
+                        }))
+                      }
+                      disabled={!formData.endpoint}
+                      className={errors.qos ? 'border-red-500' : ''}
+                    />
+                    {qosOptions.length === 0 && (
+                      <p className="text-xs text-gray-500">
+                        No QoS presets configured; enter a value manually.
+                      </p>
+                    )}
+                  </div>
+                  {errors.qos && (
+                    <p className="mt-1 text-sm text-red-600">{errors.qos}</p>
+                  )}
+                </div>
+              )}
+
+              {/* Constraint */}
+              {isPerlmutterSelected && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Constraint *
+                  </label>
+                  <div className="mt-1 space-y-4">
+                    <VirtualSelect
+                      options={constraintOptions}
+                      selected={
+                        constraintOptions.includes(formData.constraint || '')
+                          ? formData.constraint
+                          : ''
+                      }
+                      onSelect={(value) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          constraint: value
+                        }))
+                      }
+                      placeholder="Select constraint"
+                      loading={loading.perlmutterOptions}
+                      disabled={!formData.endpoint}
+                      className={errors.constraint ? 'border-red-500' : ''}
+                    />
+                    <Input
+                      placeholder="Enter constraint manually (e.g., cpu)"
+                      value={formData.constraint || ''}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          constraint: e.target.value
+                        }))
+                      }
+                      disabled={!formData.endpoint}
+                      className={errors.constraint ? 'border-red-500' : ''}
+                    />
+                    {constraintOptions.length === 0 && (
+                      <p className="text-xs text-gray-500">
+                        No constraint presets configured; enter a value
+                        manually.
+                      </p>
+                    )}
+                  </div>
+                  {errors.constraint && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.constraint}
+                    </p>
+                  )}
+                </div>
+              )}
 
               {/* Account */}
               <div className="md:row-span-2">

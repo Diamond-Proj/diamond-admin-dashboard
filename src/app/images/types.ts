@@ -7,6 +7,7 @@ export interface ContainerData {
 
 export interface BuilderFormData {
   endpoint: string;
+  endpointHost?: string;
   partition: string;
   account: string;
   reservation?: string;
