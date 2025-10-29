@@ -128,7 +128,7 @@ export function TaskSubmissionModal({
     } finally {
       setLoading((prev) => ({ ...prev, partitions: false }));
     }
-  }, [formData.endpoint]);
+  }, [formData.endpoint, formData.endpointHost]);
 
   const fetchAccounts = useCallback(async () => {
     if (!formData.endpoint) return;
@@ -257,8 +257,7 @@ export function TaskSubmissionModal({
     if (!formData.endpoint) newErrors.endpoint = 'Endpoint is required';
     if (isPerlmutterSelected) {
       if (!formData.qos) newErrors.qos = 'QoS is required';
-      if (!formData.constraint)
-        newErrors.constraint = 'Constraint is required';
+      if (!formData.constraint) newErrors.constraint = 'Constraint is required';
     } else if (!formData.partition) {
       newErrors.partition = 'Partition is required';
     }
@@ -279,7 +278,9 @@ export function TaskSubmissionModal({
       const payload: TaskSubmissionData = {
         endpoint: formData.endpoint,
         taskName: formData.taskName,
-        partition: isPerlmutterSelected ? undefined : formData.partition || undefined,
+        partition: isPerlmutterSelected
+          ? undefined
+          : formData.partition || undefined,
         qos: isPerlmutterSelected ? formData.qos : undefined,
         constraint: isPerlmutterSelected ? formData.constraint : undefined,
         account: formData.account,
@@ -496,7 +497,10 @@ export function TaskSubmissionModal({
                       placeholder="Enter QoS manually (e.g., regular)"
                       value={formData.qos || ''}
                       onChange={(e) =>
-                        setFormData((prev) => ({ ...prev, qos: e.target.value }))
+                        setFormData((prev) => ({
+                          ...prev,
+                          qos: e.target.value
+                        }))
                       }
                       disabled={!formData.endpoint}
                       className={errors.qos ? 'border-red-500' : ''}
@@ -552,7 +556,8 @@ export function TaskSubmissionModal({
                     />
                     {constraintOptions.length === 0 && (
                       <p className="text-xs text-gray-500">
-                        No constraint presets configured; enter a value manually.
+                        No constraint presets configured; enter a value
+                        manually.
                       </p>
                     )}
                   </div>

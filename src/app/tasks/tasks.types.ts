@@ -2,7 +2,7 @@ export interface TaskSubmissionData {
   endpoint: string;
   endpointHost?: string;
   taskName: string;
-  partition: string;
+  partition?: string;
   qos?: string;
   constraint?: string;
   account: string;
