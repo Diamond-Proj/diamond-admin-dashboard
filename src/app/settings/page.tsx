@@ -1,16 +1,10 @@
-import { is_authenticated } from '@/lib/authUtils';
-import { SettingsForm } from './form';
+import { SettingsContent } from './components/settings-content';
 
 export default async function SettingsPage() {
-  const isAuthenticated = await is_authenticated();
-  
   return (
-    <main className="flex flex-1 flex-col p-4 md:p-6">
-      <div className="flex items-center mb-8">
-        <h1 className="font-semibold text-lg md:text-2xl">Settings</h1>
-      </div>
-      <div className="w-full max-w-4xl">
-        <SettingsForm />
+    <main className="min-h-full bg-gray-50 p-6 dark:bg-gray-900">
+      <div className="mx-auto max-w-7xl">
+        <SettingsContent />
       </div>
     </main>
   );
