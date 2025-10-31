@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { X, ArrowRight, Settings } from 'lucide-react';
-
-const STORAGE_KEY = 'diamond-endpoint-onboarding';
 
 interface EndpointOnboardingProps {
   isAuthenticated: boolean;
@@ -14,19 +13,55 @@ export function EndpointOnboarding({
   isAuthenticated
 }: EndpointOnboardingProps) {
   const [isVisible, setIsVisible] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
-    const hasCompleted = localStorage.getItem(STORAGE_KEY) === 'completed';
+    async function checkInitialization() {
+      if (!isAuthenticated) {
+        return;
+      }
 
-    if (isAuthenticated && !hasCompleted) {
-      setTimeout(() => setIsVisible(true), 1000);
+      // Don't show onboarding on settings page - early check to avoid API call
+      if (pathname === '/settings') {
+        return;
+      }
+
+      // Get identity_id from cookies
+      const cookies = document.cookie.split(';');
+      const cookieObj: Record<string, string> = {};
+      cookies.forEach((cookie) => {
+        const [name, value] = cookie.trim().split('=');
+        if (name) cookieObj[name] = decodeURIComponent(value || '');
+      });
+
+      const primaryIdentity = cookieObj['primary_identity'];
+
+      if (!primaryIdentity) {
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `/api/profile?identity_id=${primaryIdentity}`
+        );
+        const data = await response.json();
+
+        // Show onboarding if profile is not initialized
+        if (response.ok && data.profile && !data.profile.isInitialized) {
+          setTimeout(() => {
+            // Double check pathname in case user navigated during the delay
+            if (window.location.pathname !== '/settings') {
+              setIsVisible(true);
+            }
+          }, 1000);
+        }
+      } catch (error) {
+        console.error('Error checking profile initialization:', error);
+      }
     }
-  }, [isAuthenticated]);
 
-  const handleComplete = () => {
-    localStorage.setItem(STORAGE_KEY, 'completed');
-    setIsVisible(false);
-  };
+    checkInitialization();
+  }, [isAuthenticated, pathname]);
 
   const handleClose = () => {
     setIsVisible(false);
@@ -75,7 +110,7 @@ export function EndpointOnboarding({
             <div className="space-y-3">
               <Link
                 href="/settings"
-                onClick={handleComplete}
+                onClick={handleClose}
                 className="flex w-full items-center justify-center space-x-2 rounded-lg bg-blue-600 px-4 py-2.5 font-medium text-white transition-colors hover:bg-blue-700"
               >
                 <span>Go to Settings</span>
@@ -83,7 +118,7 @@ export function EndpointOnboarding({
               </Link>
 
               <button
-                onClick={handleComplete}
+                onClick={handleClose}
                 className="w-full cursor-pointer py-2 text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
               >
                 Skip for now
