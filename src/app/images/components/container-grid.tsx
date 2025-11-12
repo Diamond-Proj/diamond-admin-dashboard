@@ -20,6 +20,9 @@ export function ContainerGrid({
   const [deletingContainers, setDeletingContainers] = useState<Set<string>>(
     new Set()
   );
+  const [publishingContainers, setPublishingContainers] = useState<Set<string>>(
+    new Set()
+  );
   const { toast } = useToast();
 
   const fetchContainerStatus = useCallback(async () => {
@@ -86,6 +89,54 @@ export function ContainerGrid({
         const newSet = new Set(prev);
         newSet.delete(containerName);
         return newSet;
+      });
+    }
+  };
+
+  const publishContainer = async (containerName: string) => {
+    setPublishingContainers((prev) => new Set(prev).add(containerName));
+    try {
+      const response = await fetch('/api/publish_container', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ container_name: containerName, is_public: true })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData?.error || 'Failed to publish container');
+      }
+
+      const data = await response.json();
+      setContainersData((prevData) => {
+        const nextData = { ...prevData };
+        const updated = {
+          ...nextData[containerName],
+          ...data.container,
+          is_public: true
+        };
+        nextData[containerName] = updated;
+        return nextData;
+      });
+      toast({
+        title: 'Success',
+        description: `Container "${containerName}" is now public`
+      });
+    } catch (error) {
+      console.error('Error publishing container:', error);
+      toast({
+        title: 'Error',
+        description: `Failed to publish container "${containerName}"`,
+        variant: 'destructive'
+      });
+    } finally {
+      setPublishingContainers((prev) => {
+        const next = new Set(prev);
+        next.delete(containerName);
+        return next;
       });
     }
   };
@@ -178,7 +229,9 @@ export function ContainerGrid({
           containerName={containerName}
           data={data}
           deletingContainers={deletingContainers}
+          publishingContainers={publishingContainers}
           deleteContainer={deleteContainer}
+          publishContainer={publishContainer}
           getStatusIcon={getStatusIcon}
           getStatusBadgeColor={getStatusBadgeColor}
         />

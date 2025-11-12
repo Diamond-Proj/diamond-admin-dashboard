@@ -4,6 +4,9 @@ export interface ContainerData {
   container_task_id: string;
   base_image: string;
   host_name?: string;
+  is_public?: boolean;
+  is_owner?: boolean;
+  owner_identity_id?: string;
 }
 
 export interface BuilderFormData {
