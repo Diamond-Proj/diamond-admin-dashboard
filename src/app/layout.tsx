@@ -4,7 +4,7 @@ import './globals.css';
 
 import Link from 'next/link';
 
-import { is_authenticated } from '@/lib/authUtils';
+import { TokenManagerServer } from '@/lib/auth/tokenManager.server';
 
 import { ThemeProvider } from 'next-themes';
 import { Logo } from '@/components/icons';
@@ -27,7 +27,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   // Get initial authentication status for server-side rendering
-  const isAuthenticated = await is_authenticated();
+  const tokens = await TokenManagerServer.getTokensFromServerCookies();
+  const isAuthenticated = !!tokens && !TokenManagerServer.isExpired(tokens);
 
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
