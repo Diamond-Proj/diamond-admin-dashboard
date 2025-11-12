@@ -1,16 +1,13 @@
 import { LoginButton } from '@/components/login-button';
-import { is_authenticated } from '@/lib/authUtils';
+import { TokenManagerServer } from '@/lib/auth/tokenManager.server';
 import Link from 'next/link';
 import Image from 'next/image';
 import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
 
 export default async function SignInPage() {
-  // Check for authentication directly from cookies
-  const cookieStore = await cookies();
-  const tokensInCookies = cookieStore.get('tokens');
-  const isAuthenticatedCookie = cookieStore.get('is_authenticated');
-  const isAuthenticated = !!tokensInCookies || !!isAuthenticatedCookie;
+  // Check for authentication using new TokenManager
+  const tokens = await TokenManagerServer.getTokensFromServerCookies();
+  const isAuthenticated = !!tokens && !TokenManagerServer.isExpired(tokens);
 
   console.debug('Authentication status on SignIn Page:', isAuthenticated);
 
