@@ -25,7 +25,7 @@ export function ContainerGrid({
   const fetchContainerStatus = useCallback(async () => {
     try {
       // setIsLoading(true);
-      const response = await fetch('/api/get_containers', {
+      const response = await fetch('/api/get_all_containers', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
