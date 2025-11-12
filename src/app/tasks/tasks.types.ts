@@ -18,6 +18,7 @@ export interface Task {
   status: 'COMPLETED' | 'PENDING' | 'RUNNING' | 'FAILED';
   details: {
     endpoint_id: string;
+    endpoint_name?: string;
     task_create_time: string;
   };
   result: string | null;
