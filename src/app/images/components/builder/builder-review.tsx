@@ -2,55 +2,89 @@
 
 import { Server, Container, Terminal } from 'lucide-react';
 import { BuilderFormData, ReviewSection } from '@/app/images/types';
+import { isPerlmutterHost } from '@/app/utils/hosts';
 
 interface BuilderReviewProps {
   formData: BuilderFormData;
 }
 
 export function BuilderReview({ formData }: BuilderReviewProps) {
+  const isPerlmutter = isPerlmutterHost(formData.endpointHost);
+
+  const computingItems = [
+    { label: 'Endpoint', value: formData.endpoint },
+    ...(isPerlmutter
+      ? []
+      : [
+          {
+            label: 'Partition',
+            value: formData.partition || 'Not set'
+          }
+        ]),
+    {
+      label: 'Account',
+      value: isPerlmutter
+        ? 'Not required (Perlmutter)'
+        : formData.account || 'Not set'
+    },
+    {
+      label: 'Reservation',
+      value: isPerlmutter
+        ? 'Not required (Perlmutter)'
+        : formData.reservation || 'None'
+    }
+  ];
+
   const sections: ReviewSection[] = [
     {
       title: 'Computing Resources',
       icon: <Server className="text-primary h-5 w-5" />,
-      items: [
-        { label: 'Endpoint', value: formData.endpoint },
-        { label: 'Partition', value: formData.partition },
-        { label: 'Account', value: formData.account },
-        { label: 'Reservation', value: formData.reservation || 'None' }
-      ]
+      items: computingItems
     },
     {
       title: 'Container Configuration',
       icon: <Container className="text-primary h-5 w-5" />,
       items: [
         { label: 'Container Name', value: formData.containerName },
-        { label: 'Build Location', value: formData.location || 'Default' },
+        {
+          label: 'Build Location',
+          value: isPerlmutter
+            ? 'Not applicable (Perlmutter)'
+            : formData.location || 'Default'
+        },
         { label: 'Base Image', value: formData.baseImage }
       ]
     },
     {
       title: 'Build Configuration',
       icon: <Terminal className="text-primary h-5 w-5" />,
-      items: [
-        {
-          label: 'Dependencies',
-          value: formData.dependencies ? 'Configured' : 'None',
-          expandable: formData.dependencies,
-          content: formData.dependencies
-        },
-        {
-          label: 'Environment Variables',
-          value: formData.environment ? 'Configured' : 'None',
-          expandable: formData.environment,
-          content: formData.environment
-        },
-        {
-          label: 'Build Commands',
-          value: formData.commands ? 'Configured' : 'None',
-          expandable: formData.commands,
-          content: formData.commands
-        }
-      ]
+      items: isPerlmutter
+        ? [
+            {
+              label: 'Shifter Configuration',
+              value: 'No additional configuration required'
+            }
+          ]
+        : [
+            {
+              label: 'Dependencies',
+              value: formData.dependencies ? 'Configured' : 'None',
+              expandable: formData.dependencies,
+              content: formData.dependencies
+            },
+            {
+              label: 'Environment Variables',
+              value: formData.environment ? 'Configured' : 'None',
+              expandable: formData.environment,
+              content: formData.environment
+            },
+            {
+              label: 'Build Commands',
+              value: formData.commands ? 'Configured' : 'None',
+              expandable: formData.commands,
+              content: formData.commands
+            }
+          ]
     }
   ];
 
