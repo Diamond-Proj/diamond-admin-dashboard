@@ -41,6 +41,10 @@ export interface Container {
   status: string;
   base_image: string;
   location: string;
+  host_name?: string;
+  is_public?: boolean;
+  owner_identity_id?: string;
+  is_owner?: boolean;
 }
 
 export interface ContainersResponse {

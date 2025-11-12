@@ -9,7 +9,9 @@ export default function ContainerItem({
   containerName,
   data,
   deletingContainers,
+  publishingContainers,
   deleteContainer,
+  publishContainer,
 
   getStatusIcon,
   getStatusBadgeColor
@@ -17,11 +19,15 @@ export default function ContainerItem({
   containerName: string;
   data: ContainerData;
   deletingContainers: Set<string>;
+  publishingContainers: Set<string>;
   deleteContainer: (name: string, taskId: string) => void;
+  publishContainer: (name: string) => void;
   getStatusIcon: (status: string) => React.ReactNode;
   getStatusBadgeColor: (status: string) => string;
 }) {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const isDeleting = deletingContainers.has(containerName);
+  const isPublishing = publishingContainers.has(containerName);
 
   const handleDeleteClick = () => {
     setShowConfirmDialog(true);
@@ -53,6 +59,11 @@ export default function ContainerItem({
                   {getStatusIcon(data.status)}
                   {data.status || 'Unknown'}
                 </span>
+                {data.is_public && (
+                  <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800 dark:bg-amber-950/50 dark:text-amber-300">
+                    Public
+                  </span>
+                )}
               </div>
             </div>
 
@@ -92,16 +103,27 @@ export default function ContainerItem({
           </div>
 
           {/* Actions */}
-          <div className="ml-6">
+          <div className="ml-6 flex flex-col gap-2">
+            {data.is_owner && !data.is_public && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => publishContainer(containerName)}
+                disabled={isPublishing}
+                className="cursor-pointer"
+              >
+                {isPublishing ? 'Publishing...' : 'Make Public'}
+              </Button>
+            )}
             <Button
               variant="destructive"
               size="sm"
               onClick={handleDeleteClick}
-              disabled={deletingContainers.has(containerName)}
+              disabled={isDeleting}
               className="flex cursor-pointer items-center gap-2"
             >
               <Trash2 className="h-4 w-4" />
-              {deletingContainers.has(containerName) ? 'Deleting...' : 'Delete'}
+              {isDeleting ? 'Deleting...' : 'Delete'}
             </Button>
           </div>
         </div>
@@ -143,6 +165,11 @@ export default function ContainerItem({
                     <p className="text-muted-foreground text-xs">
                       <span className="font-bold">Location:</span>{' '}
                       {data.location}
+                    </p>
+                  )}
+                  {data.is_public && (
+                    <p className="text-muted-foreground text-xs">
+                      <span className="font-bold">Visibility:</span> Public
                     </p>
                   )}
                 </div>
