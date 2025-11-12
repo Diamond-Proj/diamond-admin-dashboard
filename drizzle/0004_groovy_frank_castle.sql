@@ -1,1 +1,0 @@
-ALTER TABLE "container" ADD COLUMN "is_public" boolean DEFAULT false;
