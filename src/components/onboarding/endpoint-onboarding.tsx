@@ -47,7 +47,7 @@ export function EndpointOnboarding({
         const data = await response.json();
 
         // Show onboarding if profile is not initialized
-        if (response.ok && data.profile && !data.profile.isInitialized) {
+        if (response.ok && data.profile && !data.profile.is_initialized) {
           setTimeout(() => {
             // Double check pathname in case user navigated during the delay
             if (window.location.pathname !== '/settings') {
