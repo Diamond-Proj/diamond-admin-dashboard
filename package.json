@@ -16,14 +16,9 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "check": "eslint && tsc -p tsconfig.json --noEmit",
     "format": "prettier --write .",
-    "shadcn:add": "npx shadcn@latest add",
-    "shadcn:init": "npx shadcn@latest init",
-    "db:generate": "npx drizzle-kit generate",
-    "db:pull": "npx drizzle-kit pull",
-    "db:migrate": "npx drizzle-kit migrate",
-    "db:studio": "npx drizzle-kit studio",
-    "db:push": "npx drizzle-kit push",
-    "db:up": "npx drizzle-kit up"
+    "shadcn:add": "shadcn@latest add",
+    "shadcn:init": "shadcn@latest init",
+    "db:pull": "drizzle-kit pull"
   },
   "dependencies": {
     "@globus/react-auth-context": "^0.1.0",
