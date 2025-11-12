@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Task } from '../tasks.types';
 import { CheckCircle, Clock, XCircle, Loader, Terminal } from 'lucide-react';
 import TaskItem from './task/TaskItem';
@@ -54,6 +54,13 @@ export function TasksList({
     }
   }, []);
 
+  const sortedTasks = useMemo(() => {
+    return [...tasks].sort((a, b) => {
+      return new Date(b.details.task_create_time).getTime() - 
+             new Date(a.details.task_create_time).getTime();
+    });
+  }, [tasks]);
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -96,7 +103,7 @@ export function TasksList({
 
   return (
     <div className="flex flex-col gap-4">
-      {tasks.map((task) => (
+      {sortedTasks.map((task) => (
         <TaskItem
           key={task.task_id}
           task={task}
