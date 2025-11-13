@@ -5,7 +5,7 @@ import { TokenManagerServer } from './tokenManager.server';
 const PUBLIC_ROUTES = ['/sign-in', '/auth/callback'];
 
 // API routes that don't need auth check
-const API_ROUTES = ['/api/auth'];
+const API_ROUTES = ['/api/auth', '/api/healthcheck'];
 
 function getBaseUrl(request: NextRequest): string {
   return request.nextUrl.origin;
