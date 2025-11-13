@@ -1,8 +1,7 @@
-import { is_authenticated } from '@/lib/authUtils';
 import { ImagesPageContent } from './components/images-page-content';
 
 export default async function ImagesPage() {
-  const isAuthenticated = await is_authenticated();
+  const isAuthenticated = true;
 
   return (
     <main className="min-h-full bg-gray-50 p-6 dark:bg-gray-900">

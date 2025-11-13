@@ -3,7 +3,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Container, CheckCircle2, Clock, X, Activity } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { ContainersResponse } from '@/app/images/types';
+import {
+  ContainersResponse,
+  ContainersApiResponse
+} from '@/app/images/types';
 import ContainerItem from './container/ContainerItem';
 
 interface ContainerGridProps {
@@ -15,7 +18,11 @@ export function ContainerGrid({
   isAuthenticated,
   refreshTrigger
 }: ContainerGridProps) {
-  const [containersData, setContainersData] = useState<ContainersResponse>({});
+  const [privateContainers, setPrivateContainers] =
+    useState<ContainersResponse>({});
+  const [publicContainers, setPublicContainers] = useState<
+    Record<string, ContainersResponse>
+  >({});
   const [isLoading, setIsLoading] = useState(true);
   const [deletingContainers, setDeletingContainers] = useState<Set<string>>(
     new Set()
@@ -25,15 +32,16 @@ export function ContainerGrid({
   const fetchContainerStatus = useCallback(async () => {
     try {
       // setIsLoading(true);
-      const response = await fetch('/api/get_containers', {
+      const response = await fetch('/api/get_all_containers', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
         }
       });
-      const data: ContainersResponse = await response.json();
+      const data: ContainersApiResponse = await response.json();
       console.log('Fetched container data:', data);
-      setContainersData(data);
+      setPrivateContainers(data.containers || {});
+      setPublicContainers(data.public_by_host || {});
     } catch (error) {
       console.error('Error fetching container status:', error);
       toast({
@@ -62,7 +70,7 @@ export function ContainerGrid({
       });
 
       if (response.ok) {
-        setContainersData((prevData) => {
+        setPrivateContainers((prevData) => {
           const newData = { ...prevData };
           delete newData[containerName];
           return newData;
@@ -156,7 +164,15 @@ export function ContainerGrid({
     );
   }
 
-  if (Object.keys(containersData).length === 0) {
+  const privateKeys = Object.keys(privateContainers);
+  const publicHosts = Object.keys(publicContainers);
+  const hasPrivate = privateKeys.length > 0;
+  const hasPublic = publicHosts.some(
+    (host) =>
+      publicContainers[host] && Object.keys(publicContainers[host]).length > 0
+  );
+
+  if (!hasPrivate && !hasPublic) {
     return (
       <div className="py-16 text-center">
         <div className="bg-muted dark:bg-muted/50 mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full">
@@ -172,17 +188,65 @@ export function ContainerGrid({
 
   return (
     <div className="flex flex-col gap-4">
-      {Object.entries(containersData).map(([containerName, data]) => (
-        <ContainerItem
-          key={containerName}
-          containerName={containerName}
-          data={data}
-          deletingContainers={deletingContainers}
-          deleteContainer={deleteContainer}
-          getStatusIcon={getStatusIcon}
-          getStatusBadgeColor={getStatusBadgeColor}
-        />
-      ))}
+      {privateKeys.map((containerName) => {
+        const data = privateContainers[containerName];
+        if (!data) return null;
+        return (
+          <ContainerItem
+            key={containerName}
+            containerName={containerName}
+            data={data}
+            deletingContainers={deletingContainers}
+            deleteContainer={deleteContainer}
+            getStatusIcon={getStatusIcon}
+            getStatusBadgeColor={getStatusBadgeColor}
+          />
+        );
+      })}
+
+      {hasPublic && (
+        <div className="mt-6 space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            Public Images by Host
+          </h3>
+          {publicHosts.map((host, index) => {
+            const hostContainers = publicContainers[host];
+            if (!hostContainers || Object.keys(hostContainers).length === 0) {
+              return null;
+            }
+            return (
+              <details
+                key={host}
+                className="rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+                open={index === 0}
+              >
+                <summary className="flex cursor-pointer items-center justify-between px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">
+                  <span>{host}</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    {Object.keys(hostContainers).length} image
+                    {Object.keys(hostContainers).length === 1 ? '' : 's'}
+                  </span>
+                </summary>
+                <div className="border-t border-gray-100 px-4 py-4 dark:border-gray-700">
+                  <div className="flex flex-col gap-4">
+                    {Object.entries(hostContainers).map(
+                      ([containerName, data]) => (
+                        <ContainerItem
+                          key={containerName}
+                          containerName={containerName}
+                          data={data}
+                          getStatusIcon={getStatusIcon}
+                          getStatusBadgeColor={getStatusBadgeColor}
+                        />
+                      )
+                    )}
+                  </div>
+                </div>
+              </details>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

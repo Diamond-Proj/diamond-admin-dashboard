@@ -11,7 +11,8 @@ import {
   Endpoint,
   ContainersResponse,
   DatasetsApiResponse,
-  Dataset
+  Dataset,
+  EndpointContainersApiResponse
 } from '../tasks.types';
 
 interface TaskSubmissionModalProps {
@@ -74,15 +75,15 @@ export function TaskSubmissionModal({
       const data = await response.json();
       setEndpoints(data);
 
-      // Filter only online endpoints and create options and mapping for VirtualSelect
-      const onlineEndpoints = data.filter(
-        (ep: Endpoint) => ep.endpoint_status === 'online'
+      // Filter only online, managed endpoints and create options and mapping for VirtualSelect
+      const eligibleEndpoints = data.filter(
+        (ep: Endpoint) => ep.endpoint_status === 'online' && ep.is_managed
       );
 
       const options: string[] = [];
       const map = new Map<string, string>();
 
-      onlineEndpoints.forEach((ep: Endpoint) => {
+      eligibleEndpoints.forEach((ep: Endpoint) => {
         const displayName = `${ep.endpoint_name} (${ep.endpoint_status})`;
         options.push(displayName);
         map.set(displayName, ep.endpoint_uuid);
@@ -139,20 +140,33 @@ export function TaskSubmissionModal({
     }
   }, [formData.endpoint]);
 
-  const fetchContainers = async () => {
+  const fetchContainersForEndpoint = useCallback(async () => {
+    if (!formData.endpoint) {
+      setContainers([]);
+      return;
+    }
+
     setLoading((prev) => ({ ...prev, containers: true }));
     try {
-      const response = await fetch('/api/get_containers', {
-        credentials: 'include'
+      const response = await fetch('/api/get_containers_on_endpoint', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ endpoint_uuid: formData.endpoint })
       });
-      const data: ContainersResponse = await response.json();
-      setContainers(Object.keys(data));
+      const data: EndpointContainersApiResponse = await response.json();
+      const privateNames = Object.keys(data.private || {});
+      const publicNames = Object.keys(data.public || {}).filter(
+        (name) => !privateNames.includes(name)
+      );
+      setContainers([...privateNames, ...publicNames]);
     } catch (error) {
       console.error('Error fetching containers:', error);
+      setContainers([]);
     } finally {
       setLoading((prev) => ({ ...prev, containers: false }));
     }
-  };
+  }, [formData.endpoint]);
 
   const fetchDatasets = async () => {
     setLoading((prev) => ({ ...prev, datasets: true }));
@@ -186,7 +200,6 @@ export function TaskSubmissionModal({
   useEffect(() => {
     if (isOpen) {
       fetchEndpoints();
-      fetchContainers();
       fetchDatasets();
     }
   }, [isOpen]);
@@ -196,7 +209,13 @@ export function TaskSubmissionModal({
       fetchPartitions();
       fetchAccounts();
     }
-  }, [formData.endpoint, fetchPartitions, fetchAccounts]);
+    fetchContainersForEndpoint();
+  }, [
+    formData.endpoint,
+    fetchPartitions,
+    fetchAccounts,
+    fetchContainersForEndpoint
+  ]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -353,11 +372,12 @@ export function TaskSubmissionModal({
                           ...prev,
                           endpoint: uuid,
                           partition: '',
-                          account: ''
+                          account: '',
+                          container: ''
                         }));
                       }
                     }}
-                    placeholder="Select endpoint"
+                    placeholder="Select an online, managed endpoint"
                     loading={loading.endpoints}
                     className={errors.endpoint ? 'border-red-500' : ''}
                   />
@@ -449,6 +469,7 @@ export function TaskSubmissionModal({
                     }
                     placeholder="Select container"
                     loading={loading.containers}
+                    disabled={!formData.endpoint}
                     className={errors.container ? 'border-red-500' : ''}
                   />
                 </div>
