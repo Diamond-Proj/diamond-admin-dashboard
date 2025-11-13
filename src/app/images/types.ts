@@ -40,6 +40,11 @@ export interface ContainersResponse {
   [containerName: string]: ContainerData;
 }
 
+export interface ContainersApiResponse {
+  containers: ContainersResponse;
+  public_by_host: Record<string, ContainersResponse>;
+}
+
 export interface BuildLogResponse {
   log_content: string;
   status: string;
@@ -71,4 +76,5 @@ export interface Endpoint {
   endpoint_host: string; // Endpoint host address
   endpoint_status: string; // Endpoint status (online/offline)
   diamond_dir: string; // Diamond working directory path
+  is_managed?: boolean;
 }
