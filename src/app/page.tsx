@@ -12,6 +12,8 @@ import type {
 } from '@/components/dashboard/dashboard.types';
 
 import { getUserProfile, updateUserProfile } from '@/lib/taskHandlers';
+import { TokenManager } from '@/lib/auth/tokenManager.client';
+import { useTokenRefresh } from '@/lib/auth/useTokenRefresh';
 
 import { SetupGuide } from '@/components/dashboard/setup-guide';
 import { DashboardStatsCards } from '@/components/dashboard/dashboard-stats';
@@ -25,43 +27,45 @@ export default function DashboardPage() {
   const [recentTasks, setRecentTasks] = useState<RecentTask[]>([]);
   const [isPending, startTransition] = useTransition();
 
+  // Enable automatic token refresh
+  useTokenRefresh();
+
   useEffect(() => {
     // Check authentication status from cookies client-side
     const checkAuth = () => {
-      const cookies = document.cookie.split(';');
+      const tokens = TokenManager.getTokensFromClientCookies();
+      const hasAuth = !!tokens;
 
-      const authCookies = [
-        'is_authenticated',
-        'tokens',
-        'access_token',
-        'id_token',
-        'refresh_token',
-        'name',
-        'email',
-        'primary_identity'
-      ];
+      setIsAuthenticated(hasAuth);
 
-      const hasAuthCookie = cookies.some((cookie) => {
-        const cookieName = cookie.trim().split('=')[0];
-        return authCookies.includes(cookieName);
-      });
+      // If authenticated, get user info from tokens or cookies
+      if (hasAuth) {
+        // First try to get from tokens
+        const tokenUserInfo = tokens ? TokenManager.getUserInfo(tokens) : null;
 
-      setIsAuthenticated(hasAuthCookie);
+        if (tokenUserInfo) {
+          setUserInfo({
+            name: tokenUserInfo.name || '',
+            email: tokenUserInfo.email || '',
+            primary_identity: tokenUserInfo.id || '',
+            institution: tokenUserInfo.organization || ''
+          });
+        } else {
+          // Fallback to cookies
+          const cookies = document.cookie.split(';');
+          const cookieObj: Record<string, string> = {};
+          cookies.forEach((cookie) => {
+            const [name, value] = cookie.trim().split('=');
+            if (name && value) cookieObj[name] = decodeURIComponent(value);
+          });
 
-      // If authenticated, get user info from cookies
-      if (hasAuthCookie) {
-        const cookieObj: Record<string, string> = {};
-        cookies.forEach((cookie) => {
-          const [name, value] = cookie.trim().split('=');
-          if (name) cookieObj[name] = decodeURIComponent(value || '');
-        });
-
-        setUserInfo({
-          name: cookieObj['name'],
-          email: cookieObj['email'],
-          primary_identity: cookieObj['primary_identity'],
-          institution: cookieObj['institution']
-        });
+          setUserInfo({
+            name: cookieObj['name'] || '',
+            email: cookieObj['email'] || '',
+            primary_identity: cookieObj['primary_identity'] || '',
+            institution: cookieObj['institution'] || ''
+          });
+        }
       }
     };
 
@@ -144,7 +148,8 @@ export default function DashboardPage() {
     return (
       <main className="flex flex-1 flex-col items-center justify-center p-4 md:p-6">
         <div className="text-center">
-          <p>Loading dashboard...</p>
+          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600"></div>
+          <p className="mt-4 text-gray-600">Loading dashboard...</p>
         </div>
       </main>
     );
