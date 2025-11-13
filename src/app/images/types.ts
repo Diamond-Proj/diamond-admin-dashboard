@@ -3,6 +3,10 @@ export interface ContainerData {
   location: string;
   container_task_id: string;
   base_image: string;
+  host_name?: string;
+  is_public?: boolean;
+  is_owner?: boolean;
+  owner_identity_id?: string;
 }
 
 export interface BuilderFormData {
@@ -33,6 +37,11 @@ export interface ReviewSection {
 
 export interface ContainersResponse {
   [containerName: string]: ContainerData;
+}
+
+export interface ContainersApiResponse {
+  containers: ContainersResponse;
+  public_by_host: Record<string, ContainersResponse>;
 }
 
 export interface BuildLogResponse {
@@ -66,4 +75,5 @@ export interface Endpoint {
   endpoint_host: string; // Endpoint host address
   endpoint_status: string; // Endpoint status (online/offline)
   diamond_dir: string; // Diamond working directory path
+  is_managed?: boolean;
 }

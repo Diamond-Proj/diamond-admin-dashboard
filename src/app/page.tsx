@@ -15,7 +15,6 @@ import { getUserProfile, updateUserProfile } from '@/lib/taskHandlers';
 import { TokenManager } from '@/lib/auth/tokenManager.client';
 import { useTokenRefresh } from '@/lib/auth/useTokenRefresh';
 
-import { DataPrepStatus } from '@/components/data-prep-status';
 import { SetupGuide } from '@/components/dashboard/setup-guide';
 import { DashboardStatsCards } from '@/components/dashboard/dashboard-stats';
 import { RecentActivity } from '@/components/dashboard/recent-activity';
@@ -187,9 +186,6 @@ export default function DashboardPage() {
           <p className="text-gray-600 dark:text-gray-400">
             {"Here's what's happening with your HPC workloads today"}
           </p>
-        </div>
-        <div className="mt-4 md:mt-0">
-          <DataPrepStatus initialIsAuthenticated={isAuthenticated} />
         </div>
       </div>
 
