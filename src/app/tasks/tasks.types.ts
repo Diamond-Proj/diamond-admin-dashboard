@@ -35,6 +35,7 @@ export interface Endpoint {
   endpoint_host: string;
   endpoint_status: string;
   diamond_dir: string;
+  is_managed?: boolean;
 }
 
 export interface Container {
@@ -50,6 +51,11 @@ export interface Container {
 
 export interface ContainersResponse {
   [containerName: string]: Container;
+}
+
+export interface EndpointContainersApiResponse {
+  private: ContainersResponse;
+  public: ContainersResponse;
 }
 
 export interface Dataset {

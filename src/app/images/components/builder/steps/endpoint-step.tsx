@@ -108,11 +108,11 @@ export function EndpointStep({ formData, onUpdate }: EndpointStepProps) {
 
   const isEndpointSelected = !!formData.endpoint;
 
-  // Filter only online endpoints and create options for VirtualSelect
-  const onlineEndpoints = endpoints.filter(
-    (endpoint) => endpoint.endpoint_status === 'online'
+  // Filter only online, managed endpoints and create options for VirtualSelect
+  const eligibleEndpoints = endpoints.filter(
+    (endpoint) => endpoint.endpoint_status === 'online' && endpoint.is_managed
   );
-  const endpointOptions = onlineEndpoints.map(
+  const endpointOptions = eligibleEndpoints.map(
     (endpoint) => `${endpoint.endpoint_name} (${endpoint.endpoint_status})`
   );
 
@@ -126,7 +126,7 @@ export function EndpointStep({ formData, onUpdate }: EndpointStepProps) {
 
   const handleEndpointSelect = (displayName: string) => {
     // Find the endpoint UUID from the display name
-    const endpoint = onlineEndpoints.find(
+    const endpoint = eligibleEndpoints.find(
       (ep) => `${ep.endpoint_name} (${ep.endpoint_status})` === displayName
     );
     if (endpoint) {
@@ -167,10 +167,10 @@ export function EndpointStep({ formData, onUpdate }: EndpointStepProps) {
 
               {!isLoadingEndpoints &&
                 endpoints.length > 0 &&
-                onlineEndpoints.length === 0 && (
+                eligibleEndpoints.length === 0 && (
                   <p className="text-sm text-amber-600">
-                    No online endpoints available. Please contact your
-                    administrator.
+                    No online, managed endpoints are available. Please refresh
+                    your endpoints in Settings or contact your administrator.
                   </p>
                 )}
             </div>
