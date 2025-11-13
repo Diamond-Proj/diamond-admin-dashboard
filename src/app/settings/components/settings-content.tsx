@@ -23,6 +23,7 @@ interface EndpointDetail {
   endpoint_host: string;
   endpoint_status: string;
   diamond_dir: string;
+  is_managed?: boolean;
 }
 
 interface EndpointApiResponse {
@@ -32,6 +33,14 @@ interface EndpointApiResponse {
 
 interface EndpointOverviewResponse {
   [uuid: string]: EndpointApiResponse;
+}
+
+type DataPrepStatus = 'idle' | 'running' | 'success' | 'error';
+
+interface DataPrepProgress {
+  completed: number;
+  total: number;
+  currentEndpoint: string;
 }
 
 export function SettingsContent() {
@@ -45,6 +54,14 @@ export function SettingsContent() {
   const [activeTab, setActiveTab] = useState<'managed' | 'available'>(
     'managed'
   );
+  const [dataPrepStatus, setDataPrepStatus] =
+    useState<DataPrepStatus>('idle');
+  const [dataPrepProgress, setDataPrepProgress] = useState<DataPrepProgress>({
+    completed: 0,
+    total: 0,
+    currentEndpoint: ''
+  });
+  const [dataPrepMessage, setDataPrepMessage] = useState('');
   const { toast } = useToast();
 
   const fetchEndpoints = useCallback(async () => {
@@ -121,6 +138,96 @@ export function SettingsContent() {
     loadInitialData();
   }, [fetchEndpoints]);
 
+  const runDataPrepWorkflow = useCallback(
+    async (): Promise<{ success: boolean; message?: string }> => {
+    setDataPrepStatus('running');
+    setDataPrepProgress({ completed: 0, total: 0, currentEndpoint: '' });
+    setDataPrepMessage('');
+
+    try {
+      const response = await fetch('/api/list_all_endpoints', {
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch endpoints for preparation.');
+      }
+
+      const allEndpointDetails = (await response.json()) as EndpointDetail[];
+      const eligibleEndpoints = allEndpointDetails.filter(
+        (endpoint) =>
+          endpoint.endpoint_status === 'online' && endpoint.is_managed
+      );
+
+      if (eligibleEndpoints.length === 0) {
+        const message =
+          'No online, managed endpoints available for preparation.';
+        setDataPrepStatus('error');
+        setDataPrepMessage(message);
+        return { success: false, message };
+      }
+
+      const failures: string[] = [];
+
+      for (let i = 0; i < eligibleEndpoints.length; i++) {
+        const endpoint = eligibleEndpoints[i];
+
+        setDataPrepProgress({
+          completed: i,
+          total: eligibleEndpoints.length,
+          currentEndpoint: endpoint.endpoint_name
+        });
+
+        try {
+          const loadResponse = await fetch('/api/load_accounts_partitions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({ endpoint_uuid: endpoint.endpoint_uuid })
+          });
+
+          if (!loadResponse.ok) {
+            throw new Error('Failed to load endpoint metadata');
+          }
+        } catch (error) {
+          console.error(
+            `Failed to prepare endpoint ${endpoint.endpoint_name}`,
+            error
+          );
+          failures.push(endpoint.endpoint_name);
+        }
+      }
+
+      setDataPrepProgress({
+        completed: eligibleEndpoints.length,
+        total: eligibleEndpoints.length,
+        currentEndpoint: ''
+      });
+
+      if (failures.length > 0) {
+        const message = `Failed to prepare: ${failures.join(', ')}`;
+        setDataPrepStatus('error');
+        setDataPrepMessage(message);
+        return { success: false, message };
+      }
+
+      setDataPrepStatus('success');
+      setDataPrepMessage('Endpoint data preparation complete.');
+      return { success: true };
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Endpoint preparation failed.';
+      setDataPrepStatus('error');
+      setDataPrepMessage(message);
+      return { success: false, message };
+    }
+  },
+  []);
+
   const refreshEndpoints = async () => {
     try {
       setIsRefreshing(true);
@@ -136,17 +243,30 @@ export function SettingsContent() {
         throw new Error('Failed to refresh endpoints');
       }
 
-      toast({
-        title: 'Success',
-        description: 'Endpoints refreshed successfully!'
-      });
-
+      const prepResult = await runDataPrepWorkflow();
       await fetchEndpoints();
+
+      toast({
+        title: prepResult?.success
+          ? 'Endpoints refreshed'
+          : 'Endpoints refreshed with warnings',
+        description:
+          prepResult?.success
+            ? 'Endpoints and metadata are up to date.'
+            : prepResult?.message ||
+              'Some endpoints could not be prepared. Please review their status.',
+        variant: prepResult?.success ? 'default' : 'destructive'
+      });
     } catch (error) {
       console.error('Error refreshing endpoints:', error);
+      setDataPrepStatus('error');
+      setDataPrepMessage('Failed to refresh endpoints.');
       toast({
         title: 'Error',
-        description: 'Failed to refresh endpoints. Please try again.',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Failed to refresh endpoints. Please try again.',
         variant: 'destructive'
       });
     } finally {
@@ -221,6 +341,42 @@ export function SettingsContent() {
         isRefreshing={isRefreshing}
         onRefresh={refreshEndpoints}
       />
+
+      {dataPrepStatus !== 'idle' && (
+        <div
+          className={`flex items-center justify-between rounded-lg border p-4 ${
+            dataPrepStatus === 'success'
+              ? 'border-green-200 bg-green-50 dark:border-green-900/50 dark:bg-green-950/40'
+              : dataPrepStatus === 'running'
+              ? 'border-blue-200 bg-blue-50 dark:border-blue-900/50 dark:bg-blue-950/40'
+              : 'border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/40'
+          }`}
+        >
+          <div>
+            <p className="font-medium text-gray-900 dark:text-gray-100">
+              {dataPrepStatus === 'running'
+                ? 'Preparing endpoints'
+                : dataPrepStatus === 'success'
+                ? 'Endpoint data ready'
+                : 'Endpoint preparation issue'}
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              {dataPrepStatus === 'running'
+                ? dataPrepProgress.total > 0
+                  ? `Prepared ${dataPrepProgress.completed}/${dataPrepProgress.total}${
+                      dataPrepProgress.currentEndpoint
+                        ? ` • ${dataPrepProgress.currentEndpoint}`
+                        : ''
+                    }`
+                  : 'Starting endpoint preparation...'
+                : dataPrepMessage}
+            </p>
+          </div>
+          {dataPrepStatus === 'running' && (
+            <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
+          )}
+        </div>
+      )}
 
       {isInitialLoading && (
         <>
