@@ -28,7 +28,10 @@ export function SettingsHeader({
       >
         {isRefreshing ? (
           <>
-            <Loader2 className="h-4 w-4 animate-spin transition-transform duration-200" />
+            <Loader2 
+              className="h-4 w-4 animate-spin transition-transform duration-200" 
+              style={{ animationDuration: '1s' }}
+            />
             Refreshing...
           </>
         ) : (
