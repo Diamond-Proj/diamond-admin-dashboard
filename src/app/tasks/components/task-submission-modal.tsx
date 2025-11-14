@@ -65,6 +65,46 @@ export function TaskSubmissionModal({
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [hasDiamondDir, setHasDiamondDir] = useState<boolean>(true);
+
+  const checkDiamondDir = useCallback(async (endpointUuid: string) => {
+    if (!endpointUuid) {
+      setHasDiamondDir(true);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/get_diamond_dir?endpoint_uuid=${endpointUuid}`,
+        {
+          credentials: 'include'
+        }
+      );
+      const data = await response.json();
+      const diamondDirExists = data.diamond_dir !== null && data.diamond_dir !== undefined;
+      setHasDiamondDir(diamondDirExists);
+      
+      if (!diamondDirExists) {
+        setErrors((prev) => ({
+          ...prev,
+          endpoint: 'Diamond directory not configured for this endpoint. Please configure it in settings.'
+        }));
+      } else {
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors.endpoint;
+          return newErrors;
+        });
+      }
+    } catch (error) {
+      console.error('Error checking diamond directory:', error);
+      setHasDiamondDir(false);
+      setErrors((prev) => ({
+        ...prev,
+        endpoint: 'Failed to verify diamond directory configuration'
+      }));
+    }
+  }, []);
 
   const fetchEndpoints = async () => {
     setLoading((prev) => ({ ...prev, endpoints: true }));
@@ -208,20 +248,28 @@ export function TaskSubmissionModal({
     if (formData.endpoint) {
       fetchPartitions();
       fetchAccounts();
+      checkDiamondDir(formData.endpoint);
+    } else {
+      setHasDiamondDir(true);
     }
     fetchContainersForEndpoint();
   }, [
     formData.endpoint,
     fetchPartitions,
     fetchAccounts,
-    fetchContainersForEndpoint
+    fetchContainersForEndpoint,
+    checkDiamondDir
   ]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.taskName.trim()) newErrors.taskName = 'Task name is required';
-    if (!formData.endpoint) newErrors.endpoint = 'Endpoint is required';
+    if (!formData.endpoint) {
+      newErrors.endpoint = 'Endpoint is required';
+    } else if (!hasDiamondDir) {
+      newErrors.endpoint = 'Diamond directory not configured for this endpoint. Please configure it in settings.';
+    }
     if (!formData.partition) newErrors.partition = 'Partition is required';
     if (!formData.account) newErrors.account = 'Account is required';
     if (!formData.container) newErrors.container = 'Container is required';
@@ -285,6 +333,7 @@ export function TaskSubmissionModal({
       dataset_id: ''
     });
     setErrors({});
+    setHasDiamondDir(true);
   };
 
   // Helper functions to get display values for selected items
@@ -375,11 +424,12 @@ export function TaskSubmissionModal({
                           account: '',
                           container: ''
                         }));
+                        checkDiamondDir(uuid);
                       }
                     }}
                     placeholder="Select an online, managed endpoint"
                     loading={loading.endpoints}
-                    className={errors.endpoint ? 'border-red-500' : ''}
+                    className={errors.endpoint || !hasDiamondDir ? 'border-red-500' : ''}
                   />
                 </div>
                 {errors.endpoint && (

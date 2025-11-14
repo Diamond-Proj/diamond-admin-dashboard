@@ -77,7 +77,12 @@ export function ImageBuilderModal({
   const canProceed = () => {
     switch (currentStep) {
       case 0: // Endpoint step
-        return formData.endpoint && formData.partition && formData.account;
+        return (
+          formData.endpoint &&
+          formData.partition &&
+          formData.account &&
+          formData.hasDiamondDir !== false
+        );
       case 1: // Container step
         return formData.containerName && formData.baseImage;
       case 2: // Build step
