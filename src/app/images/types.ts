@@ -20,6 +20,7 @@ export interface BuilderFormData {
   dependencies?: string;
   environment?: string;
   commands?: string;
+  hasDiamondDir?: boolean;
 }
 
 interface ReviewItem {
