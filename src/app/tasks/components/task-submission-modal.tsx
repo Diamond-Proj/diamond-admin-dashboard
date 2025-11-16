@@ -177,20 +177,29 @@ export function TaskSubmissionModal({
     }
   }, [formData.endpoint]);
 
-  const fetchContainers = async () => {
+  const fetchContainersForEndpoint = useCallback(async () => {
+    if (!formData.endpoint) {
+      setContainers([]);
+      return;
+    }
+
     setLoading((prev) => ({ ...prev, containers: true }));
     try {
-      const response = await fetch('/api/get_containers', {
-        credentials: 'include'
+      const response = await fetch('/api/get_containers_on_endpoint', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ endpoint_uuid: formData.endpoint })
       });
       const data: ContainersResponse = await response.json();
       setContainers(Object.keys(data));
     } catch (error) {
       console.error('Error fetching containers:', error);
+      setContainers([]);
     } finally {
       setLoading((prev) => ({ ...prev, containers: false }));
     }
-  };
+  }, [formData.endpoint]);
 
   const fetchDatasets = async () => {
     setLoading((prev) => ({ ...prev, datasets: true }));
@@ -224,7 +233,6 @@ export function TaskSubmissionModal({
   useEffect(() => {
     if (isOpen) {
       fetchEndpoints();
-      fetchContainers();
       fetchDatasets();
     }
   }, [isOpen]);
@@ -241,13 +249,15 @@ export function TaskSubmissionModal({
       fetchPartitions();
     }
     fetchAccounts();
+    fetchContainersForEndpoint();
   }, [
     formData.endpoint,
     formData.endpointHost,
     isPerlmutterSelected,
     fetchPartitions,
     fetchAccounts,
-    fetchPerlmutterOptions
+    fetchPerlmutterOptions,
+    fetchContainersForEndpoint
   ]);
 
   const validateForm = () => {
@@ -426,7 +436,8 @@ export function TaskSubmissionModal({
                           partition: '',
                           qos: '',
                           constraint: '',
-                          account: ''
+                          account: '',
+                          container: ''
                         }));
                         setPartitions([]);
                         setQosOptions([]);
@@ -626,6 +637,7 @@ export function TaskSubmissionModal({
                     }
                     placeholder="Select container"
                     loading={loading.containers}
+                    disabled={!formData.endpoint}
                     className={errors.container ? 'border-red-500' : ''}
                   />
                 </div>

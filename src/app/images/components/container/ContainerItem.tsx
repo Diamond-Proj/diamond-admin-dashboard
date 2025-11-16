@@ -68,13 +68,13 @@ export default function ContainerItem({
                   </span>
                 </div>
               )}
-              {data.container_task_id && (
+              {data.host_name && (
                 <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
                   <span className="block text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
-                    Task ID
+                    Host Name
                   </span>
                   <span className="mt-1 block font-mono text-sm font-semibold text-gray-900 dark:text-gray-100">
-                    {data.container_task_id}
+                    {data.host_name}
                   </span>
                 </div>
               )}
@@ -133,12 +133,10 @@ export default function ContainerItem({
                       <span className="font-mono">{data.base_image}</span>
                     </p>
                   )}
-                  {data.container_task_id && (
+                  {data.host_name && (
                     <p className="text-muted-foreground text-xs">
-                      <span className="font-bold">Task ID:</span>{' '}
-                      <span className="font-mono">
-                        {data.container_task_id}
-                      </span>
+                      <span className="font-bold">Host Name:</span>{' '}
+                      <span className="font-mono">{data.host_name}</span>
                     </p>
                   )}
                   {data.location && (

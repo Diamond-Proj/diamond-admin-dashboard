@@ -3,6 +3,7 @@ export interface ContainerData {
   location: string;
   container_task_id: string;
   base_image: string;
+  host_name?: string;
 }
 
 export interface BuilderFormData {
