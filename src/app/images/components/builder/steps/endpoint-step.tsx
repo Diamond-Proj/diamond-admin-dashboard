@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Server, Cpu, User, Calendar } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { BuilderFormData, Endpoint } from '@/app/images/types';
@@ -18,6 +18,41 @@ export function EndpointStep({ formData, onUpdate }: EndpointStepProps) {
   const [isLoadingEndpoints, setIsLoadingEndpoints] = useState(false);
   const [isLoadingPartitions, setIsLoadingPartitions] = useState(false);
   const [isLoadingAccounts, setIsLoadingAccounts] = useState(false);
+  const [hasDiamondDir, setHasDiamondDir] = useState<boolean>(true);
+  const [diamondDirError, setDiamondDirError] = useState<string>('');
+
+  const checkDiamondDir = useCallback(async (endpointUuid: string) => {
+    if (!endpointUuid) {
+      setHasDiamondDir(true);
+      setDiamondDirError('');
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `/api/get_diamond_dir?endpoint_uuid=${endpointUuid}`,
+        {
+          credentials: 'include'
+        }
+      );
+      const data = await response.json();
+      const diamondDirExists = data.diamond_dir !== null && data.diamond_dir !== undefined;
+      setHasDiamondDir(diamondDirExists);
+      
+      if (!diamondDirExists) {
+        setDiamondDirError('Diamond directory not configured for this endpoint. Please configure it in settings.');
+        onUpdate({ hasDiamondDir: false });
+      } else {
+        setDiamondDirError('');
+        onUpdate({ hasDiamondDir: true });
+      }
+    } catch (error) {
+      console.error('Error checking diamond directory:', error);
+      setHasDiamondDir(false);
+      setDiamondDirError('Failed to verify diamond directory configuration');
+      onUpdate({ hasDiamondDir: false });
+    }
+  }, [onUpdate]);
 
   // Fetch all available endpoints on component mount
   useEffect(() => {
@@ -44,6 +79,16 @@ export function EndpointStep({ formData, onUpdate }: EndpointStepProps) {
     };
     fetchEndpoints();
   }, []);
+
+  // Check diamond directory when endpoint changes
+  useEffect(() => {
+    if (formData.endpoint) {
+      checkDiamondDir(formData.endpoint);
+    } else {
+      setHasDiamondDir(true);
+      setDiamondDirError('');
+    }
+  }, [formData.endpoint, checkDiamondDir]);
 
   // Fetch partitions and accounts when endpoint changes
   useEffect(() => {
@@ -131,6 +176,7 @@ export function EndpointStep({ formData, onUpdate }: EndpointStepProps) {
     );
     if (endpoint) {
       onUpdate({ endpoint: endpoint.endpoint_uuid });
+      checkDiamondDir(endpoint.endpoint_uuid);
     }
   };
 
@@ -163,7 +209,12 @@ export function EndpointStep({ formData, onUpdate }: EndpointStepProps) {
                 onSelect={handleEndpointSelect}
                 placeholder="Choose an HPC endpoint"
                 loading={isLoadingEndpoints}
+                className={diamondDirError || !hasDiamondDir ? 'border-red-500' : ''}
               />
+
+              {diamondDirError && (
+                <p className="text-sm text-red-600">{diamondDirError}</p>
+              )}
 
               {!isLoadingEndpoints &&
                 endpoints.length > 0 &&
