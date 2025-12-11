@@ -20,6 +20,7 @@ function redirectToSignIn(request: NextRequest): NextResponse {
 function initiateGlobusLogin(request: NextRequest): NextResponse {
   try {
     const clientId = process.env.NEXT_PUBLIC_GLOBUS_CLIENT_ID;
+    const scopes = process.env.NEXT_PUBLIC_GLOBUS_SCOPES;
     const redirectUri = `${getBaseUrl(request)}/auth/callback`;
 
     if (!clientId) {
@@ -30,8 +31,7 @@ function initiateGlobusLogin(request: NextRequest): NextResponse {
       client_id: clientId,
       redirect_uri: redirectUri,
       response_type: 'code',
-      scope:
-        'openid email profile urn:globus:auth:scope:transfer.api.globus.org:all',
+      scope: scopes || 'openid email profile urn:globus:auth:scope:transfer.api.globus.org:all https://auth.globus.org/scopes/facd7ccc-c5f4-42aa-916b-a0e270e2c2a9/all',
       access_type: 'offline'
     });
 
