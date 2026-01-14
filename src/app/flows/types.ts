@@ -23,14 +23,6 @@ export interface BuilderFormData {
   hasDiamondDir?: boolean;
 }
 
-export interface FlowBuilderFormData {
-  data_endpoint: string;
-  data_path: string;
-  gce_endpoint: string;
-  image: string;
-  function_code: string;
-}
-
 interface ReviewItem {
   label: string;
   value: string;
@@ -76,14 +68,6 @@ export interface ImageBuilderResponse {
   task_id: string;
   container_name: string;
   message?: string;
-}
-
-export interface FlowImageBuilderPayload {
-  data_endpoint: string;
-  data_path: string;
-  gce_endpoint: string;
-  image: string;
-  function_code: string;
 }
 
 export interface Endpoint {
