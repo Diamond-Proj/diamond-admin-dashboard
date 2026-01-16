@@ -36,7 +36,8 @@ export function TaskSubmissionModal({
     task: '',
     num_of_nodes: 1,
     time_duration: '',
-    dataset_id: ''
+    dataset_id: '',
+    slurm_options: ''
   });
 
   const [endpoints, setEndpoints] = useState<Endpoint[]>([]);
@@ -295,7 +296,8 @@ export function TaskSubmissionModal({
         task: formData.task || undefined,
         num_of_nodes: formData.num_of_nodes,
         time_duration: formData.time_duration,
-        dataset_id: formData.dataset_id || undefined
+        dataset_id: formData.dataset_id || undefined,
+        slurm_options: formData.slurm_options || undefined
       };
 
       const response = await fetch('/api/submit_task', {
@@ -330,7 +332,8 @@ export function TaskSubmissionModal({
       task: '',
       num_of_nodes: 1,
       time_duration: '',
-      dataset_id: ''
+      dataset_id: '',
+      slurm_options: ''
     });
     setErrors({});
     setHasDiamondDir(true);
@@ -613,6 +616,25 @@ export function TaskSubmissionModal({
                     {errors.time_duration}
                   </p>
                 )}
+              </div>
+
+              {/* Scheduler Options */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Scheduler Options (Optional)
+                </label>
+                <Textarea
+                  value={formData.slurm_options}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      slurm_options: e.target.value
+                    }))
+                  }
+                  placeholder="Extra scheduler directives or lines to include in the batch script"
+                  className="mt-1"
+                  rows={3}
+                />
               </div>
 
               {/* Task Command */}
