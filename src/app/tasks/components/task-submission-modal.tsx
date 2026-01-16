@@ -621,7 +621,7 @@ export function TaskSubmissionModal({
               {/* Scheduler Options */}
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Scheduler Options (Optional)
+                  Slurm Options (Optional)
                 </label>
                 <Textarea
                   value={formData.slurm_options}
