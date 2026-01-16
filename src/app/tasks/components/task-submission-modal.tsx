@@ -618,7 +618,7 @@ export function TaskSubmissionModal({
                 )}
               </div>
 
-              {/* Scheduler Options */}
+              {/* Slurm Options */}
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Slurm Options (Optional)
@@ -631,7 +631,7 @@ export function TaskSubmissionModal({
                       slurm_options: e.target.value
                     }))
                   }
-                  placeholder="Extra scheduler directives or lines to include in the batch script"
+                  placeholder="Extra Slurm directives or lines to include in the batch script"
                   className="mt-1"
                   rows={3}
                 />
