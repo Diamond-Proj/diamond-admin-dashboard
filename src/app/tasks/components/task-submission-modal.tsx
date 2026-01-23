@@ -631,7 +631,8 @@ export function TaskSubmissionModal({
                       slurm_options: e.target.value
                     }))
                   }
-                  placeholder="Extra Slurm directives or lines to include in the batch script"
+                  placeholder="Extra Slurm directives or lines to include in the batch script. 
+                    e.g., --gpus-per-node=1 or --mem=16G (one per line or space-separated)."
                   className="mt-1"
                   rows={3}
                 />
