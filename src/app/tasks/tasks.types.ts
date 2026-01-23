@@ -9,6 +9,7 @@ export interface TaskSubmissionData {
   num_of_nodes?: number;
   time_duration: string;
   dataset_id?: string;
+  slurm_options?: string;
 }
 
 export interface Task {
