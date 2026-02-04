@@ -2,15 +2,15 @@
 
 import { RefreshCw, Loader2 } from 'lucide-react';
 
-interface SettingsHeaderProps {
+interface EndpointsHeaderProps {
   isRefreshing: boolean;
   onRefresh: () => void;
 }
 
-export function SettingsHeader({
+export function EndpointsHeader({
   isRefreshing,
   onRefresh
-}: SettingsHeaderProps) {
+}: EndpointsHeaderProps) {
   return (
     <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
       <div className="flex flex-col gap-2">

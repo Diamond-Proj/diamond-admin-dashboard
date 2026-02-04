@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useToast } from '@/components/ui/use-toast';
-import { SettingsHeader } from './settings-header';
+import { EndpointsHeader } from './endpoints-header';
 import { EndpointStats } from './endpoint-stats';
 import { EndpointTabs } from './endpoint-tabs';
 import { ManagedEndpointCard } from './managed-endpoint-card';
@@ -43,7 +43,7 @@ interface DataPrepProgress {
   currentEndpoint: string;
 }
 
-export function SettingsContent() {
+export function EndpointsContent() {
   const [endpoints, setEndpoints] = useState<Endpoint[]>([]);
   const [endpointDetails, setEndpointDetails] = useState<EndpointDetail[]>([]);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -337,7 +337,7 @@ export function SettingsContent() {
 
   return (
     <div className="space-y-6">
-      <SettingsHeader
+      <EndpointsHeader
         isRefreshing={isRefreshing}
         onRefresh={refreshEndpoints}
       />
