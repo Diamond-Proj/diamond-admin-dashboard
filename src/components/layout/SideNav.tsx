@@ -9,11 +9,11 @@ import { debounce } from '@/lib/debounce';
 
 const navLinks = [
   { href: '/', label: 'Dashboard', Icon: DashboardIcon },
-  { href: '/endpoints', label: 'Endpoints', Icon: Cpu },
   { href: '/images', label: 'Images', Icon: Container },
   { href: '/datasets', label: 'Datasets', Icon: Database },
   { href: '/tasks', label: 'Tasks', Icon: TaskIcon },
   { href: '/profile', label: 'Profile', Icon: PersonIcon },
+  { href: '/endpoints', label: 'Endpoints', Icon: Cpu },
 ];
 
 export function SideNav({
