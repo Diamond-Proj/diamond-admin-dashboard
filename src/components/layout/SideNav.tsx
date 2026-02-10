@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { NavItem } from './nav-item';
-import { SettingsIcon, TaskIcon } from '@/components/icons';
+import { TaskIcon } from '@/components/icons';
 import { DashboardIcon, PersonIcon } from '@radix-ui/react-icons';
-import { Database, Container } from 'lucide-react';
+import { Database, Container, Cpu } from 'lucide-react';
 import { debounce } from '@/lib/debounce';
 
 const navLinks = [
@@ -13,7 +13,7 @@ const navLinks = [
   { href: '/datasets', label: 'Datasets', Icon: Database },
   { href: '/tasks', label: 'Tasks', Icon: TaskIcon },
   { href: '/profile', label: 'Profile', Icon: PersonIcon },
-  { href: '/settings', label: 'Settings', Icon: SettingsIcon }
+  { href: '/endpoints', label: 'Endpoints', Icon: Cpu },
 ];
 
 export function SideNav({
