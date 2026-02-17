@@ -65,17 +65,19 @@ export function BuilderLogs({
           }
         }
 
+        const normalizedStatus = (data.status || '').toLowerCase();
+
         if (logType === 'stdout') {
           setStdoutLogs(data.log_content || 'Waiting for build logs...');
-          setBuildStatus(data.status);
+          setBuildStatus(normalizedStatus || 'running');
         } else {
           setStderrLogs(data.log_content || 'No error logs');
         }
 
         return (
-          data.status === 'completed' ||
-          data.status === 'failed' ||
-          data.status === 'error'
+          normalizedStatus === 'completed' ||
+          normalizedStatus === 'failed' ||
+          normalizedStatus === 'error'
         );
       } catch (error) {
         console.error(`Error fetching ${logType} logs:`, error);

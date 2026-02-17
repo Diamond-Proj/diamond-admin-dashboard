@@ -302,46 +302,42 @@ export function EndpointStep({ formData, onUpdate }: EndpointStepProps) {
               </div>
             </div>
 
-            {!isEndpointSelected ? (
-              <div className="rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 p-8 text-center">
-                <User className="mx-auto mb-3 h-8 w-8 text-gray-400" />
-                <p className="mb-1 text-sm font-medium text-gray-600">
-                  Select an endpoint first
-                </p>
-                <p className="text-xs text-gray-500">
-                  Accounts will be available after endpoint selection
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {accounts.length > 0 && (
-                  <VirtualSelect
-                    options={accounts}
-                    selected={formData.account}
-                    onSelect={(account) => onUpdate({ account })}
-                    placeholder="Choose an account"
-                    loading={isLoadingAccounts}
-                  />
-                )}
+            <div className="space-y-4">
+              {isEndpointSelected && accounts.length > 0 && (
+                <VirtualSelect
+                  options={accounts}
+                  selected={formData.account}
+                  onSelect={(account) => onUpdate({ account })}
+                  placeholder="Choose an account"
+                  loading={isLoadingAccounts}
+                />
+              )}
 
-                <div className="space-y-3">
-                  <label className="block text-sm font-medium text-gray-700">
-                    {accounts.length > 0 ? 'Or enter manually' : 'Account Name'}
-                  </label>
-                  <Input
-                    placeholder="Enter account name"
-                    value={formData.account || ''}
-                    onChange={(e) => onUpdate({ account: e.target.value })}
-                    className="h-11 rounded-lg border-gray-300 shadow-sm focus:border-blue-400 focus:ring-blue-100"
-                  />
-                  {accounts.length === 0 && !isLoadingAccounts && (
-                    <p className="text-xs text-gray-500">
-                      No available accounts found for this endpoint
-                    </p>
-                  )}
-                </div>
+              <div className="space-y-3">
+                <label className="block text-sm font-medium text-gray-700">
+                  {isEndpointSelected && accounts.length > 0
+                    ? 'Or enter manually'
+                    : 'Account Name'}
+                </label>
+                <Input
+                  placeholder="Enter account name"
+                  value={formData.account || ''}
+                  onChange={(e) => onUpdate({ account: e.target.value })}
+                  className="h-11 rounded-lg border-gray-300 shadow-sm focus:border-blue-400 focus:ring-blue-100"
+                />
+                {!isEndpointSelected && (
+                  <p className="text-xs text-gray-500">
+                    You can enter account manually now. Suggestions appear after
+                    endpoint selection.
+                  </p>
+                )}
+                {isEndpointSelected && accounts.length === 0 && !isLoadingAccounts && (
+                  <p className="text-xs text-gray-500">
+                    No available accounts found for this endpoint
+                  </p>
+                )}
               </div>
-            )}
+            </div>
           </div>
 
           {/* Reservation (Optional) */}
