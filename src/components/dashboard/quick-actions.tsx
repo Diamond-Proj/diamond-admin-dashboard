@@ -76,7 +76,7 @@ export function QuickActions() {
 
         {/* Settings - Application configuration */}
         <Link
-          href="/settings"
+          href="/endpoints"
           className="group flex w-full items-center rounded-xl bg-gradient-to-r from-gray-50 to-gray-50/70 p-4 text-left transition-all duration-300 hover:-translate-x-1 hover:from-gray-100 hover:to-gray-100/80 hover:shadow-md dark:from-gray-900/20 dark:to-gray-900/10 dark:hover:from-gray-900/40 dark:hover:to-gray-900/30"
         >
           <div className="mr-4 flex h-10 w-10 items-center justify-center rounded-xl bg-gray-500 shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:shadow-md">

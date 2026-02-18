@@ -22,7 +22,7 @@ export function EndpointOnboarding({
       }
 
       // Don't show onboarding on settings page - early check to avoid API call
-      if (pathname === '/settings') {
+      if (pathname === '/endpoints') {
         return;
       }
 
@@ -50,7 +50,7 @@ export function EndpointOnboarding({
         if (response.ok && data.profile && !data.profile.is_initialized) {
           setTimeout(() => {
             // Double check pathname in case user navigated during the delay
-            if (window.location.pathname !== '/settings') {
+            if (window.location.pathname !== '/endpoints') {
               setIsVisible(true);
             }
           }, 1000);
@@ -109,7 +109,7 @@ export function EndpointOnboarding({
 
             <div className="space-y-3">
               <Link
-                href="/settings"
+                href="/endpoints"
                 onClick={handleClose}
                 className="flex w-full items-center justify-center space-x-2 rounded-lg bg-blue-600 px-4 py-2.5 font-medium text-white transition-colors hover:bg-blue-700"
               >

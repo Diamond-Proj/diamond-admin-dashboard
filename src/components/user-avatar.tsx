@@ -78,10 +78,10 @@ export function UserAvatar() {
           </div>
           <div className="px-2 py-1.5">
             <a 
-              href="/settings" 
+              href="/endpoints" 
               className="block w-full px-2 py-1.5 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
             >
-              Settings
+              Endpoints
             </a>
           </div>
         </DropdownMenuGroup>

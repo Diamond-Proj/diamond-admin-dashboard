@@ -163,7 +163,7 @@ export function DashboardStatsCards({
 
       {/* Endpoints Card */}
       <Link
-        href="/settings"
+        href="/endpoints"
         className="group relative overflow-hidden rounded-xl border border-gray-200/60 bg-white p-6 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-green-300/80 hover:shadow-xl hover:shadow-green-500/10 dark:border-gray-700/60 dark:bg-gray-800 dark:hover:border-green-600/80 dark:hover:shadow-green-500/20"
       >
         <div className="absolute inset-0 bg-gradient-to-br from-green-50/50 to-green-100/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:from-green-900/50 dark:to-green-800/50 dark:group-hover:opacity-20"></div>
