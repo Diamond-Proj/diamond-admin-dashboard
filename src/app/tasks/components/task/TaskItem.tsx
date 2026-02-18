@@ -3,10 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Trash2, AlertTriangle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
 import { Task } from '../../tasks.types';
-
-const TASK_LOG_ALLOWED_STATUSES = new Set(['RUNNING', 'FAILED', 'COMPLETED']);
 
 export default function TaskItem({
   task,
@@ -27,18 +24,8 @@ export default function TaskItem({
   const [logLoading, setLogLoading] = useState(false);
   const [logError, setLogError] = useState<string | null>(null);
   const logPollingRef = useRef<NodeJS.Timeout | null>(null);
-  const { toast } = useToast();
 
   const handleViewLog = (logType: 'stdout' | 'stderr') => {
-    const currentStatus = (task.status || '').toUpperCase();
-    if (!TASK_LOG_ALLOWED_STATUSES.has(currentStatus)) {
-      toast({
-        title: 'Log pending',
-        description: 'Task log is still pending.'
-      });
-      return;
-    }
-
     const logPath = logType === 'stdout' ? task.result : task.error;
     if (!logPath) {
       return;
