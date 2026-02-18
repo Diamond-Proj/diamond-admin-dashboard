@@ -9,6 +9,7 @@ import { VirtualSelect } from '@/components/ui/virtual-select';
 import {
   TaskSubmissionData,
   Endpoint,
+  ContainersResponse,
   DatasetsApiResponse,
   Dataset,
   EndpointContainersApiResponse
@@ -465,31 +466,43 @@ export function TaskSubmissionModal({
               </div>
 
               {/* Account */}
-              <div>
+              <div className="md:row-span-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Account *
                 </label>
-                <Input
-                  list="task-account-options"
-                  placeholder={
-                    loading.accounts
-                      ? 'Loading accounts...'
-                      : 'Select or enter account'
-                  }
-                  value={formData.account || ''}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      account: e.target.value
-                    }))
-                  }
-                  className={`mt-1 ${errors.account ? 'border-red-500' : ''}`}
-                />
-                <datalist id="task-account-options">
-                  {accounts.map((account) => (
-                    <option key={account} value={account} />
-                  ))}
-                </datalist>
+                <div className="mt-1 space-y-6">
+                  <VirtualSelect
+                    options={accounts}
+                    selected={
+                      accounts.includes(formData.account)
+                        ? formData.account
+                        : ''
+                    }
+                    onSelect={(value) =>
+                      setFormData((prev) => ({ ...prev, account: value }))
+                    }
+                    placeholder="Select account"
+                    loading={loading.accounts}
+                    disabled={!formData.endpoint}
+                  />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Account Manual Input
+                    </label>
+                    <Input
+                      placeholder="Or enter account manually"
+                      value={formData.account || ''}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          account: e.target.value
+                        }))
+                      }
+                      disabled={!formData.endpoint}
+                      className={`mt-1 ${errors.account ? 'border-red-500' : ''}`}
+                    />
+                  </div>
+                </div>
                 {errors.account && (
                   <p className="mt-1 text-sm text-red-600">{errors.account}</p>
                 )}
@@ -542,6 +555,25 @@ export function TaskSubmissionModal({
                 </div>
               </div>
 
+              {/* Reservation */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Reservation (Optional)
+                </label>
+                <Input
+                  type="text"
+                  value={formData.reservation}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      reservation: e.target.value
+                    }))
+                  }
+                  placeholder="Enter reservation"
+                  className="mt-1"
+                />
+              </div>
+
               {/* Number of Nodes */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -586,51 +618,24 @@ export function TaskSubmissionModal({
                 )}
               </div>
 
-              {/* Advanced Settings */}
+              {/* Slurm Options */}
               <div className="md:col-span-2">
-                <details className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-800/50">
-                  <summary className="cursor-pointer text-sm font-medium text-gray-700 select-none dark:text-gray-300">
-                    Advanced settings
-                  </summary>
-                  <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Reservation (Optional)
-                      </label>
-                      <Input
-                        type="text"
-                        value={formData.reservation}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            reservation: e.target.value
-                          }))
-                        }
-                        placeholder="Enter reservation"
-                        className="mt-1"
-                      />
-                    </div>
-
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Slurm Options (Optional)
-                      </label>
-                      <Textarea
-                        value={formData.slurm_options}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            slurm_options: e.target.value
-                          }))
-                        }
-                        placeholder="Extra Slurm directives or lines to include in the batch script. 
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Slurm Options (Optional)
+                </label>
+                <Textarea
+                  value={formData.slurm_options}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      slurm_options: e.target.value
+                    }))
+                  }
+                  placeholder="Extra Slurm directives or lines to include in the batch script. 
                     e.g., --gpus-per-node=1 or --mem=16G (one per line or space-separated)."
-                        className="mt-1"
-                        rows={3}
-                      />
-                    </div>
-                  </div>
-                </details>
+                  className="mt-1"
+                  rows={3}
+                />
               </div>
 
               {/* Task Command */}
