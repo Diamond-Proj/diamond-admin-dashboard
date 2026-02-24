@@ -175,9 +175,9 @@ export class TokenManagerServer {
    * Reads the 'tokens' cookie which contains by_resource_server JSON (Flask backend format)
    */
   static async getTokensFromServerCookies(): Promise<TokenStore | null> {
-    try {
-      const cookieStore = await cookies();
+    const cookieStore = await cookies();
 
+    try {
       // Read the 'tokens' cookie which contains by_resource_server structure
       const tokensCookie = cookieStore.get('tokens')?.value;
       const idToken = cookieStore.get('id_token')?.value;
