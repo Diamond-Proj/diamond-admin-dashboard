@@ -73,3 +73,11 @@ export interface Dataset {
 export interface DatasetsApiResponse {
   datasets: Dataset[];
 }
+
+export interface TaskTemplate {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  defaults: Partial<TaskSubmissionData>;
+}

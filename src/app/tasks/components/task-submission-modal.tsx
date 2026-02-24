@@ -8,12 +8,14 @@ import { X } from 'lucide-react';
 import { VirtualSelect } from '@/components/ui/virtual-select';
 import {
   TaskSubmissionData,
+  TaskTemplate,
   Endpoint,
-  ContainersResponse,
   DatasetsApiResponse,
   Dataset,
   EndpointContainersApiResponse
 } from '../tasks.types';
+import { TASK_TEMPLATES } from '../templates';
+import { TemplateSelector } from './template-selector';
 
 interface TaskSubmissionModalProps {
   isOpen: boolean;
@@ -26,7 +28,7 @@ export function TaskSubmissionModal({
   onClose,
   onSuccess
 }: TaskSubmissionModalProps) {
-  const [formData, setFormData] = useState<TaskSubmissionData>({
+  const INITIAL_FORM_DATA: TaskSubmissionData = {
     endpoint: '',
     taskName: '',
     partition: '',
@@ -38,7 +40,9 @@ export function TaskSubmissionModal({
     time_duration: '',
     dataset_id: '',
     slurm_options: ''
-  });
+  };
+
+  const [formData, setFormData] = useState<TaskSubmissionData>(INITIAL_FORM_DATA);
 
   const [endpoints, setEndpoints] = useState<Endpoint[]>([]);
   const [partitions, setPartitions] = useState<string[]>([]);
@@ -67,6 +71,26 @@ export function TaskSubmissionModal({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [hasDiamondDir, setHasDiamondDir] = useState<boolean>(true);
+  const [activeTemplateId, setActiveTemplateId] = useState<string | null>(null);
+
+  const applyTemplate = (template: TaskTemplate) => {
+    setActiveTemplateId(template.id);
+    setFormData((prev) => ({ ...prev, ...template.defaults }));
+  };
+
+  const clearTemplate = () => {
+    const active = TASK_TEMPLATES.find((t) => t.id === activeTemplateId);
+    if (active) {
+      const revertedFields = Object.fromEntries(
+        Object.keys(active.defaults).map((key) => [
+          key,
+          INITIAL_FORM_DATA[key as keyof TaskSubmissionData]
+        ])
+      ) as Partial<TaskSubmissionData>;
+      setFormData((prev) => ({ ...prev, ...revertedFields }));
+    }
+    setActiveTemplateId(null);
+  };
 
   const checkDiamondDir = useCallback(async (endpointUuid: string) => {
     if (!endpointUuid) {
@@ -322,21 +346,10 @@ export function TaskSubmissionModal({
   };
 
   const resetForm = () => {
-    setFormData({
-      endpoint: '',
-      taskName: '',
-      partition: '',
-      account: '',
-      reservation: '',
-      container: '',
-      task: '',
-      num_of_nodes: 1,
-      time_duration: '',
-      dataset_id: '',
-      slurm_options: ''
-    });
+    setFormData(INITIAL_FORM_DATA);
     setErrors({});
     setHasDiamondDir(true);
+    setActiveTemplateId(null);
   };
 
   // Helper functions to get display values for selected items
@@ -381,6 +394,14 @@ export function TaskSubmissionModal({
             <X className="h-5 w-5" />
           </Button>
         </div>
+
+        {/* Template Selector */}
+        <TemplateSelector
+          templates={TASK_TEMPLATES}
+          activeTemplateId={activeTemplateId}
+          onSelect={applyTemplate}
+          onClear={clearTemplate}
+        />
 
         {/* Content - Scrollable Area */}
         <div className="flex-1 overflow-y-auto bg-white dark:bg-gray-900">

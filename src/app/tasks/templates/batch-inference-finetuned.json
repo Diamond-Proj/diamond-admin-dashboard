@@ -1,0 +1,14 @@
+{
+  "id": "batch-inference-finetuned",
+  "name": "Batch Inference on Finetuned Model",
+  "description": "Run a batch of inference queries against a finetuned model via Delta@NCSA (1 GPU).",
+  "category": "Inference",
+  "defaults": {
+    "taskName": "batch-inference-finetuned",
+    "partition": "gpuA100x4",
+    "num_of_nodes": 1,
+    "time_duration": "01:00:00",
+    "slurm_options": "--gpus-per-node=1\n--mem=32G",
+    "task": "python inference.py --model ./output --input queries.jsonl --output results.jsonl"
+  }
+}
