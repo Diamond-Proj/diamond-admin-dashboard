@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { TokenManagerServer } from '@/lib/auth/tokenManager.server';
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     console.log('Token refresh request received');
 

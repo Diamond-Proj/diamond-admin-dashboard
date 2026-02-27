@@ -170,14 +170,14 @@ export function CreateDatasetModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="flex h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-900">
+      <div className="flex h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-[hsl(var(--dashboard-surface))] shadow-xl dark:border-slate-700/80">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 p-6 dark:border-gray-700">
+        <div className="flex items-center justify-between border-b border-slate-200/70 p-6 dark:border-slate-700/70">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
               Register New Dataset
             </h2>
-            <p className="text-gray-600 dark:text-gray-300">
+            <p className="text-slate-600 dark:text-slate-400">
               Register a dataset with Diamond platform
             </p>
           </div>
@@ -185,7 +185,8 @@ export function CreateDatasetModal({
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="cursor-pointer text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            aria-label="Close"
+            className="cursor-pointer text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
             disabled={isLoading}
           >
             <X className="h-5 w-5" />
@@ -193,16 +194,16 @@ export function CreateDatasetModal({
         </div>
 
         {/* Content - Scrollable Area */}
-        <div className="flex-1 overflow-y-auto bg-white dark:bg-gray-900">
+        <div className="flex-1 overflow-y-auto">
           <div className="p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100">
                   Required Information
                 </h3>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                     Dataset Name *
                   </label>
                   <Input
@@ -219,14 +220,14 @@ export function CreateDatasetModal({
                       {errors.dataset_name}
                     </p>
                   )}
-                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                     A human-readable name for your dataset
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                       Collection UUID *
                     </label>
                     <Input
@@ -243,13 +244,13 @@ export function CreateDatasetModal({
                         {errors.collection_uuid}
                       </p>
                     )}
-                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                       The Globus collection UUID where your data is stored
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                       Globus Path *
                     </label>
                     <Input
@@ -266,13 +267,13 @@ export function CreateDatasetModal({
                         {errors.globus_path}
                       </p>
                     )}
-                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                       Path within the Globus collection
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                       System Path *
                     </label>
                     <Input
@@ -289,13 +290,13 @@ export function CreateDatasetModal({
                         {errors.system_path}
                       </p>
                     )}
-                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                       File system path on the compute machine
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                       Machine Name *
                     </label>
                     <div className="relative mt-1" ref={dropdownRef}>
@@ -303,39 +304,39 @@ export function CreateDatasetModal({
                         type="button"
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                         disabled={isLoading}
-                        className={`flex w-full cursor-pointer items-center justify-between rounded-lg border bg-white px-3 py-2 text-gray-900 transition-all duration-200 hover:border-gray-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 focus:outline-none dark:bg-gray-700 dark:text-gray-100 dark:hover:border-gray-500 dark:focus:border-purple-400 ${
+                        className={`flex h-10 w-full cursor-pointer items-center justify-between rounded-lg border bg-white/80 px-3 py-2 text-sm text-slate-900 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-rose-500/25 dark:bg-slate-900/80 dark:text-slate-100 ${
                           errors.machine_name
                             ? 'border-red-500'
-                            : 'border-gray-300 dark:border-gray-600'
+                            : 'border-slate-200/80 hover:border-slate-300 dark:border-slate-700/80 dark:hover:border-slate-600'
                         }`}
                       >
                         <span
                           className={
                             formData.machine_name
                               ? ''
-                              : 'text-gray-500 dark:text-gray-400'
+                              : 'text-slate-500 dark:text-slate-400'
                           }
                         >
                           {formData.machine_name || 'Select a machine'}
                         </span>
                         <ChevronDown
-                          className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
+                          className={`h-4 w-4 text-slate-400 transition-transform duration-200 dark:text-slate-500 ${
                             isDropdownOpen ? 'rotate-180' : ''
                           }`}
                         />
                       </button>
 
                       {isDropdownOpen && (
-                        <div className="absolute top-full left-0 z-10 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-700">
+                        <div className="absolute top-full left-0 z-10 mt-1 w-full rounded-lg border border-slate-200/80 bg-[hsl(var(--dashboard-surface))] p-1 shadow-lg shadow-slate-900/10 dark:border-slate-700/80 dark:shadow-black/35">
                           {VALID_MACHINES.map((machine) => (
                             <button
                               key={machine}
                               type="button"
                               onClick={() => handleMachineSelect(machine)}
-                              className={`w-full cursor-pointer px-4 py-3 text-left transition-colors duration-150 first:rounded-t-lg last:rounded-b-lg hover:bg-gray-50 dark:hover:bg-gray-600 ${
+                              className={`w-full cursor-pointer rounded-md px-3 py-2 text-left text-sm transition-colors duration-150 ${
                                 formData.machine_name === machine
-                                  ? 'bg-purple-50 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300'
-                                  : 'text-gray-900 dark:text-gray-100'
+                                  ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/20 dark:text-rose-200'
+                                  : 'text-slate-900 hover:bg-slate-100 dark:text-slate-100 dark:hover:bg-slate-800'
                               }`}
                             >
                               {machine}
@@ -354,12 +355,12 @@ export function CreateDatasetModal({
               </div>
 
               <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100">
                   Optional Information
                 </h3>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                     Description
                   </label>
                   <Textarea
@@ -376,7 +377,7 @@ export function CreateDatasetModal({
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                       Size
                     </label>
                     <Input
@@ -391,7 +392,7 @@ export function CreateDatasetModal({
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                       Format
                     </label>
                     <Input
@@ -411,7 +412,7 @@ export function CreateDatasetModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 border-t border-gray-200 bg-gray-50 p-6 dark:border-gray-700 dark:bg-gray-800">
+        <div className="flex items-center justify-end gap-3 border-t border-slate-200/70 bg-slate-50/70 p-6 dark:border-slate-700/70 dark:bg-slate-900/60">
           <Button
             variant="outline"
             onClick={onClose}
@@ -423,7 +424,7 @@ export function CreateDatasetModal({
           <Button
             onClick={handleSubmit}
             disabled={isLoading}
-            className="cursor-pointer bg-purple-600 text-white hover:bg-purple-700"
+            className="cursor-pointer bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
           >
             {isLoading ? (
               <>

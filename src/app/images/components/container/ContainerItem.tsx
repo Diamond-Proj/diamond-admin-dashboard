@@ -36,11 +36,11 @@ export default function ContainerItem({
 
   return (
     <>
-      <div className="group rounded-xl border border-gray-200/60 bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-gray-300/80 hover:shadow-lg dark:border-gray-700/60 dark:bg-gray-800 dark:hover:border-gray-600/80">
+      <div className="group dashboard-card p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="mb-3 flex items-center gap-3">
-              <h3 className="text-xl font-semibold text-gray-900 transition-colors duration-200 group-hover:text-red-600 dark:text-gray-100 dark:group-hover:text-red-400">
+              <h3 className="text-xl font-semibold text-slate-900 transition-colors duration-200 group-hover:text-slate-700 dark:text-slate-100 dark:group-hover:text-slate-200">
                 {containerName}
               </h3>
               <div className="flex items-center gap-2">
@@ -62,31 +62,31 @@ export default function ContainerItem({
 
             <div className="mb-4 grid grid-cols-1 gap-4 text-sm md:grid-cols-3">
               {data.base_image && (
-                <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
-                  <span className="block text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                <div className="rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
+                  <span className="block text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
                     Base Image
                   </span>
-                  <span className="mt-1 block font-mono text-sm font-semibold text-gray-900 dark:text-gray-100">
+                  <span className="mt-1 block font-mono text-sm font-semibold text-slate-900 dark:text-slate-100">
                     {data.base_image}
                   </span>
                 </div>
               )}
               {data.host_name && (
-                <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
-                  <span className="block text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                <div className="rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
+                  <span className="block text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
                     Host Name
                   </span>
-                  <span className="mt-1 block font-mono text-sm font-semibold text-gray-900 dark:text-gray-100">
+                  <span className="mt-1 block font-mono text-sm font-semibold text-slate-900 dark:text-slate-100">
                     {data.host_name}
                   </span>
                 </div>
               )}
               {data.location && (
-                <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
-                  <span className="block text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                <div className="rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
+                  <span className="block text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
                     Location
                   </span>
-                  <span className="mt-1 block font-mono text-sm font-semibold text-gray-900 dark:text-gray-100">
+                  <span className="mt-1 block font-mono text-sm font-semibold text-slate-900 dark:text-slate-100">
                     {data.location}
                   </span>
                 </div>
@@ -113,40 +113,44 @@ export default function ContainerItem({
 
       {showConfirmDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 dark:bg-black/70">
-          <div className="bg-background dark:bg-background w-full max-w-md rounded-lg border shadow-xl dark:border-gray-800">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200/80 bg-[hsl(var(--dashboard-surface))] shadow-xl dark:border-slate-700/80">
             <div className="p-6">
               <div className="mb-4 flex items-center gap-3">
                 <div className="rounded-full bg-red-100 p-2 dark:bg-red-950/30">
                   <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
                 </div>
-                <h3 className="text-lg font-semibold">Delete Container</h3>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                  Delete Container
+                </h3>
               </div>
 
               <div className="mb-6">
-                <p className="text-muted-foreground mb-2">
+                <p className="mb-2 text-slate-600 dark:text-slate-400">
                   Are you sure you want to delete this container?
                 </p>
-                <div className="bg-muted/30 dark:bg-muted/20 space-y-2 rounded-md p-3">
-                  <p className="text-sm font-medium">{containerName}</p>
+                <div className="space-y-2 rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/60">
+                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                    {containerName}
+                  </p>
                   {data.base_image && (
-                    <p className="text-muted-foreground text-xs">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       <span className="font-bold">Base Image:</span>{' '}
                       <span className="font-mono">{data.base_image}</span>
                     </p>
                   )}
                   {data.host_name && (
-                    <p className="text-muted-foreground text-xs">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       <span className="font-bold">Host Name:</span>{' '}
                       <span className="font-mono">{data.host_name}</span>
                     </p>
                   )}
                   {data.location && (
-                    <p className="text-muted-foreground text-xs">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       <span className="font-bold">Location:</span> {data.location}
                     </p>
                   )}
                   {data.is_public && (
-                    <p className="text-muted-foreground text-xs">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       <span className="font-bold">Visibility:</span> Public
                     </p>
                   )}

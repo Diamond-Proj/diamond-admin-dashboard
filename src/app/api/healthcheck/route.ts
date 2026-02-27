@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 // GET method to retrieve health status and git information
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const currentDateTime = new Date().toISOString();
     
