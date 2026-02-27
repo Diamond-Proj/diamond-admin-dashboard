@@ -10,7 +10,6 @@ import {
   primaryKey,
   json
 } from 'drizzle-orm/pg-core';
-import { sql } from 'drizzle-orm';
 
 export const profile = pgTable('profile', {
   identityId: varchar('identity_id', { length: 255 }).primaryKey().notNull(),

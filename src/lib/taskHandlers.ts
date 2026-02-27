@@ -22,7 +22,14 @@ export async function getUserProfile(data: { identity_id: string }) {
   }
 }
 
-export async function updateUserProfile(data: any) {
+interface UpdateUserProfileData {
+  identity_id: string;
+  name?: string;
+  email?: string;
+  institution?: string;
+}
+
+export async function updateUserProfile(data: UpdateUserProfileData) {
   try {
     const response = await fetch(`/api/profile`, {
       method: 'POST',
