@@ -2,10 +2,15 @@
 
 import { useState } from 'react';
 import { Button } from './ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2, LogIn } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { cn } from '@/lib/utils';
 
-export function LoginButton() {
+interface LoginButtonProps {
+  className?: string;
+}
+
+export function LoginButton({ className }: LoginButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
@@ -54,11 +59,14 @@ export function LoginButton() {
 
   return (
     <Button
-      variant={'outline'}
-      size={'default'}
+      variant="outline"
+      size="default"
       onClick={handleLogin}
       disabled={isLoading}
-      className="border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground flex items-center gap-2"
+      className={cn(
+        'h-10 cursor-pointer rounded-lg border border-slate-300/70 bg-transparent px-4 text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-slate-100',
+        className
+      )}
     >
       {isLoading ? (
         <>
@@ -66,7 +74,10 @@ export function LoginButton() {
           <span>Connecting...</span>
         </>
       ) : (
-        <span>Sign In with Globus</span>
+        <>
+          <LogIn className="h-4 w-4" />
+          <span>Sign In</span>
+        </>
       )}
     </Button>
   );

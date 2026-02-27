@@ -1,107 +1,87 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
-import { NavItem } from './nav-item';
-import { TaskIcon } from '@/components/icons';
 import { DashboardIcon, PersonIcon } from '@radix-ui/react-icons';
-import { Database, Container, Cpu } from 'lucide-react';
-import { debounce } from '@/lib/debounce';
+import { Container, Cpu, Database } from 'lucide-react';
 
-const navLinks = [
+import { TaskIcon } from '@/components/icons';
+
+import { NavItem } from './nav-item';
+
+const workspaceLinks = [
   { href: '/', label: 'Dashboard', Icon: DashboardIcon },
   { href: '/images', label: 'Images', Icon: Container },
   { href: '/datasets', label: 'Datasets', Icon: Database },
-  { href: '/tasks', label: 'Tasks', Icon: TaskIcon },
+  { href: '/tasks', label: 'Tasks', Icon: TaskIcon }
+];
+
+const settingsLinks = [
   { href: '/profile', label: 'Profile', Icon: PersonIcon },
-  { href: '/endpoints', label: 'Endpoints', Icon: Cpu },
+  { href: '/endpoints', label: 'Endpoints', Icon: Cpu }
 ];
 
 export function SideNav({
-  initialIsAuthenticated
+  compact = false
 }: {
-  initialIsAuthenticated: boolean;
+  compact?: boolean;
 }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    initialIsAuthenticated
-  );
-  const [isLoading, setIsLoading] = useState(!initialIsAuthenticated);
+  return (
+    <nav className="flex h-full min-h-0 flex-col px-2 text-sm font-medium">
+      <p
+        className={`overflow-hidden whitespace-nowrap px-3 text-[11px] font-semibold tracking-[0.12em] text-slate-500 uppercase transition-[max-height,opacity,padding,margin] duration-300 ease-out dark:text-slate-400 ${
+          compact ? 'mb-0 max-h-0 pb-0 opacity-0' : 'mb-0 max-h-8 pb-2 opacity-100'
+        }`}
+      >
+        Workspace
+      </p>
 
-  const checkAuth = useMemo(
-    () =>
-      debounce(() => {
-        const cookies = document.cookie.split(';');
-        const authCookies = [
-          'is_authenticated',
-          'tokens',
-          'access_token',
-          'id_token',
-          'refresh_token',
-          'name',
-          'email',
-          'primary_identity'
-        ];
-
-        const hasAuthCookie = cookies.some((cookie) => {
-          const cookieName = cookie.trim().split('=')[0];
-          return authCookies.includes(cookieName);
-        });
-
-        if (hasAuthCookie !== isAuthenticated || isLoading) {
-          console.log('Navigation: Auth status changed to', hasAuthCookie);
-          setIsAuthenticated(hasAuthCookie);
-          setIsLoading(false);
-        }
-      }, 300),
-    [isAuthenticated, isLoading]
-  );
-
-  useEffect(() => {
-    checkAuth();
-
-    const observer = new MutationObserver(checkAuth);
-    observer.observe(document.body, {
-      attributes: true,
-      childList: true,
-      subtree: true
-    });
-
-    const handleFocus = () => {
-      checkAuth();
-    };
-
-    window.addEventListener('focus', handleFocus);
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('focus', handleFocus);
-    };
-  }, [checkAuth]);
-
-  if (isLoading) {
-    return (
-      <div className="grid items-start gap-2 px-4 text-sm font-medium">
-        {[...Array(navLinks.length)].map((_, i) => (
+      <div className="space-y-0.5">
+        {workspaceLinks.map(({ href, label, Icon }, index) => (
           <div
-            key={i}
-            className="h-10 animate-pulse rounded-md bg-gray-200 dark:bg-gray-700"
-          ></div>
+            key={href}
+            className={
+              index > 0
+                ? 'relative pt-1 before:absolute before:top-0 before:left-4 before:right-4 before:h-px before:bg-slate-200/35 dark:before:bg-slate-700/35'
+                : undefined
+            }
+          >
+            <NavItem
+              href={href}
+              label={label}
+              compact={compact}
+              icon={<Icon className="h-4.5 w-4.5 shrink-0" />}
+            />
+          </div>
         ))}
       </div>
-    );
-  }
 
-  if (!isAuthenticated) {
-    return null;
-  }
+      <div className="my-4 border-t border-slate-200/70 dark:border-slate-700/70" />
 
-  return (
-    <nav className="grid items-start px-4 text-sm font-medium">
-      {navLinks.map(({ href, label, Icon }) => (
-        <NavItem key={href} href={href}>
-          <Icon className="h-6 w-6" />
-          {label}
-        </NavItem>
-      ))}
+      <p
+        className={`overflow-hidden whitespace-nowrap px-3 text-[11px] font-semibold tracking-[0.12em] text-slate-500 uppercase transition-[max-height,opacity,padding,margin] duration-300 ease-out dark:text-slate-400 ${
+          compact ? 'mb-0 max-h-0 pb-0 opacity-0' : 'mb-0 max-h-8 pb-2 opacity-100'
+        }`}
+      >
+        Account
+      </p>
+      <div className="space-y-0.5">
+        {settingsLinks.map(({ href, label, Icon }, index) => (
+          <div
+            key={href}
+            className={
+              index > 0
+                ? 'relative pt-1 before:absolute before:top-0 before:left-4 before:right-4 before:h-px before:bg-slate-200/35 dark:before:bg-slate-700/35'
+                : undefined
+            }
+          >
+            <NavItem
+              href={href}
+              label={label}
+              compact={compact}
+              icon={<Icon className="h-4.5 w-4.5 shrink-0" />}
+            />
+          </div>
+        ))}
+      </div>
     </nav>
   );
 }
