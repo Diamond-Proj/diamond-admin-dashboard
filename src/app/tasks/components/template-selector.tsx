@@ -13,19 +13,19 @@ interface TemplateSelectorProps {
 
 const CATEGORY_COLORS: Record<string, string> = {
   'Fine-tuning':
-    'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
+    'bg-rose-100 text-rose-700 dark:bg-rose-950/30 dark:text-rose-200',
   Inference:
-    'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+    'bg-sky-100 text-sky-700 dark:bg-sky-950/30 dark:text-sky-200',
   Evaluation:
-    'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
+    'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-200',
   Training:
-    'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300',
+    'bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-200',
 };
 
 function getCategoryColor(category: string): string {
   return (
     CATEGORY_COLORS[category] ??
-    'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+    'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
   );
 }
 
@@ -42,24 +42,22 @@ export function TemplateSelector({
   const activeTemplate = templates.find((t) => t.id === activeTemplateId);
 
   return (
-    <div className="border-b border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
-      {/* Toggle row */}
+    <div className="border-b border-slate-200/70 bg-slate-50/65 dark:border-slate-700/70 dark:bg-slate-900/45">
       <div className="flex items-center justify-between px-6 py-3">
         <button
           type="button"
           onClick={() => setIsOpen((v) => !v)}
-          className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-gray-700 hover:text-gray-900 dark:text-gray-200 dark:hover:text-white"
+          className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-slate-700 transition-colors hover:text-slate-900 dark:text-slate-200 dark:hover:text-slate-100"
         >
-          <LayoutTemplate className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+          <LayoutTemplate className="h-4 w-4 text-slate-400 dark:text-slate-500" />
           Templates
           {isOpen ? (
-            <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
+            <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
           ) : (
-            <ChevronRight className="h-3.5 w-3.5 text-gray-400" />
+            <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
           )}
         </button>
 
-        {/* Active template pill + clear */}
         {activeTemplate && (
           <div className="flex items-center gap-2">
             <span
@@ -71,7 +69,7 @@ export function TemplateSelector({
               type="button"
               onClick={onClear}
               title="Clear template"
-              className="cursor-pointer text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              className="cursor-pointer text-slate-400 transition-colors hover:text-slate-700 dark:hover:text-slate-200"
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -79,7 +77,6 @@ export function TemplateSelector({
         )}
       </div>
 
-      {/* Collapsible card row */}
       {isOpen && (
         <div className="flex gap-3 overflow-x-auto px-6 pb-4">
           {templates.map((template) => {
@@ -93,10 +90,10 @@ export function TemplateSelector({
                   onSelect(template);
                   setIsOpen(false);
                 }}
-                className={`flex min-w-[220px] max-w-[260px] flex-shrink-0 cursor-pointer flex-col gap-2 rounded-lg border p-4 text-left transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${
+                className={`flex min-w-55 max-w-65 shrink-0 cursor-pointer flex-col gap-2 rounded-xl border p-4 text-left transition-all duration-150 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-rose-500/25 ${
                   isActive
-                    ? 'border-blue-500 bg-blue-50 shadow-sm dark:border-blue-400 dark:bg-blue-900/20'
-                    : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm dark:border-gray-600 dark:bg-gray-800 dark:hover:border-gray-500'
+                    ? 'border-rose-300/80 bg-rose-50/70 shadow-sm dark:border-rose-400/40 dark:bg-rose-950/20'
+                    : 'border-slate-200/80 bg-[hsl(var(--dashboard-surface))] hover:border-slate-300 dark:border-slate-700/80 dark:hover:border-slate-600'
                 }`}
               >
                 <span
@@ -107,13 +104,13 @@ export function TemplateSelector({
                 <span
                   className={`text-sm font-semibold leading-snug ${
                     isActive
-                      ? 'text-blue-700 dark:text-blue-300'
-                      : 'text-gray-900 dark:text-white'
+                      ? 'text-rose-700 dark:text-rose-200'
+                      : 'text-slate-900 dark:text-slate-100'
                   }`}
                 >
                   {template.name}
                 </span>
-                <span className="line-clamp-2 text-xs text-gray-500 dark:text-gray-400">
+                <span className="line-clamp-2 text-xs text-slate-500 dark:text-slate-400">
                   {template.description}
                 </span>
               </button>
