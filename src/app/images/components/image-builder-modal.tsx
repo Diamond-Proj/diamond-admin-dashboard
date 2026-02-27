@@ -167,14 +167,14 @@ export function ImageBuilderModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="flex h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-900">
+      <div className="flex h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-[hsl(var(--dashboard-surface))] shadow-xl dark:border-slate-700/80">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 p-6 dark:border-gray-700">
+        <div className="flex items-center justify-between border-b border-slate-200/70 p-6 dark:border-slate-700/70">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
               Image Builder
             </h2>
-            <p className="text-gray-600 dark:text-gray-300">
+            <p className="text-slate-600 dark:text-slate-400">
               {showLogs ? 'Build in Progress' : STEPS[currentStep]?.description}
             </p>
           </div>
@@ -182,7 +182,8 @@ export function ImageBuilderModal({
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="cursor-pointer text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            aria-label="Close"
+            className="cursor-pointer text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
           >
             <X className="h-5 w-5" />
           </Button>
@@ -190,18 +191,18 @@ export function ImageBuilderModal({
 
         {/* Progress Bar */}
         {!showLogs && (
-          <div className="border-b border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
+          <div className="border-b border-slate-200/70 bg-slate-50/70 px-6 py-4 dark:border-slate-700/70 dark:bg-slate-900/50">
             <div className="mb-2 flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                 Step {currentStep + 1} of {STEPS.length}
               </span>
-              <span className="text-sm text-gray-500 dark:text-gray-400">
+              <span className="text-sm text-slate-500 dark:text-slate-400">
                 {Math.round(((currentStep + 1) / STEPS.length) * 100)}%
               </span>
             </div>
-            <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+            <div className="h-2 w-full rounded-full bg-slate-200 dark:bg-slate-700">
               <div
-                className="h-2 rounded-full bg-rose-600 transition-all duration-300"
+                className="h-2 rounded-full bg-slate-900 transition-all duration-300 dark:bg-slate-100"
                 style={{
                   width: `${((currentStep + 1) / STEPS.length) * 100}%`
                 }}
@@ -211,7 +212,7 @@ export function ImageBuilderModal({
         )}
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto bg-white dark:bg-gray-900">
+        <div className="flex-1 overflow-y-auto">
           {showLogs && buildData ? (
             <BuilderLogs
               taskId={buildData.task_id}
@@ -236,7 +237,7 @@ export function ImageBuilderModal({
 
         {/* Footer */}
         {!showLogs && (
-          <div className="flex items-center justify-between border-t border-gray-200 bg-gray-50 p-6 dark:border-gray-700 dark:bg-gray-800">
+          <div className="flex items-center justify-between border-t border-slate-200/70 bg-slate-50/70 p-6 dark:border-slate-700/70 dark:bg-slate-900/60">
             <Button
               variant="outline"
               onClick={handlePrevious}
@@ -251,7 +252,7 @@ export function ImageBuilderModal({
               <Button
                 onClick={handleNext}
                 disabled={!canProceed()}
-                className="flex cursor-pointer items-center gap-2"
+                className="flex cursor-pointer items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 Next
                 <ChevronRight className="h-4 w-4" />
@@ -260,7 +261,7 @@ export function ImageBuilderModal({
               <Button
                 onClick={handleSubmit}
                 disabled={!canProceed() || isSubmitting}
-                className="flex cursor-pointer items-center gap-2"
+                className="flex cursor-pointer items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 <Play className="h-4 w-4" />
                 {isSubmitting ? 'Starting Build...' : 'Start Build'}

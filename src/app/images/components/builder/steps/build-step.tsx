@@ -38,8 +38,8 @@ export function BuildStep({ formData, onUpdate }: BuildStepProps) {
       {/* Dependencies */}
       <div className="space-y-4">
         <div className="mb-3 flex items-center gap-2">
-          <Package className="text-primary h-5 w-5" />
-          <h4 className="text-lg font-semibold">Dependencies (Optional)</h4>
+          <Package className="h-5 w-5 text-rose-600 dark:text-rose-300" />
+          <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Dependencies (Optional)</h4>
         </div>
 
         <Textarea
@@ -48,7 +48,7 @@ export function BuildStep({ formData, onUpdate }: BuildStepProps) {
           onChange={(e) => onUpdate({ dependencies: e.target.value })}
           className="min-h-[150px] font-mono text-sm"
         />
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-slate-500 dark:text-slate-400">
           System packages and dependencies to install (shell commands)
         </p>
       </div>
@@ -56,8 +56,8 @@ export function BuildStep({ formData, onUpdate }: BuildStepProps) {
       {/* Environment Variables */}
       <div className="space-y-4">
         <div className="mb-3 flex items-center gap-2">
-          <Settings className="text-primary h-5 w-5" />
-          <h4 className="text-lg font-semibold">
+          <Settings className="h-5 w-5 text-rose-600 dark:text-rose-300" />
+          <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
             Environment Variables (Optional)
           </h4>
         </div>
@@ -68,7 +68,7 @@ export function BuildStep({ formData, onUpdate }: BuildStepProps) {
           onChange={(e) => onUpdate({ environment: e.target.value })}
           className="min-h-[120px] font-mono text-sm"
         />
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-slate-500 dark:text-slate-400">
           Environment variables to set during the build process
         </p>
       </div>
@@ -76,8 +76,8 @@ export function BuildStep({ formData, onUpdate }: BuildStepProps) {
       {/* Build Commands */}
       <div className="space-y-4">
         <div className="mb-3 flex items-center gap-2">
-          <Terminal className="text-primary h-5 w-5" />
-          <h4 className="text-lg font-semibold">Build Commands (Optional)</h4>
+          <Terminal className="h-5 w-5 text-rose-600 dark:text-rose-300" />
+          <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Build Commands (Optional)</h4>
         </div>
 
         <Textarea
@@ -86,7 +86,7 @@ export function BuildStep({ formData, onUpdate }: BuildStepProps) {
           onChange={(e) => onUpdate({ commands: e.target.value })}
           className="min-h-[100px] font-mono text-sm"
         />
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-slate-500 dark:text-slate-400">
           Commands to build and configure your application inside the container
         </p>
       </div>
