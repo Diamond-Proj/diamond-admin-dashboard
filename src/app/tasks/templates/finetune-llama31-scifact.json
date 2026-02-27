@@ -1,0 +1,14 @@
+{
+  "id": "finetune-llama31-scifact",
+  "name": "Fine-tune LLaMA 3.1 on SciFact",
+  "description": "Fine-tune Meta LLaMA 3.1 on the allenai/scifact dataset using Delta@NCSA with 1 GPU. Adjust dataset and hyperparameters as needed.",
+  "category": "Fine-tuning",
+  "defaults": {
+    "taskName": "finetune-llama31-scifact",
+    "partition": "gpuA100x4",
+    "num_of_nodes": 1,
+    "time_duration": "01:00:00",
+    "slurm_options": "--gpus-per-node=1\n--mem=64G",
+    "task": "python finetune.py --model meta-llama/Llama-3.1-8B --dataset allenai/scifact"
+  }
+}
