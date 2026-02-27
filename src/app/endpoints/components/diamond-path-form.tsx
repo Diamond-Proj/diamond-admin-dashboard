@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { Loader2, Save } from 'lucide-react';
 import Form from 'next/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 interface Endpoint {
   endpoint_uuid: string;
@@ -74,25 +76,25 @@ export function DiamondPathForm({ endpoint }: DiamondPathFormProps) {
 
   return (
     <Form action="" onSubmit={handleSubmit} className="space-y-2">
-      <label className="block text-sm text-gray-900 dark:text-white">
+      <label className="block text-sm text-slate-900 dark:text-slate-100">
         <span className="font-medium">Diamond Work Path</span>
-        <span className="ml-2 font-normal text-gray-600 dark:text-gray-400">
+        <span className="ml-2 font-normal text-slate-600 dark:text-slate-400">
           (Specify the working directory for Diamond tasks on this endpoint)
         </span>
       </label>
       <div className="flex gap-2">
-        <input
+        <Input
           type="text"
           value={path}
           onChange={(e) => setPath(e.target.value)}
           placeholder="/path/to/diamond/work/directory"
           disabled={isSaving}
-          className="flex h-10 w-full flex-1 rounded-lg border border-gray-200 bg-white px-3 py-2 font-mono text-sm text-gray-900 ring-offset-white transition-colors placeholder:text-gray-400 focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-500/20 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:ring-offset-gray-950 dark:placeholder:text-gray-500 dark:focus-visible:border-blue-400 dark:focus-visible:ring-blue-400/20"
+          className="h-10 flex-1 border-slate-200/80 bg-white/80 font-mono text-slate-900 placeholder:text-slate-400 focus-visible:ring-rose-500/25 dark:border-slate-700/80 dark:bg-slate-900/80 dark:text-slate-100 dark:placeholder:text-slate-500"
         />
-        <button
+        <Button
           type="submit"
           disabled={isSaving || !path || !hasChanges}
-          className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium whitespace-nowrap text-white transition-colors hover:bg-blue-700 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus-visible:ring-blue-400"
+          className="h-10 whitespace-nowrap bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
         >
           {isSaving ? (
             <>
@@ -105,7 +107,7 @@ export function DiamondPathForm({ endpoint }: DiamondPathFormProps) {
               Save Path
             </>
           )}
-        </button>
+        </Button>
       </div>
     </Form>
   );

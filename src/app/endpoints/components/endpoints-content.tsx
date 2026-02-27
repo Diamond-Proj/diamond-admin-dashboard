@@ -344,23 +344,23 @@ export function EndpointsContent() {
 
       {dataPrepStatus !== 'idle' && (
         <div
-          className={`flex items-center justify-between rounded-lg border p-4 ${
+          className={`dashboard-card flex items-center justify-between p-4 ${
             dataPrepStatus === 'success'
-              ? 'border-green-200 bg-green-50 dark:border-green-900/50 dark:bg-green-950/40'
+              ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-950/30'
               : dataPrepStatus === 'running'
-              ? 'border-blue-200 bg-blue-50 dark:border-blue-900/50 dark:bg-blue-950/40'
-              : 'border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/40'
+              ? 'border-sky-200 bg-sky-50 dark:border-sky-900/50 dark:bg-sky-950/30'
+              : 'border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/30'
           }`}
         >
           <div>
-            <p className="font-medium text-gray-900 dark:text-gray-100">
+            <p className="font-medium text-slate-900 dark:text-slate-100">
               {dataPrepStatus === 'running'
                 ? 'Preparing endpoints'
                 : dataPrepStatus === 'success'
                 ? 'Endpoint data ready'
                 : 'Endpoint preparation issue'}
             </p>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
+            <p className="text-sm text-slate-600 dark:text-slate-300">
               {dataPrepStatus === 'running'
                 ? dataPrepProgress.total > 0
                   ? `Prepared ${dataPrepProgress.completed}/${dataPrepProgress.total}${
@@ -373,7 +373,7 @@ export function EndpointsContent() {
             </p>
           </div>
           {dataPrepStatus === 'running' && (
-            <Loader2 className="h-5 w-5 animate-spin text-gray-500" />
+            <Loader2 className="h-5 w-5 animate-spin text-slate-500 dark:text-slate-400" />
           )}
         </div>
       )}
@@ -385,14 +385,14 @@ export function EndpointsContent() {
             {[...Array(4)].map((_, i) => (
               <div
                 key={i}
-                className="animate-pulse rounded-xl border border-gray-200/60 bg-white p-5 shadow-sm dark:border-gray-700/60 dark:bg-gray-800"
+                className="dashboard-card animate-pulse p-5"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <div className="mb-2 h-4 w-20 rounded bg-gray-200 dark:bg-gray-700"></div>
-                    <div className="h-8 w-12 rounded bg-gray-200 dark:bg-gray-700"></div>
+                    <div className="mb-2 h-4 w-20 rounded bg-slate-200 dark:bg-slate-700"></div>
+                    <div className="h-8 w-12 rounded bg-slate-200 dark:bg-slate-700"></div>
                   </div>
-                  <div className="h-12 w-12 rounded-lg bg-gray-200 dark:bg-gray-700"></div>
+                  <div className="h-12 w-12 rounded-lg bg-slate-200 dark:bg-slate-700"></div>
                 </div>
               </div>
             ))}
@@ -401,8 +401,8 @@ export function EndpointsContent() {
           {/* Content Loading */}
           <div className="flex items-center justify-center py-16">
             <div className="text-center">
-              <Loader2 className="mx-auto h-12 w-12 animate-spin text-blue-600" />
-              <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+              <Loader2 className="mx-auto h-12 w-12 animate-spin text-slate-600 dark:text-slate-300" />
+              <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
                 Loading endpoints...
               </p>
             </div>
@@ -423,8 +423,13 @@ export function EndpointsContent() {
 
           <EndpointTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-          {activeTab === 'managed' && (
-            <div className="space-y-4">
+          <div
+            role="tabpanel"
+            id="endpoint-panel-managed"
+            aria-labelledby="endpoint-tab-managed"
+            hidden={activeTab !== 'managed'}
+            className={activeTab === 'managed' ? 'space-y-4' : 'hidden'}
+          >
               {managedEndpoints.length === 0 && (
                 <EmptyState
                   type="managed"
@@ -446,17 +451,21 @@ export function EndpointsContent() {
                     }
                   />
                 ))}
-            </div>
-          )}
+          </div>
 
-          {activeTab === 'available' && (
-            <div className="space-y-3">
+          <div
+            role="tabpanel"
+            id="endpoint-panel-available"
+            aria-labelledby="endpoint-tab-available"
+            hidden={activeTab !== 'available'}
+            className={activeTab === 'available' ? 'space-y-3' : 'hidden'}
+          >
               {availableEndpoints.length === 0 && (
                 <EmptyState type="available" />
               )}
               {availableEndpoints.length > 0 && (
                 <>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
                     Add endpoints to Diamond management to configure work paths
                     and enable workflow execution.
                   </p>
@@ -472,8 +481,7 @@ export function EndpointsContent() {
                   ))}
                 </>
               )}
-            </div>
-          )}
+          </div>
         </>
       )}
     </div>
