@@ -189,14 +189,14 @@ export function EndpointStep({ formData, onUpdate }: EndpointStepProps) {
           {/* Endpoint Selection */}
           <div className="space-y-6">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-                <Server className="h-5 w-5 text-blue-600" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sky-100 dark:bg-sky-950/30">
+                <Server className="h-5 w-5 text-sky-700 dark:text-sky-300" />
               </div>
               <div>
-                <h4 className="text-lg font-semibold text-gray-900">
+                <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                   HPC Endpoint
                 </h4>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-slate-600 dark:text-slate-400">
                   Select your compute endpoint
                 </p>
               </div>
@@ -230,26 +230,26 @@ export function EndpointStep({ formData, onUpdate }: EndpointStepProps) {
           {/* Partition Selection */}
           <div className="space-y-6">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100">
-                <Cpu className="h-5 w-5 text-purple-600" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-950/30">
+                <Cpu className="h-5 w-5 text-indigo-700 dark:text-indigo-300" />
               </div>
               <div>
-                <h4 className="text-lg font-semibold text-gray-900">
+                <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                   Partition
                 </h4>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-slate-600 dark:text-slate-400">
                   Choose compute partition
                 </p>
               </div>
             </div>
 
             {!isEndpointSelected ? (
-              <div className="rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 p-8 text-center">
-                <Cpu className="mx-auto mb-3 h-8 w-8 text-gray-400" />
-                <p className="mb-1 text-sm font-medium text-gray-600">
+              <div className="rounded-xl border-2 border-dashed border-slate-200/80 bg-slate-50/70 p-8 text-center dark:border-slate-700/80 dark:bg-slate-800/50">
+                <Cpu className="mx-auto mb-3 h-8 w-8 text-slate-400 dark:text-slate-500" />
+                <p className="mb-1 text-sm font-medium text-slate-600 dark:text-slate-300">
                   Select an endpoint first
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Partitions will be available after endpoint selection
                 </p>
               </div>
@@ -265,17 +265,17 @@ export function EndpointStep({ formData, onUpdate }: EndpointStepProps) {
                   />
                 ) : (
                   <div className="space-y-3">
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                       Partition Name
                     </label>
                     <Input
                       placeholder="Enter partition name"
                       value={formData.partition || ''}
                       onChange={(e) => onUpdate({ partition: e.target.value })}
-                      className="h-11 rounded-lg border-gray-300 shadow-sm focus:border-blue-400 focus:ring-blue-100"
+                      className="h-11 border-slate-200/80 bg-white/80 dark:border-slate-700/80 dark:bg-slate-900/80 focus-visible:ring-rose-500/25"
                     />
                     {!isLoadingPartitions && (
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
                         No available partitions found for this endpoint
                       </p>
                     )}
@@ -291,24 +291,24 @@ export function EndpointStep({ formData, onUpdate }: EndpointStepProps) {
           {/* Account Selection */}
           <div className="space-y-6">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100">
-                <User className="h-5 w-5 text-green-600" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-950/30">
+                <User className="h-5 w-5 text-emerald-700 dark:text-emerald-300" />
               </div>
               <div>
-                <h4 className="text-lg font-semibold text-gray-900">
+                <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                   HPC Account
                 </h4>
-                <p className="text-sm text-gray-600">Your compute account</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400">Your compute account</p>
               </div>
             </div>
 
             {!isEndpointSelected ? (
-              <div className="rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 p-8 text-center">
-                <User className="mx-auto mb-3 h-8 w-8 text-gray-400" />
-                <p className="mb-1 text-sm font-medium text-gray-600">
+              <div className="rounded-xl border-2 border-dashed border-slate-200/80 bg-slate-50/70 p-8 text-center dark:border-slate-700/80 dark:bg-slate-800/50">
+                <User className="mx-auto mb-3 h-8 w-8 text-slate-400 dark:text-slate-500" />
+                <p className="mb-1 text-sm font-medium text-slate-600 dark:text-slate-300">
                   Select an endpoint first
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Accounts will be available after endpoint selection
                 </p>
               </div>
@@ -325,17 +325,17 @@ export function EndpointStep({ formData, onUpdate }: EndpointStepProps) {
                 )}
 
                 <div className="space-y-3">
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                     {accounts.length > 0 ? 'Or enter manually' : 'Account Name'}
                   </label>
                   <Input
                     placeholder="Enter account name"
                     value={formData.account || ''}
                     onChange={(e) => onUpdate({ account: e.target.value })}
-                    className="h-11 rounded-lg border-gray-300 shadow-sm focus:border-blue-400 focus:ring-blue-100"
+                    className="h-11 border-slate-200/80 bg-white/80 dark:border-slate-700/80 dark:bg-slate-900/80 focus-visible:ring-rose-500/25"
                   />
                   {accounts.length === 0 && !isLoadingAccounts && (
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       No available accounts found for this endpoint
                     </p>
                   )}
@@ -347,44 +347,44 @@ export function EndpointStep({ formData, onUpdate }: EndpointStepProps) {
           {/* Reservation (Optional) */}
           <div className="space-y-6">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100">
-                <Calendar className="h-5 w-5 text-orange-600" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-950/30">
+                <Calendar className="h-5 w-5 text-amber-700 dark:text-amber-300" />
               </div>
               <div>
-                <h4 className="text-lg font-semibold text-gray-900">
+                <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                   Reservation
-                  <span className="ml-2 text-sm font-normal text-gray-500">
+                  <span className="ml-2 text-sm font-normal text-slate-500 dark:text-slate-400">
                     (Optional)
                   </span>
                 </h4>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-slate-600 dark:text-slate-400">
                   Reserved compute resources
                 </p>
               </div>
             </div>
 
             {!isEndpointSelected ? (
-              <div className="rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 p-8 text-center">
-                <Calendar className="mx-auto mb-3 h-8 w-8 text-gray-400" />
-                <p className="mb-1 text-sm font-medium text-gray-600">
+              <div className="rounded-xl border-2 border-dashed border-slate-200/80 bg-slate-50/70 p-8 text-center dark:border-slate-700/80 dark:bg-slate-800/50">
+                <Calendar className="mx-auto mb-3 h-8 w-8 text-slate-400 dark:text-slate-500" />
+                <p className="mb-1 text-sm font-medium text-slate-600 dark:text-slate-300">
                   Select an endpoint first
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Reservations can be specified after endpoint selection
                 </p>
               </div>
             ) : (
               <div className="space-y-3">
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Reservation Name
                 </label>
                 <Input
                   placeholder="Enter reservation name (optional)"
                   value={formData.reservation || ''}
                   onChange={(e) => onUpdate({ reservation: e.target.value })}
-                  className="h-11 rounded-lg border-gray-300 shadow-sm focus:border-blue-400 focus:ring-blue-100"
+                  className="h-11 border-slate-200/80 bg-white/80 dark:border-slate-700/80 dark:bg-slate-900/80 focus-visible:ring-rose-500/25"
                 />
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Leave empty if no reservation is required
                 </p>
               </div>

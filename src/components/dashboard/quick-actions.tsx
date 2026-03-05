@@ -1,100 +1,89 @@
 'use client';
 
 import Link from 'next/link';
-import { Container, Database, ChevronRight, Settings } from 'lucide-react';
+import { type ComponentType } from 'react';
+import { ChevronRight, Container, Cpu, Database } from 'lucide-react';
+
 import { TaskIcon } from '@/components/icons';
+
+type Action = {
+  href: string;
+  title: string;
+  description: string;
+  icon: ComponentType<{ className?: string }>;
+  iconSurface: string;
+  cardSurface: string;
+};
+
+const actions: Action[] = [
+  {
+    href: '/images',
+    title: 'Images',
+    description: 'Build and manage container images for HPC workloads',
+    icon: Container,
+    iconSurface: 'bg-sky-600',
+    cardSurface: 'bg-sky-50/70 dark:bg-sky-900/18'
+  },
+  {
+    href: '/datasets',
+    title: 'Datasets',
+    description: 'Register and manage data collections for compute tasks',
+    icon: Database,
+    iconSurface: 'bg-emerald-600',
+    cardSurface: 'bg-emerald-50/70 dark:bg-emerald-900/18'
+  },
+  {
+    href: '/tasks',
+    title: 'Tasks',
+    description: 'Submit jobs and monitor execution status in real time',
+    icon: TaskIcon,
+    iconSurface: 'bg-orange-600',
+    cardSurface: 'bg-orange-50/70 dark:bg-orange-900/18'
+  },
+  {
+    href: '/endpoints',
+    title: 'Endpoints',
+    description: 'Configure Globus Compute endpoints and runtime settings',
+    icon: Cpu,
+    iconSurface: 'bg-slate-600',
+    cardSurface: 'bg-slate-50/85 dark:bg-slate-900/40'
+  }
+];
 
 export function QuickActions() {
   return (
-    <div className="rounded-xl border border-gray-200/60 bg-white p-6 shadow-sm dark:border-gray-700/60 dark:bg-gray-800">
-      <h3 className="mb-6 text-lg font-semibold text-gray-900 dark:text-gray-100">
+    <section className="dashboard-card flex max-h-130 min-h-0 flex-col overflow-hidden p-6">
+      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
         Quick Actions
       </h3>
-      <div className="space-y-3">
-        {/* Images - Container management and building */}
-        <Link
-          href="/images"
-          className="group flex w-full items-center rounded-xl bg-gradient-to-r from-blue-50 to-blue-50/70 p-4 text-left transition-all duration-300 hover:-translate-x-1 hover:from-blue-100 hover:to-blue-100/80 hover:shadow-md dark:from-blue-900/20 dark:to-blue-900/10 dark:hover:from-blue-900/40 dark:hover:to-blue-900/30"
-        >
-          <div className="mr-4 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500 shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:shadow-md">
-            <Container className="h-5 w-5 text-white" />
-          </div>
-          <div className="flex-1">
-            <p className="font-semibold text-gray-900 transition-colors duration-300 group-hover:text-blue-700 dark:text-gray-100 dark:group-hover:text-blue-300">
-              Images
-            </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Manage and build container images
-            </p>
-          </div>
-          <div className="opacity-0 transition-all duration-300 group-hover:translate-x-2 group-hover:opacity-100">
-            <ChevronRight className="h-5 w-5 text-blue-500" />
-          </div>
-        </Link>
+      <div className="mt-5 min-h-0 flex-1 overflow-y-auto pr-1">
+        <div className="flex flex-col gap-3">
+          {actions.map((action) => (
+            <Link
+              key={action.href}
+              href={action.href}
+              className={`group flex items-center rounded-2xl border border-slate-200/65 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-slate-700/60 ${action.cardSurface}`}
+            >
+              <div
+                className={`mr-4 flex h-10 w-10 items-center justify-center rounded-xl text-white shadow-sm transition-transform duration-300 group-hover:scale-105 ${action.iconSurface}`}
+              >
+                <action.icon className="h-5 w-5" />
+              </div>
 
-        {/* Datasets - Data collection management and registration */}
-        <Link
-          href="/datasets"
-          className="group flex w-full items-center rounded-xl bg-gradient-to-r from-green-50 to-green-50/70 p-4 text-left transition-all duration-300 hover:-translate-x-1 hover:from-green-100 hover:to-green-100/80 hover:shadow-md dark:from-green-900/20 dark:to-green-900/10 dark:hover:from-green-900/40 dark:hover:to-green-900/30"
-        >
-          <div className="mr-4 flex h-10 w-10 items-center justify-center rounded-xl bg-green-500 shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:shadow-md">
-            <Database className="h-5 w-5 text-white" />
-          </div>
-          <div className="flex-1">
-            <p className="font-semibold text-gray-900 transition-colors duration-300 group-hover:text-green-700 dark:text-gray-100 dark:group-hover:text-green-300">
-              Datasets
-            </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Manage and register data collections
-            </p>
-          </div>
-          <div className="opacity-0 transition-all duration-300 group-hover:translate-x-2 group-hover:opacity-100">
-            <ChevronRight className="h-5 w-5 text-green-500" />
-          </div>
-        </Link>
+              <div className="flex-1">
+                <p className="font-semibold text-slate-900 dark:text-slate-100">
+                  {action.title}
+                </p>
+                <p className="text-sm text-slate-600 dark:text-slate-300">
+                  {action.description}
+                </p>
+              </div>
 
-        {/* Tasks - Job status monitoring and management */}
-        <Link
-          href="/tasks"
-          className="group flex w-full items-center rounded-xl bg-gradient-to-r from-orange-50 to-orange-50/70 p-4 text-left transition-all duration-300 hover:-translate-x-1 hover:from-orange-100 hover:to-orange-100/80 hover:shadow-md dark:from-orange-900/20 dark:to-orange-900/10 dark:hover:from-orange-900/40 dark:hover:to-orange-900/30"
-        >
-          <div className="mr-4 flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500 shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:shadow-md">
-            <TaskIcon className="h-5 w-5 text-white" />
-          </div>
-          <div className="flex-1">
-            <p className="font-semibold text-gray-900 transition-colors duration-300 group-hover:text-orange-700 dark:text-gray-100 dark:group-hover:text-orange-300">
-              Tasks
-            </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Monitor and manage HPC tasks
-            </p>
-          </div>
-          <div className="opacity-0 transition-all duration-300 group-hover:translate-x-2 group-hover:opacity-100">
-            <ChevronRight className="h-5 w-5 text-orange-500" />
-          </div>
-        </Link>
-
-        {/* Settings - Application configuration */}
-        <Link
-          href="/endpoints"
-          className="group flex w-full items-center rounded-xl bg-gradient-to-r from-gray-50 to-gray-50/70 p-4 text-left transition-all duration-300 hover:-translate-x-1 hover:from-gray-100 hover:to-gray-100/80 hover:shadow-md dark:from-gray-900/20 dark:to-gray-900/10 dark:hover:from-gray-900/40 dark:hover:to-gray-900/30"
-        >
-          <div className="mr-4 flex h-10 w-10 items-center justify-center rounded-xl bg-gray-500 shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:shadow-md">
-            <Settings className="h-5 w-5 text-white" />
-          </div>
-          <div className="flex-1">
-            <p className="font-semibold text-gray-900 transition-colors duration-300 group-hover:text-gray-700 dark:text-gray-100 dark:group-hover:text-gray-300">
-              Settings
-            </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Configure application preferences
-            </p>
-          </div>
-          <div className="opacity-0 transition-all duration-300 group-hover:translate-x-2 group-hover:opacity-100">
-            <ChevronRight className="h-5 w-5 text-gray-500" />
-          </div>
-        </Link>
+              <ChevronRight className="h-5 w-5 text-slate-400 transition-all duration-300 group-hover:translate-x-1 group-hover:text-slate-700 dark:group-hover:text-slate-200" />
+            </Link>
+          ))}
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

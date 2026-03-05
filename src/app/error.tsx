@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function Error({
   error,
@@ -17,77 +18,68 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="bg-background flex min-h-full w-full items-center justify-center">
-      <div className="container mx-auto max-w-xl px-6 py-12">
-        <div className="-translate-y-14 space-y-6 text-center lg:translate-x-[-110px] lg:translate-y-[-60px]">
-          {/* Error Icon */}
+    <div className="relative flex w-full items-center justify-center p-6 min-h-[calc(100dvh-6rem)] md:min-h-[calc(100dvh-7rem)]">
+      <div className="w-full max-w-2xl rounded-2xl border border-slate-200/80 bg-[hsl(var(--dashboard-surface))] p-7 shadow-xl dark:border-slate-700/80">
+        <div className="space-y-6 text-center">
           <div className="flex justify-center">
-            <div className="bg-destructive/10 rounded-full p-4">
-              <AlertTriangle className="text-destructive h-12 w-12" />
+            <div className="rounded-full bg-red-100 p-4 dark:bg-red-950/30">
+              <AlertTriangle className="h-10 w-10 text-red-600 dark:text-red-400" />
             </div>
           </div>
 
-          {/* Error Title */}
           <div className="space-y-2">
-            <h1 className="text-foreground text-3xl font-bold tracking-tight">
-              Something went wrong!
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+              Something went wrong
             </h1>
-            <p className="text-muted-foreground">
-              We apologize for the inconvenience. An unexpected error occurred.
+            <p className="text-slate-600 dark:text-slate-400">
+              An unexpected error occurred while loading this page.
             </p>
           </div>
 
-          {/* Error Details */}
-          <div className="space-y-4">
+          <div className="space-y-3 text-left">
             {error.message && (
-              <div className="bg-card rounded-lg border p-4 text-left">
-                <h3 className="text-card-foreground mb-2 font-medium">
-                  Error Message:
+              <div className="rounded-lg border border-slate-200/80 bg-slate-50/70 p-4 dark:border-slate-700/80 dark:bg-slate-800/55">
+                <h3 className="mb-2 font-medium text-slate-900 dark:text-slate-100">
+                  Error Message
                 </h3>
-                <p className="text-muted-foreground font-mono text-sm break-words">
+                <p className="break-words font-mono text-sm text-slate-600 dark:text-slate-400">
                   {error.message}
                 </p>
               </div>
             )}
 
             {error.digest && (
-              <div className="bg-card rounded-lg border p-4 text-left">
-                <h3 className="text-card-foreground mb-2 font-medium">
-                  Error Digest:
+              <div className="rounded-lg border border-slate-200/80 bg-slate-50/70 p-4 dark:border-slate-700/80 dark:bg-slate-800/55">
+                <h3 className="mb-2 font-medium text-slate-900 dark:text-slate-100">
+                  Error Digest
                 </h3>
-                <p className="text-muted-foreground font-mono text-sm break-words">
+                <p className="break-words font-mono text-sm text-slate-600 dark:text-slate-400">
                   {error.digest}
                 </p>
               </div>
             )}
           </div>
 
-          {/* Action Buttons */}
           <div className="flex flex-col justify-center gap-3 sm:flex-row">
-            <button
+            <Button
               onClick={reset}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-md px-8 text-sm font-medium transition-all duration-200 hover:scale-105 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden active:scale-95"
+              className="h-11 gap-2 bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
             >
               <RefreshCw className="h-4 w-4" />
               Try again
-            </button>
+            </Button>
 
-            <Link
-              href="/"
-              className="border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring inline-flex h-11 items-center justify-center gap-2 rounded-md border px-8 text-sm font-medium transition-all duration-200 hover:scale-105 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden active:scale-95"
-            >
-              <Home className="h-4 w-4" />
-              Back to Dashboard
-            </Link>
+            <Button asChild variant="outline" className="h-11 gap-2">
+              <Link href="/">
+                <Home className="h-4 w-4" />
+                Back to Dashboard
+              </Link>
+            </Button>
           </div>
 
-          {/* Help Text */}
-          <div className="text-muted-foreground text-sm">
-            <p>
-              If the problem persists, try refreshing the page or contact
-              support.
-            </p>
-          </div>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            If this keeps happening, refresh and try again.
+          </p>
         </div>
       </div>
     </div>

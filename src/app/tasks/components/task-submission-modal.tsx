@@ -374,14 +374,14 @@ export function TaskSubmissionModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="flex h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-900">
+      <div className="flex h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-[hsl(var(--dashboard-surface))] shadow-xl dark:border-slate-700/80">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 p-6 dark:border-gray-700">
+        <div className="flex items-center justify-between border-b border-slate-200/70 p-6 dark:border-slate-700/70">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
               Submit New Task
             </h2>
-            <p className="text-gray-600 dark:text-gray-300">
+            <p className="text-slate-600 dark:text-slate-400">
               Configure and submit a new computational task
             </p>
           </div>
@@ -389,7 +389,8 @@ export function TaskSubmissionModal({
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="cursor-pointer text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            aria-label="Close"
+            className="cursor-pointer text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
           >
             <X className="h-5 w-5" />
           </Button>
@@ -404,12 +405,12 @@ export function TaskSubmissionModal({
         />
 
         {/* Content - Scrollable Area */}
-        <div className="flex-1 overflow-y-auto bg-white dark:bg-gray-900">
+        <div className="flex-1 overflow-y-auto">
           <div className="p-6">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               {/* Task Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Task Name *
                 </label>
                 <Input
@@ -431,7 +432,7 @@ export function TaskSubmissionModal({
 
               {/* Endpoint */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Endpoint *
                 </label>
                 <div className="mt-1">
@@ -463,7 +464,7 @@ export function TaskSubmissionModal({
 
               {/* Partition */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Partition *
                 </label>
                 <div className="mt-1">
@@ -488,7 +489,7 @@ export function TaskSubmissionModal({
 
               {/* Account */}
               <div className="md:row-span-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Account *
                 </label>
                 <div className="mt-1 space-y-6">
@@ -507,7 +508,7 @@ export function TaskSubmissionModal({
                     disabled={!formData.endpoint}
                   />
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                       Account Manual Input
                     </label>
                     <Input
@@ -531,7 +532,7 @@ export function TaskSubmissionModal({
 
               {/* Container */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Container *
                 </label>
                 <div className="mt-1">
@@ -556,7 +557,7 @@ export function TaskSubmissionModal({
 
               {/* Dataset */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Dataset (Optional)
                 </label>
                 <div className="mt-1">
@@ -578,7 +579,7 @@ export function TaskSubmissionModal({
 
               {/* Reservation */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Reservation (Optional)
                 </label>
                 <Input
@@ -597,7 +598,7 @@ export function TaskSubmissionModal({
 
               {/* Number of Nodes */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Number of Nodes
                 </label>
                 <Input
@@ -617,7 +618,7 @@ export function TaskSubmissionModal({
 
               {/* Time Duration */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Time Duration (HH:MM:SS) *
                 </label>
                 <Input
@@ -641,7 +642,7 @@ export function TaskSubmissionModal({
 
               {/* Slurm Options */}
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Slurm Options (Optional)
                 </label>
                 <Textarea
@@ -661,7 +662,7 @@ export function TaskSubmissionModal({
 
               {/* Task Command */}
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Task Command (Optional)
                 </label>
                 <Textarea
@@ -688,7 +689,7 @@ export function TaskSubmissionModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 border-t border-gray-200 bg-gray-50 p-6 dark:border-gray-700 dark:bg-gray-800">
+        <div className="flex items-center justify-end gap-3 border-t border-slate-200/70 bg-slate-50/70 p-6 dark:border-slate-700/70 dark:bg-slate-900/60">
           <Button
             variant="outline"
             onClick={onClose}
@@ -699,7 +700,7 @@ export function TaskSubmissionModal({
           <Button
             onClick={handleSubmit}
             disabled={loading.submit}
-            className="cursor-pointer"
+            className="cursor-pointer bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
           >
             {loading.submit ? 'Submitting...' : 'Submit Task'}
           </Button>

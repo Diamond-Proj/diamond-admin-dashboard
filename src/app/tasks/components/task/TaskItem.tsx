@@ -121,12 +121,12 @@ export default function TaskItem({
 
   return (
     <>
-      <div className="group rounded-xl border border-gray-200/60 bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-gray-300/80 hover:shadow-lg dark:border-gray-700/60 dark:bg-gray-800 dark:hover:border-gray-600/80">
+      <div className="group dashboard-card p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             {/* Header */}
             <div className="mb-3 flex items-center gap-3">
-              <h3 className="text-xl font-semibold text-gray-900 transition-colors duration-200 group-hover:text-blue-600 dark:text-gray-100 dark:group-hover:text-blue-400">
+              <h3 className="text-xl font-semibold text-slate-900 transition-colors duration-200 group-hover:text-slate-700 dark:text-slate-100 dark:group-hover:text-slate-200">
                 {task.task_name}
               </h3>
               <div className="flex items-center gap-2">
@@ -141,66 +141,74 @@ export default function TaskItem({
 
             {/* Task Details Grid */}
             <div className="mb-4 grid grid-cols-1 gap-4 text-sm md:grid-cols-3">
-              <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
-                <span className="block text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+              <div className="rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
+                <span className="block text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
                   Endpoint
                 </span>
-                <span className="mt-1 block font-mono text-sm font-semibold text-gray-900 dark:text-gray-100">
+                <span
+                  className="mt-1 block text-sm font-semibold text-slate-900 dark:text-slate-100"
+                  style={{ fontFamily: 'var(--font-mono)' }}
+                >
                   {task.details.endpoint_name}
                 </span>
               </div>
-              <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
-                <span className="block text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+              <div className="rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
+                <span className="block text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
                   Task ID
                 </span>
-                <span className="mt-1 block font-mono text-sm font-semibold text-gray-900 dark:text-gray-100">
+                <span
+                  className="mt-1 block text-sm font-semibold text-slate-900 dark:text-slate-100"
+                  style={{ fontFamily: 'var(--font-mono)' }}
+                >
                   {task.task_id}
                 </span>
               </div>
-              <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
-                <span className="block text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+              <div className="rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
+                <span className="block text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
                   Created
                 </span>
-                <span className="mt-1 block text-sm font-semibold text-gray-900 dark:text-gray-100">
+                <span className="mt-1 block text-sm font-semibold text-slate-900 dark:text-slate-100">
                   {new Date(task.details.task_create_time).toLocaleString()}
                 </span>
               </div>
             </div>
 
             {(task.result || task.error) && (
-              <div className="border-t border-gray-100 pt-4 dark:border-gray-700">
+              <div className="border-t border-slate-200/70 pt-4 dark:border-slate-700/70">
                 <div className="space-y-3">
-                  <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
-                    <span className="block text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                  <div className="rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
+                    <span className="block text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
                       Stdout Log
                     </span>
                     {task.result ? (
                       <button
                         onClick={() => handleViewLog('stdout')}
-                        className="mt-1 block w-full text-left font-mono text-sm text-blue-600 underline underline-offset-4 transition-colors hover:text-blue-500 dark:text-blue-300 dark:hover:text-blue-200 break-all"
+                        className="mt-1 block w-full cursor-pointer break-all text-left text-sm text-rose-700 underline underline-offset-4 transition-colors hover:text-rose-600 dark:text-rose-200 dark:hover:text-rose-100"
+                        style={{ fontFamily: 'var(--font-mono)' }}
                       >
                         {task.result}
                       </button>
                     ) : (
-                      <span className="mt-1 block text-sm text-muted-foreground">
+                      <span className="mt-1 block text-sm text-slate-500 dark:text-slate-400">
                         Not available
                       </span>
                     )}
                   </div>
 
-                  <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
-                    <span className="block text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                  <div className="rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
+                    <span className="block text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
                       Stderr Log
                     </span>
                     {task.error ? (
                       <button
                         onClick={() => handleViewLog('stderr')}
-                        className="mt-1 block w-full text-left font-mono text-sm text-blue-600 underline underline-offset-4 transition-colors hover:text-blue-500 dark:text-blue-300 dark:hover:text-blue-200 break-all"
+                        className="mt-1 block w-full cursor-pointer break-all text-left text-sm text-rose-700 underline underline-offset-4 transition-colors hover:text-rose-600 dark:text-rose-200 dark:hover:text-rose-100"
+                        style={{ fontFamily: 'var(--font-mono)' }}
                       >
                         {task.error}
                       </button>
                     ) : (
-                      <span className="mt-1 block text-sm text-muted-foreground">
+                      <span className="mt-1 block text-sm text-slate-500 dark:text-slate-400">
                         Not available
                       </span>
                     )}
@@ -227,15 +235,15 @@ export default function TaskItem({
       </div>
 
       {logViewer && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4 dark:bg-black/70">
-          <div className="bg-background dark:bg-background w-full max-w-3xl rounded-lg border shadow-xl dark:border-gray-800">
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/50 p-4 dark:bg-black/70">
+          <div className="w-full max-w-3xl rounded-2xl border border-slate-200/80 bg-[hsl(var(--dashboard-surface))] shadow-xl dark:border-slate-700/80">
             <div className="p-6 space-y-4">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h3 className="text-lg font-semibold">
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                     {logViewer.type === 'stdout' ? 'Stdout Log Output' : 'Stderr Log Output'}
                   </h3>
-                  <p className="text-muted-foreground mt-1 text-xs break-all">
+                  <p className="mt-1 break-all text-xs text-slate-500 dark:text-slate-400">
                     Path: {logViewer.path}
                   </p>
                 </div>
@@ -248,16 +256,16 @@ export default function TaskItem({
                   Close
                 </Button>
               </div>
-              <div className="bg-muted/30 dark:bg-muted/20 min-h-[240px] max-h-[60vh] overflow-y-auto rounded-md p-4">
+              <div className="min-h-60 max-h-[60vh] overflow-y-auto rounded-lg border border-slate-200/70 bg-slate-50/70 p-4 dark:border-slate-700/70 dark:bg-slate-800/60">
                 {logLoading ? (
-                  <div className="flex items-center gap-2 text-muted-foreground">
+                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Loading log...
                   </div>
                 ) : logError ? (
-                  <p className="text-sm text-red-500 dark:text-red-400">{logError}</p>
+                  <p className="text-sm text-red-600 dark:text-red-400">{logError}</p>
                 ) : (
-                  <pre className="whitespace-pre-wrap break-words font-mono text-xs text-foreground dark:text-gray-100">
+                  <pre className="wrap-break-word whitespace-pre-wrap font-mono text-xs text-slate-900 dark:text-slate-100">
                     {logContent || 'Log is empty.'}
                   </pre>
                 )}
@@ -270,34 +278,34 @@ export default function TaskItem({
       {/* Confirmation Dialog */}
       {showConfirmDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 dark:bg-black/70">
-          <div className="bg-background dark:bg-background w-full max-w-md rounded-lg border shadow-xl dark:border-gray-800">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200/80 bg-[hsl(var(--dashboard-surface))] shadow-xl dark:border-slate-700/80">
             <div className="p-6">
               {/* Header */}
               <div className="mb-4 flex items-center gap-3">
                 <div className="rounded-full bg-red-100 p-2 dark:bg-red-950/30">
                   <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
                 </div>
-                <h3 className="text-lg font-semibold">Delete Task</h3>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Delete Task</h3>
               </div>
 
               {/* Content */}
               <div className="mb-6">
-                <p className="text-muted-foreground mb-2">
+                <p className="mb-2 text-slate-600 dark:text-slate-400">
                   Are you sure you want to delete this task?
                 </p>
-                <div className="bg-muted/30 dark:bg-muted/20 space-y-2 rounded-md p-3">
-                  <p className="text-sm font-medium">{task.task_name}</p>
-                  <p className="text-muted-foreground text-xs">
+                <div className="space-y-2 rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/60">
+                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{task.task_name}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     <span className="font-bold">Task ID:</span>{' '}
                     <span className="font-mono">{task.task_id}</span>
                   </p>
-                  <p className="text-muted-foreground text-xs">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     <span className="font-bold">Endpoint:</span>{' '}
                     <span className="font-mono">
                       {task.details.endpoint_name}
                     </span>
                   </p>
-                  <p className="text-muted-foreground text-xs">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     <span className="font-bold">Status:</span>{' '}
                     {task.status || 'Unknown'}
                   </p>

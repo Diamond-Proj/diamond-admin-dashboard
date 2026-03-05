@@ -1,13 +1,15 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Plus } from 'lucide-react';
+
+import { useToast } from '@/components/ui/use-toast';
+
 import { TasksList } from './tasks-list';
 import { TaskSubmissionModal } from './task-submission-modal';
 import { TaskControls } from './task-controls';
 import { TaskStats } from './task-stats';
 import { Task, TasksApiResponse, Endpoint } from '../tasks.types';
-import { useToast } from '@/components/ui/use-toast';
 
 interface TasksPageContentProps {
   isAuthenticated: boolean;
@@ -40,7 +42,6 @@ export function TasksPageContent({ isAuthenticated }: TasksPageContentProps) {
 
   const fetchTasks = useCallback(async () => {
     try {
-      // setLoading(true);
       const response = await fetch('/api/get_task_status', {
         method: 'GET',
         credentials: 'include',
@@ -55,9 +56,9 @@ export function TasksPageContent({ isAuthenticated }: TasksPageContentProps) {
 
       const data: TasksApiResponse = await response.json();
       const tasksArray = Object.values(data);
-      const tasksArrayNew = tasksArray.map(task => {
+      const tasksArrayNew = tasksArray.map((task) => {
         const endpoint = endpoints.find(
-          ep => ep.endpoint_uuid === task.details.endpoint_id
+          (ep) => ep.endpoint_uuid === task.details.endpoint_id
         );
         return {
           ...task,
@@ -159,28 +160,29 @@ export function TasksPageContent({ isAuthenticated }: TasksPageContentProps) {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-foreground text-3xl font-bold">Tasks</h1>
-          <p className="text-muted-foreground text-lg">
-            Submit and manage computational tasks across HPC resources
-          </p>
+      <section className="dashboard-card relative overflow-hidden p-5 md:p-6">
+        <div className="pointer-events-none absolute -right-10 -top-16 h-40 w-40 rounded-full bg-sky-400/6 blur-2xl" />
+        <div className="pointer-events-none absolute -left-8 -bottom-12 h-36 w-36 rounded-full bg-primary/5 blur-2xl" />
+
+        <div className="relative z-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+              Tasks
+            </h1>
+          </div>
+
+          <button
+            onClick={() => setIsSubmissionOpen(true)}
+            className="group inline-flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors duration-200 hover:bg-primary/90"
+          >
+            <Plus className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
+            Submit New Task
+          </button>
         </div>
+      </section>
 
-        <button
-          onClick={() => setIsSubmissionOpen(true)}
-          className="group flex cursor-pointer items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-3 font-medium text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:from-blue-700 hover:to-blue-800 hover:shadow-md focus:ring-2 focus:ring-blue-500/50 focus:outline-none"
-        >
-          <Plus className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
-          Submit New Task
-        </button>
-      </div>
-
-      {/* Task Stats */}
       <TaskStats tasks={tasks} loading={loading} />
 
-      {/* Task Controls */}
       <TaskControls
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -188,7 +190,6 @@ export function TasksPageContent({ isAuthenticated }: TasksPageContentProps) {
         setFilter={setFilter}
       />
 
-      {/* Tasks List */}
       <TasksList
         tasks={filteredTasks}
         loading={loading}
@@ -196,7 +197,6 @@ export function TasksPageContent({ isAuthenticated }: TasksPageContentProps) {
         deletingTasks={deletingTasks}
       />
 
-      {/* Task Submission Modal */}
       <TaskSubmissionModal
         isOpen={isSubmissionOpen}
         onClose={() => setIsSubmissionOpen(false)}

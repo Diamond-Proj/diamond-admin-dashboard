@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
+
 import { LoginButton } from './login-button';
 import { UserAvatar } from './user-avatar';
-import { DocsButton } from './docs-button';
-import { usePathname } from 'next/navigation';
 import { useTokenRefresh } from '@/lib/auth/useTokenRefresh';
 
 export function AuthStatus() {
@@ -12,7 +12,6 @@ export function AuthStatus() {
   const [isLoading, setIsLoading] = useState(true);
   const pathname = usePathname();
 
-  // Enable automatic token refresh
   useTokenRefresh();
 
   useEffect(() => {
@@ -28,11 +27,7 @@ export function AuthStatus() {
     };
 
     checkAuth();
-
-    // Recheck periodically
     const interval = setInterval(checkAuth, 2000);
-
-    // Check when window gains focus
     const handleFocus = () => checkAuth();
     window.addEventListener('focus', handleFocus);
 
@@ -44,16 +39,12 @@ export function AuthStatus() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-4">
-        <DocsButton />
-        <div className="h-9 w-20 animate-pulse rounded-md bg-gray-200"></div>
-      </div>
+      <div className="h-10 w-32 animate-pulse rounded-lg bg-slate-200/80 dark:bg-slate-700/70" />
     );
   }
 
   return (
-    <div className="flex items-center gap-4">
-      <DocsButton />
+    <div className="flex items-center">
       {isAuthenticated ? <UserAvatar /> : <LoginButton />}
     </div>
   );

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { TokenManagerServer } from '@/lib/auth/tokenManager.server';
+import { type GlobusTokenResponse } from '@/lib/auth/types';
 
 export async function GET(request: NextRequest) {
   try {
@@ -64,14 +65,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const tokenData = await tokenResponse.json();
+    const tokenData = (await tokenResponse.json()) as GlobusTokenResponse;
     console.log('✓ Token exchange successful');
     console.log(
       'Received tokens for resource servers:',
       tokenData.other_tokens
         ? [
             'auth.globus.org',
-            ...tokenData.other_tokens.map((t: any) => t.resource_server)
+            ...tokenData.other_tokens.map((token) => token.resource_server)
           ]
         : ['auth.globus.org']
     );

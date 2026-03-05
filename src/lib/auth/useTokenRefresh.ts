@@ -5,7 +5,6 @@ import { TokenManager } from './tokenManager.client';
 import { useRouter } from 'next/navigation';
 
 const CHECK_INTERVAL_MS = 60 * 1000; // Check every minute
-const REFRESH_BUFFER_SECONDS = 300; // Refresh 5 minutes before expiry
 
 export function useTokenRefresh() {
   const router = useRouter();

@@ -1,6 +1,6 @@
 'use client';
 
-import { RefreshCw, Loader2 } from 'lucide-react';
+import { Loader2, RefreshCw } from 'lucide-react';
 
 interface EndpointsHeaderProps {
   isRefreshing: boolean;
@@ -12,35 +12,35 @@ export function EndpointsHeader({
   onRefresh
 }: EndpointsHeaderProps) {
   return (
-    <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-foreground text-3xl font-bold">
-          Endpoint Management
-        </h1>
-        <p className="text-muted-foreground text-lg">
-          Manage your Diamond compute endpoints and configure work paths
-        </p>
+    <section className="dashboard-card relative overflow-hidden p-5 md:p-6">
+      <div className="pointer-events-none absolute -right-10 -top-16 h-40 w-40 rounded-full bg-emerald-400/6 blur-2xl" />
+      <div className="pointer-events-none absolute -left-8 -bottom-12 h-36 w-36 rounded-full bg-primary/5 blur-2xl" />
+
+      <div className="relative z-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+            Endpoint Management
+          </h1>
+        </div>
+
+        <button
+          onClick={onRefresh}
+          disabled={isRefreshing}
+          className="group inline-flex cursor-pointer items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors duration-200 hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isRefreshing ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Refreshing...
+            </>
+          ) : (
+            <>
+              <RefreshCw className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
+              Refresh Endpoints
+            </>
+          )}
+        </button>
       </div>
-      <button
-        onClick={onRefresh}
-        disabled={isRefreshing}
-        className="group flex cursor-pointer items-center gap-2 rounded-lg bg-gradient-to-r from-green-600 to-green-700 px-6 py-3 font-medium text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:from-green-700 hover:to-green-800 hover:shadow-md focus:ring-2 focus:ring-green-500/50 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {isRefreshing ? (
-          <>
-            <Loader2 
-              className="h-4 w-4 animate-spin transition-transform duration-200" 
-              style={{ animationDuration: '1s' }}
-            />
-            Refreshing...
-          </>
-        ) : (
-          <>
-            <RefreshCw className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
-            Refresh Endpoints
-          </>
-        )}
-      </button>
-    </div>
+    </section>
   );
 }

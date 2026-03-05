@@ -1,7 +1,8 @@
 'use client';
 
+import { CheckCircle2, Plus, Server } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
-import { Server, CheckCircle2, Plus } from 'lucide-react';
 
 interface EmptyStateProps {
   type: 'managed' | 'available';
@@ -11,14 +12,14 @@ interface EmptyStateProps {
 export function EmptyState({ type, onAction }: EmptyStateProps) {
   if (type === 'managed') {
     return (
-      <div className="flex flex-col items-center justify-center py-16">
-        <div className="rounded-full bg-gray-100 p-6 dark:bg-gray-700">
-          <Server className="h-12 w-12 text-gray-400 dark:text-gray-500" />
+      <div className="dashboard-card flex flex-col items-center justify-center py-16">
+        <div className="rounded-full bg-slate-200/70 p-6 dark:bg-slate-800/70">
+          <Server className="h-12 w-12 text-slate-500 dark:text-slate-300" />
         </div>
-        <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-white">
+        <h3 className="mt-4 text-lg font-semibold text-slate-900 dark:text-slate-100">
           No Managed Endpoints
         </h3>
-        <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+        <p className="mt-2 text-center text-sm text-slate-600 dark:text-slate-300">
           Add endpoints from the &quot;Available Endpoints&quot; tab to start
           managing them.
         </p>
@@ -33,14 +34,14 @@ export function EmptyState({ type, onAction }: EmptyStateProps) {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center py-16">
-      <div className="rounded-full bg-gray-100 p-6 dark:bg-gray-700">
-        <CheckCircle2 className="h-12 w-12 text-green-600" />
+    <div className="dashboard-card flex flex-col items-center justify-center py-16">
+      <div className="rounded-full bg-emerald-100 p-6 dark:bg-emerald-900/25">
+        <CheckCircle2 className="h-12 w-12 text-emerald-600 dark:text-emerald-400" />
       </div>
-      <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-white">
+      <h3 className="mt-4 text-lg font-semibold text-slate-900 dark:text-slate-100">
         All Endpoints Managed
       </h3>
-      <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+      <p className="mt-2 text-center text-sm text-slate-600 dark:text-slate-300">
         All your available endpoints are already under Diamond management.
       </p>
     </div>

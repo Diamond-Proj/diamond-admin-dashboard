@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { X, ArrowRight, Settings } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { ArrowRight, Settings, Sparkles, X } from 'lucide-react';
 
 interface EndpointOnboardingProps {
   isAuthenticated: boolean;
@@ -17,25 +17,19 @@ export function EndpointOnboarding({
 
   useEffect(() => {
     async function checkInitialization() {
-      if (!isAuthenticated) {
+      if (!isAuthenticated || pathname === '/endpoints') {
         return;
       }
 
-      // Don't show onboarding on settings page - early check to avoid API call
-      if (pathname === '/endpoints') {
-        return;
-      }
-
-      // Get identity_id from cookies
       const cookies = document.cookie.split(';');
       const cookieObj: Record<string, string> = {};
+
       cookies.forEach((cookie) => {
         const [name, value] = cookie.trim().split('=');
         if (name) cookieObj[name] = decodeURIComponent(value || '');
       });
 
       const primaryIdentity = cookieObj['primary_identity'];
-
       if (!primaryIdentity) {
         return;
       }
@@ -46,10 +40,8 @@ export function EndpointOnboarding({
         );
         const data = await response.json();
 
-        // Show onboarding if profile is not initialized
         if (response.ok && data.profile && !data.profile.is_initialized) {
           setTimeout(() => {
-            // Double check pathname in case user navigated during the delay
             if (window.location.pathname !== '/endpoints') {
               setIsVisible(true);
             }
@@ -63,67 +55,77 @@ export function EndpointOnboarding({
     checkInitialization();
   }, [isAuthenticated, pathname]);
 
-  const handleClose = () => {
-    setIsVisible(false);
-  };
-
-  if (!isVisible) return null;
+  if (!isVisible) {
+    return null;
+  }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={handleClose}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <button
+        type="button"
+        className="absolute inset-0 cursor-pointer bg-slate-950/60 backdrop-blur-sm"
+        onClick={() => setIsVisible(false)}
+        aria-label="Close onboarding dialog"
       />
 
-      <div className="relative mx-4 w-full max-w-lg">
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900">
-          <div className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Getting Started
-            </h2>
-            <button
-              onClick={handleClose}
-              className="cursor-pointer rounded-lg p-1 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
-            >
-              <X className="h-4 w-4 text-gray-400" />
-            </button>
-          </div>
+      <div className="dashboard-card relative w-full max-w-xl overflow-hidden p-7">
+        <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-primary/6 blur-2xl" />
+        <div className="pointer-events-none absolute -left-6 -bottom-12 h-36 w-36 rounded-full bg-sky-400/6 blur-2xl" />
 
-          <div className="p-6">
-            <div className="mb-4 flex justify-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
-                <Settings className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+        <button
+          type="button"
+          onClick={() => setIsVisible(false)}
+          className="absolute right-4 top-4 cursor-pointer rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-slate-200/60 hover:text-slate-800 dark:text-slate-300 dark:hover:bg-slate-700/70 dark:hover:text-white"
+          aria-label="Close dialog"
+        >
+          <X className="h-4 w-4" />
+        </button>
+
+        <div className="relative z-10">
+          <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+            <Sparkles className="h-3 w-3" />
+            First-Time Setup
+          </span>
+
+          <h2 className="mt-4 text-2xl font-bold text-slate-900 dark:text-slate-100">
+            Configure your compute endpoint
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            Diamond needs one active Globus Compute endpoint to run workloads. You can finish setup in under five minutes.
+          </p>
+
+          <div className="mt-6 rounded-2xl border border-slate-200/75 bg-slate-50/80 p-4 dark:border-slate-700/60 dark:bg-slate-900/45">
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-white shadow-sm">
+                <Settings className="h-4 w-4" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                  Endpoint settings
+                </p>
+                <p className="text-xs text-slate-600 dark:text-slate-300">
+                  Add your endpoint ID and enable health checks.
+                </p>
               </div>
             </div>
+          </div>
 
-            <div className="mb-6 text-center">
-              <h3 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">
-                Configure Your Endpoints
-              </h3>
-              <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-                Set up and manage your API endpoints to get started with
-                Diamond.
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              <Link
-                href="/endpoints"
-                onClick={handleClose}
-                className="flex w-full items-center justify-center space-x-2 rounded-lg bg-blue-600 px-4 py-2.5 font-medium text-white transition-colors hover:bg-blue-700"
-              >
-                <span>Go to Settings</span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-
-              <button
-                onClick={handleClose}
-                className="w-full cursor-pointer py-2 text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-              >
-                Skip for now
-              </button>
-            </div>
+          <div className="mt-6 space-y-2.5">
+            <Link
+              href="/endpoints"
+              onClick={() => setIsVisible(false)}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:-translate-y-0.5 hover:brightness-95"
+            >
+              Go to Endpoints
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <button
+              type="button"
+              onClick={() => setIsVisible(false)}
+              className="w-full cursor-pointer rounded-xl border border-slate-300/70 bg-white/70 px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
+              Skip for now
+            </button>
           </div>
         </div>
       </div>

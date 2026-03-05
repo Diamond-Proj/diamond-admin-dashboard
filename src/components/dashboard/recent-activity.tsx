@@ -1,14 +1,13 @@
 'use client';
 
-import { CheckCircle, XCircle, Zap, Clock } from 'lucide-react';
+import { CheckCircle, Clock, XCircle, Zap } from 'lucide-react';
+
 import { type RecentTask } from '@/components/dashboard/dashboard.types';
 
 const getActivityIcon = (status: RecentTask['status']) => {
   switch (status) {
     case 'COMPLETED':
       return <CheckCircle className="h-4 w-4" />;
-    case 'PENDING':
-      return <Clock className="h-4 w-4" />;
     case 'RUNNING':
       return <Zap className="h-4 w-4" />;
     case 'FAILED':
@@ -21,30 +20,26 @@ const getActivityIcon = (status: RecentTask['status']) => {
 const getActivityColor = (status: RecentTask['status']) => {
   switch (status) {
     case 'COMPLETED':
-      return 'bg-gradient-to-br from-green-500 to-green-600';
-    case 'PENDING':
-      return 'bg-gradient-to-br from-gray-500 to-gray-600';
+      return 'bg-emerald-600';
     case 'RUNNING':
-      return 'bg-gradient-to-br from-blue-500 to-blue-600';
+      return 'bg-sky-600';
     case 'FAILED':
-      return 'bg-gradient-to-br from-red-500 to-red-600';
+      return 'bg-rose-600';
     default:
-      return 'bg-gradient-to-br from-gray-500 to-gray-600';
+      return 'bg-slate-600';
   }
 };
 
 const getStatusBadgeStyle = (status: RecentTask['status']) => {
   switch (status) {
     case 'COMPLETED':
-      return 'bg-green-100 text-green-800 border-green-200 shadow-sm dark:bg-green-900/30 dark:text-green-400 dark:border-green-800';
-    case 'PENDING':
-      return 'bg-gray-100 text-gray-800 border-gray-200 shadow-sm dark:bg-gray-900/30 dark:text-gray-400 dark:border-gray-700';
+      return 'border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300';
     case 'RUNNING':
-      return 'bg-blue-100 text-blue-800 border-blue-200 shadow-sm dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800';
+      return 'border-sky-300 bg-sky-50 text-sky-700 dark:border-sky-700 dark:bg-sky-900/20 dark:text-sky-300';
     case 'FAILED':
-      return 'bg-red-100 text-red-800 border-red-200 shadow-sm dark:bg-red-900/30 dark:text-red-400 dark:border-red-800';
+      return 'border-rose-300 bg-rose-50 text-rose-700 dark:border-rose-700 dark:bg-rose-900/20 dark:text-rose-300';
     default:
-      return 'bg-gray-100 text-gray-800 border-gray-200 shadow-sm dark:bg-gray-900/30 dark:text-gray-400 dark:border-gray-700';
+      return 'border-slate-300 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-900/20 dark:text-slate-300';
   }
 };
 
@@ -54,18 +49,18 @@ const formatTimeAgo = (timeString: string) => {
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-    if (diffInSeconds < 60) {
-      return `${diffInSeconds} seconds ago`;
-    } else if (diffInSeconds < 3600) {
+    if (diffInSeconds < 60) return `${diffInSeconds} seconds ago`;
+    if (diffInSeconds < 3600) {
       const minutes = Math.floor(diffInSeconds / 60);
       return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-    } else if (diffInSeconds < 86400) {
+    }
+    if (diffInSeconds < 86400) {
       const hours = Math.floor(diffInSeconds / 3600);
       return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-    } else {
-      const days = Math.floor(diffInSeconds / 86400);
-      return `${days} day${days > 1 ? 's' : ''} ago`;
     }
+
+    const days = Math.floor(diffInSeconds / 86400);
+    return `${days} day${days > 1 ? 's' : ''} ago`;
   } catch {
     return timeString;
   }
@@ -94,102 +89,97 @@ export function RecentActivity({
   loading: boolean;
 }) {
   return (
-    <div className="max-h-150 overflow-y-auto overscroll-contain rounded-xl border border-gray-200/60 bg-white p-6 shadow-sm dark:border-gray-700/60 dark:bg-gray-800">
-      <h3 className="mb-6 text-lg font-semibold text-gray-900 dark:text-gray-100">
+    <section className="dashboard-card flex max-h-130 min-h-0 flex-col overflow-hidden p-6">
+      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
         Recent Activity
       </h3>
-      <div className="flex flex-col gap-3">
-        {/* Loading skeleton */}
-        {loading && (
-          <>
-            {[...Array(4)].map((_, i) => (
+
+      <div className="mt-5 min-h-0 flex-1 overflow-y-auto pr-1">
+        <div className="flex flex-col gap-3">
+          {loading &&
+            [...Array(4)].map((_, index) => (
               <div
-                key={i}
-                className="flex animate-pulse items-start space-x-4 rounded-xl border border-gray-100 bg-gray-50/50 p-4 dark:border-gray-700 dark:bg-gray-800/50"
+                key={index}
+                className="flex animate-pulse items-start gap-4 rounded-2xl border border-slate-200/70 bg-slate-100/60 p-4 dark:border-slate-700/60 dark:bg-slate-800/40"
               >
-                <div className="h-10 w-10 rounded-xl bg-gray-200 dark:bg-gray-600"></div>
-                <div className="flex-1 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="h-4 w-32 rounded bg-gray-200 dark:bg-gray-600"></div>
-                    <div className="h-6 w-16 rounded-full bg-gray-200 dark:bg-gray-600"></div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="h-3 w-48 rounded bg-gray-200 dark:bg-gray-600"></div>
-                    <div className="h-3 w-36 rounded bg-gray-200 dark:bg-gray-600"></div>
-                  </div>
+                <div className="h-10 w-10 rounded-xl bg-slate-200 dark:bg-slate-700" />
+                <div className="flex-1 space-y-2.5">
+                  <div className="h-4 w-40 rounded bg-slate-200 dark:bg-slate-700" />
+                  <div className="h-3 w-56 rounded bg-slate-200 dark:bg-slate-700" />
+                  <div className="h-3 w-36 rounded bg-slate-200 dark:bg-slate-700" />
                 </div>
               </div>
             ))}
-          </>
-        )}
 
-        {/* No recent tasks found */}
-        {!loading && recentTasks.length === 0 && (
-          <div className="py-12 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-700">
-              <Clock className="h-8 w-8 text-gray-400" />
+          {!loading && recentTasks.length === 0 && (
+            <div className="rounded-2xl border border-dashed border-slate-300/80 bg-slate-50/80 p-10 text-center dark:border-slate-700 dark:bg-slate-900/30">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-300">
+                <Clock className="h-5 w-5" />
+              </div>
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                No recent tasks found
+              </p>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                Tasks will appear here once jobs are submitted
+              </p>
             </div>
-            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-              No recent tasks found
-            </p>
-            <p className="text-xs text-gray-400 dark:text-gray-500">
-              Tasks will appear here once you start submitting jobs
-            </p>
-          </div>
-        )}
+          )}
 
-        {/* Recent tasks list */}
-        {!loading &&
-          recentTasks.length > 0 &&
-          recentTasks.map((task) => (
-            <div
-              key={task.task_id}
-              className="group flex items-start space-x-4 rounded-xl border border-gray-100/60 bg-gray-50/50 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-gray-200 hover:bg-white hover:shadow-md dark:border-gray-700/60 dark:bg-gray-800/50 dark:hover:border-gray-600 dark:hover:bg-gray-700/50"
-            >
-              <div
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:shadow-md ${getActivityColor(
-                  task.status
-                )}`}
+          {!loading &&
+            recentTasks.map((task) => (
+              <article
+                key={task.task_id}
+                className="group rounded-2xl border border-slate-200/70 bg-white/75 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm dark:border-slate-700/60 dark:bg-slate-900/40 dark:hover:border-slate-600"
               >
-                {getActivityIcon(task.status)}
-              </div>
-
-              <div className="min-w-0 flex-1 space-y-3">
-                <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-                  <p className="truncate text-sm font-semibold text-gray-900 transition-colors duration-300 group-hover:text-gray-700 dark:text-gray-100 dark:group-hover:text-gray-200">
-                    {task.name}
-                  </p>
-                  <span
-                    className={`inline-flex shrink-0 items-center rounded-full border px-3 py-1 text-xs font-medium transition-all duration-300 group-hover:scale-105 ${getStatusBadgeStyle(
-                      task.status
-                    )}`}
+                <div className="flex items-start gap-4">
+                  <div
+                    className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white shadow-sm ${getActivityColor(task.status)}`}
                   >
-                    {task.status}
-                  </span>
-                </div>
+                    {getActivityIcon(task.status)}
+                  </div>
 
-                <div className="space-y-1 text-xs text-gray-500 dark:text-gray-400">
-                  <div className="flex items-center space-x-4">
-                    <span className="flex items-center">
-                      <span className="mr-1 font-medium">Created:</span>
-                      {formatDateTime(task.create_time)}
-                    </span>
-                    <span className="flex items-center">
-                      <span className="mr-1 font-medium">Updated:</span>
-                      {formatTimeAgo(task.last_update_time)}
-                    </span>
-                  </div>
-                  <div className="flex items-center">
-                    <span className="mr-1 font-medium">Task ID:</span>
-                    <span className="font-mono text-xs break-all opacity-70 transition-opacity duration-300 group-hover:opacity-100">
-                      {task.task_id}
-                    </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
+                        {task.name}
+                      </p>
+                      <span
+                        className={`inline-flex shrink-0 items-center rounded-full border px-3 py-1 text-xs font-semibold ${getStatusBadgeStyle(task.status)}`}
+                      >
+                        {task.status}
+                      </span>
+                    </div>
+
+                    <div className="mt-3 grid gap-1 text-xs text-slate-500 dark:text-slate-400">
+                      <p>
+                        <span className="font-medium text-slate-700 dark:text-slate-300">
+                          Created:
+                        </span>{' '}
+                        {formatDateTime(task.create_time)}
+                      </p>
+                      <p>
+                        <span className="font-medium text-slate-700 dark:text-slate-300">
+                          Updated:
+                        </span>{' '}
+                        {formatTimeAgo(task.last_update_time)}
+                      </p>
+                      <p
+                        className="truncate"
+                        style={{ fontFamily: 'var(--font-mono)' }}
+                        title={task.task_id}
+                      >
+                        <span className="font-medium text-slate-700 dark:text-slate-300">
+                          Task ID:
+                        </span>{' '}
+                        {task.task_id}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          ))}
+              </article>
+            ))}
+        </div>
       </div>
-    </div>
+    </section>
   );
 }

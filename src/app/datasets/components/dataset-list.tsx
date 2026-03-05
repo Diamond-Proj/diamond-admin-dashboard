@@ -14,9 +14,9 @@ interface DatasetListProps {
 export function DatasetList({ datasets, loading }: DatasetListProps) {
   if (loading) {
     return (
-      <div className="py-16 text-center">
-        <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-purple-600"></div>
-        <p className="mt-4 text-gray-600 dark:text-gray-400">
+      <div className="dashboard-card py-16 text-center">
+        <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-slate-600 dark:border-slate-300"></div>
+        <p className="mt-4 text-slate-600 dark:text-slate-300">
           Loading datasets...
         </p>
       </div>
@@ -25,14 +25,14 @@ export function DatasetList({ datasets, loading }: DatasetListProps) {
 
   if (datasets.length === 0) {
     return (
-      <div className="py-16 text-center">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
-          <Database className="h-8 w-8 text-gray-400" />
+      <div className="dashboard-card py-16 text-center">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-200/70 dark:bg-slate-800/70">
+          <Database className="h-8 w-8 text-slate-500 dark:text-slate-300" />
         </div>
-        <p className="text-lg font-medium text-gray-900 dark:text-gray-100">
+        <p className="text-lg font-medium text-slate-900 dark:text-slate-100">
           No datasets found
         </p>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-slate-600 dark:text-slate-300">
           Try adjusting your search or filter criteria
         </p>
       </div>
@@ -112,21 +112,21 @@ function DatasetListItem({ dataset }: { dataset: DisplayDataset }) {
   };
 
   return (
-    <div className="group rounded-xl border border-gray-200/60 bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-gray-300/80 hover:shadow-lg dark:border-gray-700/60 dark:bg-gray-800 dark:hover:border-gray-600/80">
+    <div className="group dashboard-card p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="mb-3 flex items-center gap-3">
-            <h3 className="text-xl font-semibold text-gray-900 transition-colors duration-200 group-hover:text-purple-600 dark:text-gray-100 dark:group-hover:text-purple-400">
+            <h3 className="text-xl font-semibold text-slate-900 transition-colors duration-200 group-hover:text-slate-700 dark:text-slate-100 dark:group-hover:text-slate-200">
               {dataset.dataset_name}
             </h3>
             <div className="flex items-center gap-2">
               {dataset.public ? (
-                <div className="flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
+                <div className="flex items-center gap-1 rounded-full bg-sky-100 px-3 py-1 text-xs font-medium text-sky-700 dark:bg-sky-950/30 dark:text-sky-300">
                   <Globe className="h-3 w-3" />
                   Public
                 </div>
               ) : (
-                <div className="flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                <div className="flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300">
                   <Lock className="h-3 w-3" />
                   Private
                 </div>
@@ -134,44 +134,44 @@ function DatasetListItem({ dataset }: { dataset: DisplayDataset }) {
             </div>
           </div>
 
-          <p className="mb-4 leading-relaxed text-gray-600 dark:text-gray-400">
+          <p className="mb-4 leading-relaxed text-slate-600 dark:text-slate-400">
             {dataset.description}
           </p>
 
           <div className="mb-4 grid grid-cols-1 gap-4 text-sm md:grid-cols-3">
-            <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
-              <span className="block text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+            <div className="rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
+              <span className="block text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
                 Size
               </span>
-              <span className="mt-1 block font-semibold text-gray-900 dark:text-gray-100">
+              <span className="mt-1 block font-semibold text-slate-900 dark:text-slate-100">
                 {dataset.size}
               </span>
             </div>
-            <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
-              <span className="block text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+            <div className="rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
+              <span className="block text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
                 Format
               </span>
-              <span className="mt-1 block font-semibold text-gray-900 dark:text-gray-100">
+              <span className="mt-1 block font-semibold text-slate-900 dark:text-slate-100">
                 {dataset.format}
               </span>
             </div>
-            <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
-              <span className="block text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+            <div className="rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
+              <span className="block text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
                 Machine
               </span>
-              <span className="mt-1 block font-semibold text-gray-900 dark:text-gray-100">
+              <span className="mt-1 block font-semibold text-slate-900 dark:text-slate-100">
                 {dataset.machine_name}
               </span>
             </div>
           </div>
 
-          <div className="space-y-3 border-t border-gray-100 pt-4 dark:border-gray-700">
-            <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
+          <div className="space-y-3 border-t border-slate-200/70 pt-4 dark:border-slate-700/70">
+            <div className="flex items-center justify-between rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
               <div className="min-w-0 flex-1">
-                <span className="block text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                <span className="block text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
                   Globus Path
                 </span>
-                <span className="mt-1 block truncate font-mono text-sm text-gray-700 dark:text-gray-300">
+                <span className="mt-1 block truncate font-mono text-sm text-slate-700 dark:text-slate-300">
                   {dataset.globus_path}
                 </span>
               </div>
@@ -181,8 +181,8 @@ function DatasetListItem({ dataset }: { dataset: DisplayDataset }) {
                 }
                 className={`ml-3 cursor-pointer rounded-md p-2 transition-all duration-200 ${
                   copiedItem === 'globus_path'
-                    ? 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400'
-                    : 'text-gray-400 hover:bg-gray-200 hover:text-gray-600 dark:hover:bg-gray-600 dark:hover:text-gray-300'
+                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300'
+                    : 'text-slate-400 hover:bg-slate-200 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-200'
                 }`}
                 title={
                   copiedItem === 'globus_path' ? 'Copied!' : 'Copy Globus path'
@@ -196,12 +196,12 @@ function DatasetListItem({ dataset }: { dataset: DisplayDataset }) {
               </button>
             </div>
 
-            <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
+            <div className="flex items-center justify-between rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
               <div className="min-w-0 flex-1">
-                <span className="block text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                <span className="block text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
                   System Path
                 </span>
-                <span className="mt-1 block truncate font-mono text-sm text-gray-700 dark:text-gray-300">
+                <span className="mt-1 block truncate font-mono text-sm text-slate-700 dark:text-slate-300">
                   {dataset.system_path}
                 </span>
               </div>
@@ -211,8 +211,8 @@ function DatasetListItem({ dataset }: { dataset: DisplayDataset }) {
                 }
                 className={`ml-3 cursor-pointer rounded-md p-2 transition-all duration-200 ${
                   copiedItem === 'system_path'
-                    ? 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400'
-                    : 'text-gray-400 hover:bg-gray-200 hover:text-gray-600 dark:hover:bg-gray-600 dark:hover:text-gray-300'
+                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300'
+                    : 'text-slate-400 hover:bg-slate-200 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-200'
                 }`}
                 title={
                   copiedItem === 'system_path' ? 'Copied!' : 'Copy system path'
@@ -226,12 +226,15 @@ function DatasetListItem({ dataset }: { dataset: DisplayDataset }) {
               </button>
             </div>
 
-            <div className="flex items-center justify-between rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
+            <div className="flex items-center justify-between rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
               <div className="min-w-0 flex-1">
-                <span className="block text-xs font-medium tracking-wide text-gray-500 uppercase dark:text-gray-400">
+                <span className="block text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
                   Collection UUID
                 </span>
-                <span className="mt-1 block truncate font-mono text-sm text-gray-700 dark:text-gray-300">
+                <span
+                  className="mt-1 block truncate text-sm text-slate-700 dark:text-slate-300"
+                  style={{ fontFamily: 'var(--font-mono)' }}
+                >
                   {dataset.collection_uuid}
                 </span>
               </div>
@@ -239,8 +242,8 @@ function DatasetListItem({ dataset }: { dataset: DisplayDataset }) {
                 onClick={() => copyToClipboard(dataset.collection_uuid, 'uuid')}
                 className={`ml-3 cursor-pointer rounded-md p-2 transition-all duration-200 ${
                   copiedItem === 'uuid'
-                    ? 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400'
-                    : 'text-gray-400 hover:bg-gray-200 hover:text-gray-600 dark:hover:bg-gray-600 dark:hover:text-gray-300'
+                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300'
+                    : 'text-slate-400 hover:bg-slate-200 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-200'
                 }`}
                 title={copiedItem === 'uuid' ? 'Copied!' : 'Copy UUID'}
               >
