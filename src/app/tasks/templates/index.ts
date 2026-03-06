@@ -10,8 +10,10 @@ import { TaskTemplate } from '../tasks.types';
 
 import fineTuneLlama31SciFact from './finetune-llama31-scifact.json';
 import batchInferenceFinetuned from './batch-inference-finetuned.json';
+import launchLlmflux from './launch-llmflux.json';
 
 export const TASK_TEMPLATES: TaskTemplate[] = [
   fineTuneLlama31SciFact as TaskTemplate,
   batchInferenceFinetuned as TaskTemplate,
+  launchLlmflux as TaskTemplate,
 ];
