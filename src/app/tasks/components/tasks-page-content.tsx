@@ -30,7 +30,7 @@ export function TasksPageContent({ isAuthenticated }: TasksPageContentProps) {
 
   const fetchEndpoints = useCallback(async () => {
     try {
-      const response = await fetch('/api/list_all_endpoints', {
+      const response = await fetch('/api/list_active_managed_endpoints', {
         credentials: 'include'
       });
       const data = await response.json();
