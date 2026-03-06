@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Trash2, AlertTriangle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Task } from '../../tasks.types';
@@ -30,28 +30,14 @@ export default function TaskItem({
   const [logError, setLogError] = useState<string | null>(null);
   const logPollingRef = useRef<NodeJS.Timeout | null>(null);
 
-  const resultPath = useMemo(() => {
-    const referencePath = task.result || task.error;
-    if (!referencePath) {
-      return null;
-    }
-
-    const logsIndex = referencePath.lastIndexOf('/logs/');
-    if (logsIndex === -1) {
-      return null;
-    }
-
-    return `${referencePath.slice(0, logsIndex)}/results.jsonl`;
-  }, [task.result, task.error]);
-
   const handleViewLog = (logType: LogViewerType) => {
     const logPath =
       logType === 'result'
-        ? resultPath
+        ? task.result
         : logType === 'stdout'
-          ? task.result
-          : task.error;
-    if (!logPath) {
+          ? task.stdout
+          : task.stderr;
+    if (!logPath || !task.result || !task.stdout || !task.stderr) {
       return;
     }
 
@@ -197,35 +183,16 @@ export default function TaskItem({
               </div>
             </div>
 
-            {(resultPath || task.result || task.error) && (
+            {(task.result ) && (
               <div className="border-t border-slate-200/70 pt-4 dark:border-slate-700/70">
                 <div className="space-y-3">
                   <div className="rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
                     <span className="block text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
                       Results
                     </span>
-                    {resultPath ? (
-                      <button
-                        onClick={() => handleViewLog('result')}
-                        className="mt-1 block w-full cursor-pointer break-all text-left text-sm text-rose-700 underline underline-offset-4 transition-colors hover:text-rose-600 dark:text-rose-200 dark:hover:text-rose-100"
-                        style={{ fontFamily: 'var(--font-mono)' }}
-                      >
-                        {resultPath}
-                      </button>
-                    ) : (
-                      <span className="mt-1 block text-sm text-slate-500 dark:text-slate-400">
-                        Not available
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
-                    <span className="block text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
-                      Stdout Log
-                    </span>
                     {task.result ? (
                       <button
-                        onClick={() => handleViewLog('stdout')}
+                        onClick={() => handleViewLog('result')}
                         className="mt-1 block w-full cursor-pointer break-all text-left text-sm text-rose-700 underline underline-offset-4 transition-colors hover:text-rose-600 dark:text-rose-200 dark:hover:text-rose-100"
                         style={{ fontFamily: 'var(--font-mono)' }}
                       >
@@ -240,15 +207,34 @@ export default function TaskItem({
 
                   <div className="rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
                     <span className="block text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
+                      Stdout Log
+                    </span>
+                    {task.stdout ? (
+                      <button
+                        onClick={() => handleViewLog('stdout')}
+                        className="mt-1 block w-full cursor-pointer break-all text-left text-sm text-rose-700 underline underline-offset-4 transition-colors hover:text-rose-600 dark:text-rose-200 dark:hover:text-rose-100"
+                        style={{ fontFamily: 'var(--font-mono)' }}
+                      >
+                        {task.stdout}
+                      </button>
+                    ) : (
+                      <span className="mt-1 block text-sm text-slate-500 dark:text-slate-400">
+                        Not available
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
+                    <span className="block text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
                       Stderr Log
                     </span>
-                    {task.error ? (
+                    {task.stderr ? (
                       <button
                         onClick={() => handleViewLog('stderr')}
                         className="mt-1 block w-full cursor-pointer break-all text-left text-sm text-rose-700 underline underline-offset-4 transition-colors hover:text-rose-600 dark:text-rose-200 dark:hover:text-rose-100"
                         style={{ fontFamily: 'var(--font-mono)' }}
                       >
-                        {task.error}
+                        {task.stderr}
                       </button>
                     ) : (
                       <span className="mt-1 block text-sm text-slate-500 dark:text-slate-400">
