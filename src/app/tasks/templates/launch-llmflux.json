@@ -1,0 +1,17 @@
+{
+  "id": "launch-llmflux",
+  "name": "Launch LLMFlux Batch",
+  "description": "Submit an LLMFlux batch inference task through Globus Compute.",
+  "category": "Inference",
+  "submissionEndpoint": "/api/launch_llmflux",
+  "defaults": {
+    "taskName": "launch-llmflux",
+    "partition": "gpuA40x4",
+    "input_path": "prompts.jsonl",
+    "output_path": "results.json",
+    "model": "Qwen2.5-3B-Instruct",
+    "engine": "vllm",
+    "batch_size": 4,
+    "hf_token": ""
+  }
+}
