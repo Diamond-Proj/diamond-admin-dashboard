@@ -777,6 +777,10 @@ export function TaskSubmissionModal({
                       placeholder="results.json"
                       className={`mt-1 ${errors.output_path ? 'border-red-500' : ''}`}
                     />
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                      Relative paths are resolved under the endpoint
+                      `diamond_work_dir` (for example, `diamond_work_dir/results.json`).
+                    </p>
                     {errors.output_path && (
                       <p className="mt-1 text-sm text-red-600">
                         {errors.output_path}

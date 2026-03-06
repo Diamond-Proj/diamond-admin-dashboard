@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Trash2, AlertTriangle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Task } from '../../tasks.types';
@@ -18,15 +18,39 @@ export default function TaskItem({
   getStatusIcon: (status: string) => React.ReactNode;
   getStatusBadgeColor: (status: string) => string;
 }) {
+  type LogViewerType = 'result' | 'stdout' | 'stderr';
+
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [logViewer, setLogViewer] = useState<{ type: 'stdout' | 'stderr'; path: string } | null>(null);
+  const [logViewer, setLogViewer] = useState<{
+    type: LogViewerType;
+    path: string;
+  } | null>(null);
   const [logContent, setLogContent] = useState('');
   const [logLoading, setLogLoading] = useState(false);
   const [logError, setLogError] = useState<string | null>(null);
   const logPollingRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleViewLog = (logType: 'stdout' | 'stderr') => {
-    const logPath = logType === 'stdout' ? task.result : task.error;
+  const resultPath = useMemo(() => {
+    const referencePath = task.result || task.error;
+    if (!referencePath) {
+      return null;
+    }
+
+    const logsIndex = referencePath.lastIndexOf('/logs/');
+    if (logsIndex === -1) {
+      return null;
+    }
+
+    return `${referencePath.slice(0, logsIndex)}/results.jsonl`;
+  }, [task.result, task.error]);
+
+  const handleViewLog = (logType: LogViewerType) => {
+    const logPath =
+      logType === 'result'
+        ? resultPath
+        : logType === 'stdout'
+          ? task.result
+          : task.error;
     if (!logPath) {
       return;
     }
@@ -173,9 +197,28 @@ export default function TaskItem({
               </div>
             </div>
 
-            {(task.result || task.error) && (
+            {(resultPath || task.result || task.error) && (
               <div className="border-t border-slate-200/70 pt-4 dark:border-slate-700/70">
                 <div className="space-y-3">
+                  <div className="rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
+                    <span className="block text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
+                      Results
+                    </span>
+                    {resultPath ? (
+                      <button
+                        onClick={() => handleViewLog('result')}
+                        className="mt-1 block w-full cursor-pointer break-all text-left text-sm text-rose-700 underline underline-offset-4 transition-colors hover:text-rose-600 dark:text-rose-200 dark:hover:text-rose-100"
+                        style={{ fontFamily: 'var(--font-mono)' }}
+                      >
+                        {resultPath}
+                      </button>
+                    ) : (
+                      <span className="mt-1 block text-sm text-slate-500 dark:text-slate-400">
+                        Not available
+                      </span>
+                    )}
+                  </div>
+
                   <div className="rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
                     <span className="block text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
                       Stdout Log
@@ -241,7 +284,11 @@ export default function TaskItem({
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-                    {logViewer.type === 'stdout' ? 'Stdout Log Output' : 'Stderr Log Output'}
+                    {logViewer.type === 'result'
+                      ? 'Results Output'
+                      : logViewer.type === 'stdout'
+                        ? 'Stdout Log Output'
+                        : 'Stderr Log Output'}
                   </h3>
                   <p className="mt-1 break-all text-xs text-slate-500 dark:text-slate-400">
                     Path: {logViewer.path}
