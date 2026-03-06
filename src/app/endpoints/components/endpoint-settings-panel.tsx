@@ -34,6 +34,11 @@ interface ConfigEntry {
   value: string;
 }
 
+interface PreparedConfig {
+  payload: Record<string, unknown> | null;
+  normalizedEntries: ConfigEntry[];
+}
+
 let nextEntryId = 0;
 
 function createEntryId() {
@@ -105,6 +110,7 @@ function parseValue(key: string, rawValue: string): unknown {
 
 function buildPayload(entries: ConfigEntry[]) {
   const payload: Record<string, unknown> = {};
+  const seenKeys = new Set<string>();
 
   for (const entry of entries) {
     const trimmedKey = entry.key.trim();
@@ -113,10 +119,21 @@ function buildPayload(entries: ConfigEntry[]) {
       continue;
     }
 
+    if (seenKeys.has(trimmedKey)) {
+      throw new Error(`Duplicate key "${trimmedKey}"`);
+    }
+
+    seenKeys.add(trimmedKey);
+
     payload[trimmedKey] = parseValue(trimmedKey, entry.value);
   }
 
-  return Object.keys(payload).length > 0 ? payload : null;
+  const finalizedPayload = Object.keys(payload).length > 0 ? payload : null;
+
+  return {
+    payload: finalizedPayload,
+    normalizedEntries: normalizeConfig(finalizedPayload)
+  } satisfies PreparedConfig;
 }
 
 function getSignature(entries: ConfigEntry[]) {
@@ -131,12 +148,14 @@ function getSignature(entries: ConfigEntry[]) {
 export function EndpointSettingsPanel({
   endpoint
 }: EndpointSettingsPanelProps) {
+  const pathInputId = `diamond-work-path-${endpoint.endpoint_uuid}`;
   const [isExpanded, setIsExpanded] = useState(false);
   const [savedPath, setSavedPath] = useState(toEditableWorkPath(endpoint.diamond_dir));
   const [path, setPath] = useState(toEditableWorkPath(endpoint.diamond_dir));
   const [isSavingPath, setIsSavingPath] = useState(false);
-  const [isLoadingConfig, setIsLoadingConfig] = useState(true);
+  const [isLoadingConfig, setIsLoadingConfig] = useState(false);
   const [isSavingConfig, setIsSavingConfig] = useState(false);
+  const [hasLoadedConfig, setHasLoadedConfig] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
   const [savedEntries, setSavedEntries] = useState<ConfigEntry[]>([]);
@@ -149,7 +168,28 @@ export function EndpointSettingsPanel({
   }, [endpoint.diamond_dir]);
 
   useEffect(() => {
+    setHasLoadedConfig(false);
+    setIsLoadingConfig(false);
+    setLoadError(null);
+    setSavedEntries([]);
+    setEntries([]);
+    setReloadKey(0);
+  }, [endpoint.endpoint_uuid]);
+
+  useEffect(() => {
     let isMounted = true;
+
+    if (!isExpanded) {
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    if (hasLoadedConfig && reloadKey === 0) {
+      return () => {
+        isMounted = false;
+      };
+    }
 
     const loadConfig = async () => {
       try {
@@ -177,7 +217,9 @@ export function EndpointSettingsPanel({
         const normalizedEntries = normalizeConfig(data.user_endpoint_config);
         setSavedEntries(normalizedEntries);
         setEntries(cloneEntries(normalizedEntries));
+        setHasLoadedConfig(true);
         setLoadError(null);
+        setReloadKey(0);
       } catch (error) {
         console.error('Error fetching endpoint user config:', error);
 
@@ -185,8 +227,6 @@ export function EndpointSettingsPanel({
           return;
         }
 
-        setSavedEntries([]);
-        setEntries([]);
         setLoadError(
           error instanceof Error
             ? error.message
@@ -204,16 +244,19 @@ export function EndpointSettingsPanel({
     return () => {
       isMounted = false;
     };
-  }, [endpoint.endpoint_uuid, reloadKey]);
+  }, [endpoint.endpoint_uuid, hasLoadedConfig, isExpanded, reloadKey]);
 
   const normalizedPath = path.trim().replace(/\/diamond\/?$/, '');
   const pathHasChanges = normalizedPath !== savedPath;
   const configHasChanges = getSignature(entries) !== getSignature(savedEntries);
   const isBusy = isSavingPath || isSavingConfig;
   const configSummary =
-    savedEntries.length === 0
-      ? 'No config'
-      : `${savedEntries.length} ${savedEntries.length === 1 ? 'key' : 'keys'}`;
+    !hasLoadedConfig
+      ? 'Load on open'
+      : savedEntries.length === 0
+        ? 'No config'
+        : `${savedEntries.length} ${savedEntries.length === 1 ? 'key' : 'keys'}`;
+  const canEditLoadedConfig = hasLoadedConfig && !isLoadingConfig;
 
   const addEntry = () => {
     setEntries((current) => [
@@ -299,10 +342,10 @@ export function EndpointSettingsPanel({
   const handleSaveConfig = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    let payload: Record<string, unknown> | null = null;
+    let preparedConfig: PreparedConfig;
 
     try {
-      payload = buildPayload(entries);
+      preparedConfig = buildPayload(entries);
     } catch (error) {
       toast({
         title: 'Invalid value',
@@ -327,7 +370,7 @@ export function EndpointSettingsPanel({
           },
           credentials: 'include',
           body: JSON.stringify({
-            user_endpoint_config: payload
+            user_endpoint_config: preparedConfig.payload
           })
         }
       );
@@ -336,14 +379,15 @@ export function EndpointSettingsPanel({
         throw new Error(`Failed to update endpoint config (${response.status})`);
       }
 
-      const normalizedEntries = cloneEntries(entries);
-      setSavedEntries(normalizedEntries);
-      setEntries(cloneEntries(normalizedEntries));
+      setSavedEntries(preparedConfig.normalizedEntries);
+      setEntries(cloneEntries(preparedConfig.normalizedEntries));
+      setHasLoadedConfig(true);
+      setLoadError(null);
 
       toast({
         title: 'Success',
         description:
-          payload === null
+          preparedConfig.payload === null
             ? 'Endpoint config cleared.'
             : 'Endpoint config saved successfully.'
       });
@@ -430,9 +474,12 @@ export function EndpointSettingsPanel({
                   <Folder className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className="text-xs font-semibold whitespace-nowrap text-slate-600 dark:text-slate-300">
+                  <label
+                    htmlFor={pathInputId}
+                    className="text-xs font-semibold whitespace-nowrap text-slate-600 dark:text-slate-300"
+                  >
                     Diamond Work Path
-                  </p>
+                  </label>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400">
                     Base directory
                   </p>
@@ -440,6 +487,7 @@ export function EndpointSettingsPanel({
               </div>
 
               <Input
+                id={pathInputId}
                 type="text"
                 value={path}
                 onChange={(event) => setPath(event.target.value)}
@@ -492,7 +540,7 @@ export function EndpointSettingsPanel({
                     variant="outline"
                     size="sm"
                     onClick={addEntry}
-                    disabled={isBusy || isLoadingConfig}
+                    disabled={isBusy || !canEditLoadedConfig}
                     className="h-8 cursor-pointer gap-1.5 rounded-full px-2.5 text-xs"
                   >
                     <Plus className="h-4 w-4" />
@@ -503,7 +551,7 @@ export function EndpointSettingsPanel({
                     variant="outline"
                     size="sm"
                     onClick={handleResetConfig}
-                    disabled={isSavingConfig || !configHasChanges}
+                    disabled={isSavingConfig || !configHasChanges || !hasLoadedConfig}
                     className="h-8 cursor-pointer gap-1.5 rounded-full px-2.5 text-xs"
                   >
                     <RotateCcw className="h-4 w-4" />
@@ -512,7 +560,12 @@ export function EndpointSettingsPanel({
                   <Button
                     type="submit"
                     size="sm"
-                    disabled={isSavingConfig || isLoadingConfig || !configHasChanges}
+                    disabled={
+                      isSavingConfig ||
+                      isLoadingConfig ||
+                      !configHasChanges ||
+                      !hasLoadedConfig
+                    }
                     className="h-8 cursor-pointer gap-1.5 rounded-full bg-slate-900 px-2.5 text-xs text-white transition-all duration-200 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
                   >
                     {isSavingConfig ? (
@@ -554,7 +607,13 @@ export function EndpointSettingsPanel({
                     </div>
                   )}
 
-                  {entries.length === 0 ? (
+                  {!hasLoadedConfig ? (
+                    <div className="px-1 py-4 text-center">
+                      <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                        Config unavailable
+                      </p>
+                    </div>
+                  ) : entries.length === 0 ? (
                     <div className="px-1 py-4 text-center">
                       <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
                         No config
@@ -596,7 +655,12 @@ export function EndpointSettingsPanel({
                             variant="ghost"
                             size="icon"
                             onClick={() => removeEntry(entry.id)}
-                            disabled={isSavingConfig}
+                            disabled={isSavingConfig || !canEditLoadedConfig}
+                            aria-label={
+                              entry.key.trim()
+                                ? `Remove config entry ${entry.key.trim()}`
+                                : 'Remove config entry'
+                            }
                             className="h-9 w-9 cursor-pointer rounded-md text-slate-500 transition-colors duration-200 hover:bg-red-50 hover:text-red-600 dark:text-slate-400 dark:hover:bg-red-950/20 dark:hover:text-red-300"
                           >
                             <X className="h-4 w-4" />
