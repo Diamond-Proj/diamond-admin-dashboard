@@ -13,6 +13,7 @@ export interface TaskSubmissionData {
   input_path?: string;
   output_path?: string;
   model?: string;
+  model_path?: string;
   engine?: 'vllm' | 'ollama' | '';
   batch_size?: number;
   hf_token?: string;

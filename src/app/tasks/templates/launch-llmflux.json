@@ -9,7 +9,8 @@
     "partition": "gpuA40x4",
     "input_path": "prompts.jsonl",
     "output_path": "results.json",
-    "model": "Qwen2.5-3B-Instruct",
+    "model": "Qwen3-0.6B",
+    "model_path": "",
     "engine": "vllm",
     "batch_size": 4,
     "hf_token": ""
