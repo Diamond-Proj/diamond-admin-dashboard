@@ -8,7 +8,7 @@
     "partition": "gpuA100x4",
     "num_of_nodes": 1,
     "time_duration": "01:00:00",
-    "slurm_options": "--gpus-per-node=1\n--mem=32G",
+    "slurm_options": "#SBATCH --gpus-per-node=1\n#SBATCH --mem=32G",
     "task": "python inference.py --model ./output --input queries.jsonl --output results.jsonl"
   }
 }
