@@ -29,8 +29,9 @@ export interface Task {
     endpoint_name?: string;
     task_create_time: string;
   };
+  stdout: string | null;
+  stderr: string | null;
   result: string | null;
-  error: string | null;
 }
 
 export interface TasksApiResponse {
