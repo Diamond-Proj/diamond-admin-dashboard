@@ -41,6 +41,7 @@ export function TaskSubmissionModal({
     dataset_id: '',
     slurm_options: '',
     input_path: 'prompts.jsonl',
+    input_content: '',
     output_path: 'results.json',
     model: 'Qwen2.5-3B-Instruct',
     engine: 'vllm',
@@ -354,6 +355,7 @@ export function TaskSubmissionModal({
               account: formData.account,
               partition: formData.partition,
               input_path: formData.input_path,
+              input_content: formData.input_content || '',
               output_path: formData.output_path,
               model: formData.model,
               engine: formData.engine,
@@ -758,6 +760,30 @@ export function TaskSubmissionModal({
                         {errors.input_path}
                       </p>
                     )}
+                  </div>
+
+                  {/* Input Prompts */}
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                      Input Prompts
+                    </label>
+                    <Textarea
+                      value={formData.input_content || ''}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          input_content: e.target.value
+                        }))
+                      }
+                      placeholder='{"prompt":"Write a short summary of this paragraph..."}'
+                      className="mt-1"
+                      rows={5}
+                    />
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                      Hint: Enter prompts in JSONL format (one JSON object per
+                      line). This content will be written to the filename in
+                      Input Path before launch.
+                    </p>
                   </div>
 
                   {/* Output Path */}
