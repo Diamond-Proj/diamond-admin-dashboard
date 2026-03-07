@@ -11,6 +11,7 @@ export interface TaskSubmissionData {
   dataset_id?: string;
   slurm_options?: string;
   input_path?: string;
+  input_content?: string;
   output_path?: string;
   model?: string;
   engine?: 'vllm' | 'ollama' | '';
