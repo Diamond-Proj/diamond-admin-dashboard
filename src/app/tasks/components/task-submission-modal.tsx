@@ -43,7 +43,8 @@ export function TaskSubmissionModal({
     input_path: 'prompts.jsonl',
     input_content: '',
     output_path: 'results.json',
-    model: 'Qwen2.5-3B-Instruct',
+    model: 'Qwen3-0.6B',
+    model_path: '',
     engine: 'vllm',
     batch_size: 4,
     hf_token: ''
@@ -358,6 +359,7 @@ export function TaskSubmissionModal({
               input_content: formData.input_content || '',
               output_path: formData.output_path,
               model: formData.model,
+              model_path: formData.model_path || '',
               engine: formData.engine,
               batch_size: formData.batch_size,
               hf_token: formData.hf_token || ''
