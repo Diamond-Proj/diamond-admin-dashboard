@@ -4,7 +4,7 @@ import { Activity, Loader2, Server, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
-import { DiamondPathForm } from './diamond-path-form';
+import { EndpointSettingsPanel } from './endpoint-settings-panel';
 
 interface Endpoint {
   endpoint_uuid: string;
@@ -123,7 +123,7 @@ export function ManagedEndpointCard({
           </Button>
         </div>
 
-        <DiamondPathForm endpoint={endpoint} />
+        <EndpointSettingsPanel endpoint={endpoint} />
       </div>
     </div>
   );
