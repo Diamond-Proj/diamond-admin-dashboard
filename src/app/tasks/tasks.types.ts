@@ -43,6 +43,7 @@ export interface Task {
   };
   result: string | null;
   error: string | null;
+  artifact_path?: string | null;
 }
 
 export interface TasksApiResponse {
