@@ -18,6 +18,9 @@ export interface TaskSubmissionData {
   engine?: 'vllm' | 'ollama' | '';
   batch_size?: number;
   hf_token?: string;
+  hf_home?: string;
+  model_path?: string;
+  chat_messages?: string;
 }
 
 export interface TemplateCustomField {

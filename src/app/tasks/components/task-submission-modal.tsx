@@ -47,7 +47,9 @@ export function TaskSubmissionModal({
     model: 'Qwen2.5-3B-Instruct',
     engine: 'vllm',
     batch_size: 4,
-    hf_token: ''
+    hf_token: '',
+    model_path: '',
+    chat_messages: ''
   };
 
   const [formData, setFormData] = useState<TaskSubmissionData>(INITIAL_FORM_DATA);
@@ -83,6 +85,7 @@ export function TaskSubmissionModal({
   const activeTemplate = TASK_TEMPLATES.find((t) => t.id === activeTemplateId);
   const isLlmfluxTemplate =
     activeTemplate?.submissionEndpoint === '/api/launch_llmflux';
+  const isLlmBatchInferenceTemplate = activeTemplate?.id === 'llm-batch-inference';
   const hasCustomSubmitTemplate = Boolean(activeTemplate?.taskTemplate);
   const activeCustomFields = activeTemplate?.customFields ?? [];
   const hiddenFields = new Set(activeTemplate?.hiddenFields ?? []);
@@ -95,6 +98,9 @@ export function TaskSubmissionModal({
           : { label: option.label, value: option.value }
       )
       .filter((option) => option.value !== '');
+  const LLM_BATCH_LAUNCH_SCRIPT = '/projects/bcqj/minum/diamond/launch_vllm.sh';
+  const LLM_BATCH_VLLM_CONTAINER = '/work/nvme/bcrc/yadunand/containers/vllm.sif';
+  const LLM_BATCH_CHAT_UTIL = '/projects/bcrc/minum/diamond/chat_util.sh';
 
   const applyTemplate = (template: TaskTemplate) => {
     setActiveTemplateId(template.id);
@@ -320,6 +326,37 @@ export function TaskSubmissionModal({
     isLlmfluxTemplate
   ]);
 
+  const parseChatMessages = (value: string | undefined) => {
+    return String(value ?? '')
+      .split('\n')
+      .map((message) => message.trim())
+      .filter(Boolean);
+  };
+
+  const buildLlmBatchInferenceSlurmOptions = (
+    existingSlurmOptions: string,
+    modelPath: string,
+    chatMessages: string[]
+  ) => {
+    const lines: string[] = [];
+    const baseOptions = existingSlurmOptions.trim();
+
+    if (baseOptions) {
+      lines.push(baseOptions, '');
+    }
+
+    lines.push(
+      `bash ${LLM_BATCH_LAUNCH_SCRIPT} ${modelPath} ${LLM_BATCH_VLLM_CONTAINER} &`
+    );
+    lines.push(`source ${LLM_BATCH_CHAT_UTIL}`);
+
+    if (chatMessages.length > 0) {
+      lines.push(...chatMessages.map((message) => `chat ${JSON.stringify(message)}`));
+    }
+
+    return lines.join('\n');
+  };
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
@@ -355,6 +392,14 @@ export function TaskSubmissionModal({
       if (!isFieldHidden('time_duration') && !formData.time_duration) {
         newErrors.time_duration = 'Time duration is required';
       }
+      if (isLlmBatchInferenceTemplate) {
+        if (!formData.model_path?.trim()) {
+          newErrors.model_path = 'Model path is required';
+        }
+        if (parseChatMessages(formData.chat_messages).length === 0) {
+          newErrors.chat_messages = 'Provide at least one chat message';
+        }
+      }
     }
 
     activeCustomFields.forEach((field) => {
@@ -376,6 +421,14 @@ export function TaskSubmissionModal({
     try {
       const submissionEndpoint =
         activeTemplate?.submissionEndpoint ?? '/api/submit_task';
+      const parsedChatMessages = parseChatMessages(formData.chat_messages);
+      const llmBatchSlurmOptions = isLlmBatchInferenceTemplate
+        ? buildLlmBatchInferenceSlurmOptions(
+            String(formData.slurm_options ?? ''),
+            String(formData.model_path ?? '').trim(),
+            parsedChatMessages
+          )
+        : undefined;
       const payload =
         submissionEndpoint === '/api/launch_llmflux'
           ? {
@@ -414,7 +467,9 @@ export function TaskSubmissionModal({
                 : formData.dataset_id || undefined,
               slurm_options: isFieldHidden('slurm_options')
                 ? undefined
-                : formData.slurm_options || undefined,
+                : isLlmBatchInferenceTemplate
+                  ? llmBatchSlurmOptions
+                  : formData.slurm_options || undefined,
               task_template: activeTemplate?.taskTemplate || undefined,
               task_define: Object.fromEntries(
                 Object.entries(formData).filter(
@@ -743,6 +798,56 @@ export function TaskSubmissionModal({
                       rows={3}
                     />
                   </div>
+
+                  {isLlmBatchInferenceTemplate && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                          Model Path *
+                        </label>
+                        <Input
+                          type="text"
+                          value={String(formData.model_path ?? '')}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              model_path: e.target.value
+                            }))
+                          }
+                          placeholder="/path/to/model"
+                          className={`mt-1 ${errors.model_path ? 'border-red-500' : ''}`}
+                        />
+                        {errors.model_path && (
+                          <p className="mt-1 text-sm text-red-600">
+                            {errors.model_path}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                          Chat Messages *
+                        </label>
+                        <Textarea
+                          value={String(formData.chat_messages ?? '')}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              chat_messages: e.target.value
+                            }))
+                          }
+                          placeholder="One message per line"
+                          className={`mt-1 ${errors.chat_messages ? 'border-red-500' : ''}`}
+                          rows={5}
+                        />
+                        {errors.chat_messages && (
+                          <p className="mt-1 text-sm text-red-600">
+                            {errors.chat_messages}
+                          </p>
+                        )}
+                      </div>
+                    </>
+                  )}
 
                   {!isFieldHidden('task') && (
                     <div className="md:col-span-2">
