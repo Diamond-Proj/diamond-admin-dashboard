@@ -9,11 +9,9 @@
 import { TaskTemplate } from '../tasks.types';
 
 import deepspeedSftDelta from './deepspeed-sft-delta.json';
-import batchInferenceFinetuned from './batch-inference-finetuned.json';
-import launchLlmflux from './launch-llmflux.json';
+import llmBatchInference from './llm-batch-inference.json';
 
 export const TASK_TEMPLATES: TaskTemplate[] = [
   deepspeedSftDelta as TaskTemplate,
-  batchInferenceFinetuned as TaskTemplate,
-  launchLlmflux as TaskTemplate,
+  llmBatchInference as TaskTemplate,
 ];
