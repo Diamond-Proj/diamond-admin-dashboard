@@ -59,7 +59,7 @@ export function EndpointStep({ formData, onUpdate }: EndpointStepProps) {
     const fetchEndpoints = async () => {
       setIsLoadingEndpoints(true);
       try {
-        const response = await fetch('/api/list_all_endpoints', {
+        const response = await fetch('/api/list_active_managed_endpoints', {
           method: 'GET',
           credentials: 'include'
         });

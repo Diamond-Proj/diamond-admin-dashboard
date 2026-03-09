@@ -1,4 +1,5 @@
 export interface TaskSubmissionData {
+  [key: string]: string | number | undefined;
   endpoint: string;
   taskName: string;
   partition: string;
@@ -17,6 +18,13 @@ export interface TaskSubmissionData {
   engine?: 'vllm' | 'ollama' | '';
   batch_size?: number;
   hf_token?: string;
+}
+
+export interface TemplateCustomField {
+  key: string;
+  label?: string;
+  placeholder?: string;
+  required?: boolean;
 }
 
 export interface Task {
@@ -87,5 +95,7 @@ export interface TaskTemplate {
   description: string;
   category: string;
   submissionEndpoint?: '/api/submit_task' | '/api/launch_llmflux';
+  taskTemplate?: string;
+  customFields?: TemplateCustomField[];
   defaults: Partial<TaskSubmissionData>;
 }

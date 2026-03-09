@@ -1,0 +1,27 @@
+{
+  "id": "deepspeed-sft-delta",
+  "taskTemplate": "deepspeed-sft-delta.j2",
+  "name": "DeepSpeed Finetuning",
+  "description": "Fine-tune a model using DeepSpeed on a dataset using Delta@NCSA.",
+  "category": "Fine-tuning",
+  "defaults": {
+    "taskName": "deepspeed-sft-delta",
+    "num_of_nodes": 1,
+    "time_duration": "00:20:00",
+    "slurm_options": "#SBATCH --gpus-per-node=1\n#SBATCH --mem=64G"
+  },
+  "customFields": [
+    {
+      "key": "model_path",
+      "label": "Model Name or Path"
+    },
+    {
+      "key": "dataset_path",
+      "label": "Dataset Path"
+    },
+    {
+      "key": "finetuned_model_path",
+      "label": "Finetuned Model Output Path"
+    }
+  ]
+}

@@ -82,6 +82,8 @@ export function TaskSubmissionModal({
   const activeTemplate = TASK_TEMPLATES.find((t) => t.id === activeTemplateId);
   const isLlmfluxTemplate =
     activeTemplate?.submissionEndpoint === '/api/launch_llmflux';
+  const hasCustomSubmitTemplate = Boolean(activeTemplate?.taskTemplate);
+  const activeCustomFields = activeTemplate?.customFields ?? [];
 
   const applyTemplate = (template: TaskTemplate) => {
     setActiveTemplateId(template.id);
@@ -330,11 +332,21 @@ export function TaskSubmissionModal({
         newErrors.batch_size = 'Batch size must be at least 1';
       }
     } else {
-      if (!formData.container) newErrors.container = 'Container is required';
+      if (!hasCustomSubmitTemplate && !formData.container) {
+        newErrors.container = 'Container is required';
+      }
       if (!formData.time_duration) {
         newErrors.time_duration = 'Time duration is required';
       }
     }
+
+    activeCustomFields.forEach((field) => {
+      if (!field.required) return;
+      const value = formData[field.key];
+      if (!String(value ?? '').trim()) {
+        newErrors[field.key] = `${field.label || field.key} is required`;
+      }
+    });
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -368,12 +380,16 @@ export function TaskSubmissionModal({
               partition: formData.partition,
               account: formData.account,
               reservation: formData.reservation || undefined,
-              container: formData.container,
+              container: formData.container || undefined,
               task: formData.task || undefined,
               num_of_nodes: formData.num_of_nodes,
               time_duration: formData.time_duration,
               dataset_id: formData.dataset_id || undefined,
-              slurm_options: formData.slurm_options || undefined
+              slurm_options: formData.slurm_options || undefined,
+              task_template: activeTemplate?.taskTemplate || undefined,
+              task_define: Object.fromEntries(
+                Object.entries(formData).filter(([, value]) => value !== undefined)
+              )
             };
 
       const response = await fetch(submissionEndpoint, {
@@ -588,7 +604,7 @@ export function TaskSubmissionModal({
                   {/* Container */}
                   <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                      Container *
+                      Container{hasCustomSubmitTemplate ? '' : ' *'}
                     </label>
                     <div className="mt-1">
                       <VirtualSelect
@@ -905,6 +921,41 @@ export function TaskSubmissionModal({
                     </p>
                   </div>
                 </>
+              )}
+
+              {activeCustomFields.length > 0 && (
+                <div className="md:col-span-2 rounded-xl border border-slate-200 bg-slate-50/70 p-4 dark:border-slate-700 dark:bg-slate-900/40">
+                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                    Template Custom Fields
+                  </p>
+                  <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                    {activeCustomFields.map((field) => (
+                      <div key={field.key}>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                          {field.label || field.key}
+                          {field.required ? ' *' : ''}
+                        </label>
+                        <Input
+                          type="text"
+                          value={String(formData[field.key] ?? '')}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              [field.key]: e.target.value
+                            }))
+                          }
+                          placeholder={field.placeholder || `Enter ${field.label || field.key}`}
+                          className={`mt-1 ${errors[field.key] ? 'border-red-500' : ''}`}
+                        />
+                        {errors[field.key] && (
+                          <p className="mt-1 text-sm text-red-600">
+                            {errors[field.key]}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
 
