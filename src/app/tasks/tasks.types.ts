@@ -25,6 +25,7 @@ export interface TemplateCustomField {
   label?: string;
   placeholder?: string;
   required?: boolean;
+  optional?: Array<string | { label: string; value: string }>;
 }
 
 export interface Task {
@@ -96,6 +97,7 @@ export interface TaskTemplate {
   category: string;
   submissionEndpoint?: '/api/submit_task' | '/api/launch_llmflux';
   taskTemplate?: string;
+  hiddenFields?: string[];
   customFields?: TemplateCustomField[];
   defaults: Partial<TaskSubmissionData>;
 }
