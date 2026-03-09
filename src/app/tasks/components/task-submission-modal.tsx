@@ -98,9 +98,9 @@ export function TaskSubmissionModal({
           : { label: option.label, value: option.value }
       )
       .filter((option) => option.value !== '');
-  const LLM_BATCH_LAUNCH_SCRIPT = '/projects/bcqj/minum/diamond/launch_vllm.sh';
-  const LLM_BATCH_VLLM_CONTAINER = '/work/nvme/bcrc/yadunand/containers/vllm.sif';
-  const LLM_BATCH_CHAT_UTIL = '/projects/bcrc/minum/diamond/chat_util.sh';
+  const LLM_BATCH_LAUNCH_SCRIPT = '/work/nvme/bcrc/dev/launch_vllm.sh';
+  const LLM_BATCH_VLLM_CONTAINER = '/work/nvme/bcrc/dev/vllm.sif';
+  const LLM_BATCH_CHAT_UTIL = '/work/nvme/bcrc/dev/chat_util.sh';
 
   const applyTemplate = (template: TaskTemplate) => {
     setActiveTemplateId(template.id);
