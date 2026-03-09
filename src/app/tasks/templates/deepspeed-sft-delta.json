@@ -39,7 +39,7 @@
       ]
     },
     {
-      "key": "output_directory",
+      "key": "finetuned_model_path",
       "label": "Output Directory"
     }
   ]
