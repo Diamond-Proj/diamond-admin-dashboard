@@ -4,6 +4,7 @@
   "name": "DeepSpeed Finetuning",
   "description": "Fine-tune a model using DeepSpeed on a dataset using Delta@NCSA.",
   "category": "Fine-tuning",
+  "hiddenFields": ["dataset_id", "task"],
   "defaults": {
     "taskName": "deepspeed-sft-delta",
     "num_of_nodes": 1,
@@ -13,15 +14,33 @@
   "customFields": [
     {
       "key": "model_path",
-      "label": "Model Name or Path"
+      "label": "Model",
+      "placeholder": "Select model",
+      "required": true,
+      "optional": [
+        {
+          "label": "qwen3-0.6b",
+          "value": "/work/nvme/bcrc/hxie6/model/qwen3-0.6B"
+        },
+        {
+          "label": "tinyllama-1.1B",
+          "value": "/work/nvme/bcrc/hxie6/model/tinyllama-1.1B"
+        }
+      ]
     },
     {
       "key": "dataset_path",
-      "label": "Dataset Path"
+      "label": "Dataset Path",
+      "optional": [
+        {
+          "label": "diamond-knowledge",
+          "value": "/work/nvme/bcrc/hxie6/diamond_sft/diamond-knowledge"
+        }
+      ]
     },
     {
-      "key": "finetuned_model_path",
-      "label": "Finetuned Model Output Path"
+      "key": "output_directory",
+      "label": "Output Directory"
     }
   ]
 }

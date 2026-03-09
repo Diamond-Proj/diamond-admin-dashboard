@@ -9,6 +9,7 @@ import { VirtualSelect } from '@/components/ui/virtual-select';
 import {
   TaskSubmissionData,
   TaskTemplate,
+  TemplateCustomField,
   Endpoint,
   DatasetsApiResponse,
   Dataset,
@@ -84,10 +85,26 @@ export function TaskSubmissionModal({
     activeTemplate?.submissionEndpoint === '/api/launch_llmflux';
   const hasCustomSubmitTemplate = Boolean(activeTemplate?.taskTemplate);
   const activeCustomFields = activeTemplate?.customFields ?? [];
+  const hiddenFields = new Set(activeTemplate?.hiddenFields ?? []);
+  const isFieldHidden = (fieldKey: string) => hiddenFields.has(fieldKey);
+  const resolveCustomFieldOptions = (field: TemplateCustomField) =>
+    (field.optional ?? [])
+      .map((option) =>
+        typeof option === 'string'
+          ? { label: option, value: option }
+          : { label: option.label, value: option.value }
+      )
+      .filter((option) => option.value !== '');
 
   const applyTemplate = (template: TaskTemplate) => {
     setActiveTemplateId(template.id);
-    setFormData((prev) => ({ ...prev, ...template.defaults }));
+    const hiddenFieldDefaults = Object.fromEntries(
+      (template.hiddenFields ?? []).map((key) => [
+        key,
+        INITIAL_FORM_DATA[key as keyof TaskSubmissionData]
+      ])
+    ) as Partial<TaskSubmissionData>;
+    setFormData((prev) => ({ ...prev, ...template.defaults, ...hiddenFieldDefaults }));
   };
 
   const clearTemplate = () => {
@@ -332,10 +349,10 @@ export function TaskSubmissionModal({
         newErrors.batch_size = 'Batch size must be at least 1';
       }
     } else {
-      if (!hasCustomSubmitTemplate && !formData.container) {
+      if (!isFieldHidden('container') && !hasCustomSubmitTemplate && !formData.container) {
         newErrors.container = 'Container is required';
       }
-      if (!formData.time_duration) {
+      if (!isFieldHidden('time_duration') && !formData.time_duration) {
         newErrors.time_duration = 'Time duration is required';
       }
     }
@@ -379,16 +396,30 @@ export function TaskSubmissionModal({
               taskName: formData.taskName,
               partition: formData.partition,
               account: formData.account,
-              reservation: formData.reservation || undefined,
-              container: formData.container || undefined,
-              task: formData.task || undefined,
-              num_of_nodes: formData.num_of_nodes,
-              time_duration: formData.time_duration,
-              dataset_id: formData.dataset_id || undefined,
-              slurm_options: formData.slurm_options || undefined,
+              reservation: isFieldHidden('reservation')
+                ? undefined
+                : formData.reservation || undefined,
+              container: isFieldHidden('container')
+                ? undefined
+                : formData.container || undefined,
+              task: isFieldHidden('task') ? undefined : formData.task || undefined,
+              num_of_nodes: isFieldHidden('num_of_nodes')
+                ? undefined
+                : formData.num_of_nodes,
+              time_duration: isFieldHidden('time_duration')
+                ? undefined
+                : formData.time_duration,
+              dataset_id: isFieldHidden('dataset_id')
+                ? undefined
+                : formData.dataset_id || undefined,
+              slurm_options: isFieldHidden('slurm_options')
+                ? undefined
+                : formData.slurm_options || undefined,
               task_template: activeTemplate?.taskTemplate || undefined,
               task_define: Object.fromEntries(
-                Object.entries(formData).filter(([, value]) => value !== undefined)
+                Object.entries(formData).filter(
+                  ([key, value]) => value !== undefined && !isFieldHidden(key)
+                )
               )
             };
 
@@ -557,42 +588,23 @@ export function TaskSubmissionModal({
               </div>
 
               {/* Account */}
-              <div className="md:row-span-2">
+              <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Account *
                 </label>
-                <div className="mt-1 space-y-6">
+                <div className="mt-1">
                   <VirtualSelect
                     options={accounts}
-                    selected={
-                      accounts.includes(formData.account)
-                        ? formData.account
-                        : ''
-                    }
+                    selected={formData.account || ''}
                     onSelect={(value) =>
                       setFormData((prev) => ({ ...prev, account: value }))
                     }
                     placeholder="Select account"
+                    allowCustomInput
+                    searchPlaceholder="search or input your project name"
                     loading={loading.accounts}
                     disabled={!formData.endpoint}
                   />
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                      Account Manual Input
-                    </label>
-                    <Input
-                      placeholder="Or enter account manually"
-                      value={formData.account || ''}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          account: e.target.value
-                        }))
-                      }
-                      disabled={!formData.endpoint}
-                      className={`mt-1 ${errors.account ? 'border-red-500' : ''}`}
-                    />
-                  </div>
                 </div>
                 {errors.account && (
                   <p className="mt-1 text-sm text-red-600">{errors.account}</p>
@@ -626,27 +638,28 @@ export function TaskSubmissionModal({
                     )}
                   </div>
 
-                  {/* Dataset */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                      Dataset (Optional)
-                    </label>
-                    <div className="mt-1">
-                      <VirtualSelect
-                        options={datasetOptions}
-                        selected={getSelectedDatasetDisplay()}
-                        onSelect={(displayName) => {
-                          const id = datasetMap.get(displayName);
-                          setFormData((prev) => ({
-                            ...prev,
-                            dataset_id: id || ''
-                          }));
-                        }}
-                        placeholder="Select dataset"
-                        loading={loading.datasets}
-                      />
+                  {!isFieldHidden('dataset_id') && (
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                        Dataset (Optional)
+                      </label>
+                      <div className="mt-1">
+                        <VirtualSelect
+                          options={datasetOptions}
+                          selected={getSelectedDatasetDisplay()}
+                          onSelect={(displayName) => {
+                            const id = datasetMap.get(displayName);
+                            setFormData((prev) => ({
+                              ...prev,
+                              dataset_id: id || ''
+                            }));
+                          }}
+                          placeholder="Select dataset"
+                          loading={loading.datasets}
+                        />
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Reservation */}
                   <div>
@@ -731,21 +744,22 @@ export function TaskSubmissionModal({
                     />
                   </div>
 
-                  {/* Task Command */}
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                      Task Command (Optional)
-                    </label>
-                    <Textarea
-                      value={formData.task}
-                      onChange={(e) =>
-                        setFormData((prev) => ({ ...prev, task: e.target.value }))
-                      }
-                      placeholder="Enter command to run inside the container"
-                      className="mt-1"
-                      rows={3}
-                    />
-                  </div>
+                  {!isFieldHidden('task') && (
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                        Task Command (Optional)
+                      </label>
+                      <Textarea
+                        value={formData.task}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, task: e.target.value }))
+                        }
+                        placeholder="Enter command to run inside the container"
+                        className="mt-1"
+                        rows={3}
+                      />
+                    </div>
+                  )}
                 </>
               ) : (
                 <>
@@ -929,31 +943,64 @@ export function TaskSubmissionModal({
                     Template Custom Fields
                   </p>
                   <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                    {activeCustomFields.map((field) => (
-                      <div key={field.key}>
-                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                          {field.label || field.key}
-                          {field.required ? ' *' : ''}
-                        </label>
-                        <Input
-                          type="text"
-                          value={String(formData[field.key] ?? '')}
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              [field.key]: e.target.value
-                            }))
-                          }
-                          placeholder={field.placeholder || `Enter ${field.label || field.key}`}
-                          className={`mt-1 ${errors[field.key] ? 'border-red-500' : ''}`}
-                        />
-                        {errors[field.key] && (
-                          <p className="mt-1 text-sm text-red-600">
-                            {errors[field.key]}
-                          </p>
-                        )}
-                      </div>
-                    ))}
+                    {activeCustomFields.map((field) => {
+                      const fieldOptions = resolveCustomFieldOptions(field);
+
+                      return (
+                        <div key={field.key}>
+                          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                            {field.label || field.key}
+                            {field.required ? ' *' : ''}
+                          </label>
+                          {fieldOptions.length > 0 ? (
+                            <select
+                              value={String(formData[field.key] ?? '')}
+                              onChange={(e) =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  [field.key]: e.target.value
+                                }))
+                              }
+                              className={`mt-1 h-10 w-full rounded-md border bg-background px-3 text-sm ${
+                                errors[field.key] ? 'border-red-500' : 'border-input'
+                              }`}
+                            >
+                              <option value="">
+                                {field.placeholder || `Select ${field.label || field.key}`}
+                              </option>
+                              {fieldOptions.map((option) => (
+                                <option
+                                  key={`${field.key}-${option.value}`}
+                                  value={option.value}
+                                >
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <Input
+                              type="text"
+                              value={String(formData[field.key] ?? '')}
+                              onChange={(e) =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  [field.key]: e.target.value
+                                }))
+                              }
+                              placeholder={
+                                field.placeholder || `Enter ${field.label || field.key}`
+                              }
+                              className={`mt-1 ${errors[field.key] ? 'border-red-500' : ''}`}
+                            />
+                          )}
+                          {errors[field.key] && (
+                            <p className="mt-1 text-sm text-red-600">
+                              {errors[field.key]}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
