@@ -1,0 +1,20 @@
+{
+    "id": "llm-batch-inference",
+    "name": "LLM Batch Inference",
+    "description": "Run a batch of inference queries against a LLM via Delta@NCSA (1 GPU).",
+    "category": "Inference",
+    "defaults": {
+      "taskName": "llm-batch-inference",
+      "partition": "gpuA40x4-interactive",
+      "num_of_nodes": 1,
+      "container":"",
+      "time_duration": "01:00:00",
+      "slurm_options": "#SBATCH --gpus-per-node=1\n#SBATCH --mem=32g",
+      "task": "exit 0",
+      "model": "Qwen3-0.6B",
+      "model_path": "",
+      "hf_home": "",
+      "hf_token": "",
+      "chat_messages": "When is your training data cut off time?\nTell me about Diamond HPC?\nWhere can I find documentation on NCSA Delta supercomputer?"
+    }
+  }
