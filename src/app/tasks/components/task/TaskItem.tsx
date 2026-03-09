@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Trash2, AlertTriangle, Loader2 } from 'lucide-react';
+import { Trash2, AlertTriangle, Loader2, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Task } from '../../tasks.types';
 
@@ -23,6 +23,7 @@ export default function TaskItem({
   const [logContent, setLogContent] = useState('');
   const [logLoading, setLogLoading] = useState(false);
   const [logError, setLogError] = useState<string | null>(null);
+  const [artifactCopied, setArtifactCopied] = useState(false);
   const logPollingRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleViewLog = (logType: 'stdout' | 'stderr') => {
@@ -60,6 +61,20 @@ export default function TaskItem({
 
   const handleCancelDelete = () => {
     setShowConfirmDialog(false);
+  };
+
+  const handleCopyArtifactPath = async () => {
+    if (!task.artifact_path) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(task.artifact_path);
+      setArtifactCopied(true);
+      setTimeout(() => setArtifactCopied(false), 1500);
+    } catch (error) {
+      console.error('Failed to copy artifact path:', error);
+    }
   };
 
   useEffect(() => {
@@ -173,7 +188,7 @@ export default function TaskItem({
               </div>
             </div>
 
-            {(task.result || task.error) && (
+            {(task.result || task.error || task.artifact_path) && (
               <div className="border-t border-slate-200/70 pt-4 dark:border-slate-700/70">
                 <div className="space-y-3">
                   <div className="rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
@@ -213,6 +228,41 @@ export default function TaskItem({
                       </span>
                     )}
                   </div>
+
+                  {task.artifact_path && (
+                    <div className="rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
+                      <span className="block text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
+                        Artifact Path
+                      </span>
+                      <div className="mt-1 flex items-start gap-3">
+                        <span
+                          className="flex-1 break-all text-sm font-semibold text-slate-900 dark:text-slate-100"
+                          style={{ fontFamily: 'var(--font-mono)' }}
+                        >
+                          {task.artifact_path}
+                        </span>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          className="cursor-pointer"
+                          onClick={handleCopyArtifactPath}
+                        >
+                          {artifactCopied ? (
+                            <>
+                              <Check className="mr-1 h-3.5 w-3.5" />
+                              Copied
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="mr-1 h-3.5 w-3.5" />
+                              Copy
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

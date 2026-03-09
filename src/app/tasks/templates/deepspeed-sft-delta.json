@@ -40,7 +40,14 @@
     },
     {
       "key": "finetuned_model_path",
-      "label": "Output Directory"
+      "label": "Output Directory",
+      "placeholder": "/work/nvme/bcrc/$USER/diamond_sft",
+      "required": true
+    },
+    {
+      "key": "finetuned_model_name",
+      "label": "Output Model Name",
+      "required": true
     }
   ]
 }
