@@ -19,12 +19,12 @@
       "required": true,
       "optional": [
         {
-          "label": "qwen3-0.6b",
-          "value": "/work/nvme/bcrc/hxie6/model/qwen3-0.6B"
+          "label": "Qwen3-0.6b",
+          "value": "/work/nvme/bcrc/hxie6/model/Qwen3-0.6B"
         },
         {
-          "label": "tinyllama-1.1B",
-          "value": "/work/nvme/bcrc/hxie6/model/tinyllama-1.1B"
+          "label": "TinyLlama-1.1B",
+          "value": "/work/nvme/bcrc/hxie6/model/TinyLlama-1.1B"
         }
       ]
     },
