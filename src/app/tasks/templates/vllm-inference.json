@@ -30,11 +30,6 @@
       "label": "Max Model Length",
       "placeholder": "2048",
       "required": true
-    },
-    {
-      "key": "vllm_extra_args",
-      "label": "Extra vLLM Args",
-      "placeholder": "--gpu-memory-utilization 0.9"
     }
   ]
 }
