@@ -613,30 +613,31 @@ export function TaskSubmissionModal({
 
               {!isLlmfluxTemplate ? (
                 <>
-                  {/* Container */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                      Container{hasCustomSubmitTemplate ? '' : ' *'}
-                    </label>
-                    <div className="mt-1">
-                      <VirtualSelect
-                        options={containers}
-                        selected={formData.container}
-                        onSelect={(value) =>
-                          setFormData((prev) => ({ ...prev, container: value }))
-                        }
-                        placeholder="Select container"
-                        loading={loading.containers}
-                        disabled={!formData.endpoint}
-                        className={errors.container ? 'border-red-500' : ''}
-                      />
+                  {!isFieldHidden('container') && (
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                        Container{hasCustomSubmitTemplate ? '' : ' *'}
+                      </label>
+                      <div className="mt-1">
+                        <VirtualSelect
+                          options={containers}
+                          selected={formData.container}
+                          onSelect={(value) =>
+                            setFormData((prev) => ({ ...prev, container: value }))
+                          }
+                          placeholder="Select container"
+                          loading={loading.containers}
+                          disabled={!formData.endpoint}
+                          className={errors.container ? 'border-red-500' : ''}
+                        />
+                      </div>
+                      {errors.container && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.container}
+                        </p>
+                      )}
                     </div>
-                    {errors.container && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {errors.container}
-                      </p>
-                    )}
-                  </div>
+                  )}
 
                   {!isFieldHidden('dataset_id') && (
                     <div>
@@ -661,88 +662,92 @@ export function TaskSubmissionModal({
                     </div>
                   )}
 
-                  {/* Reservation */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                      Reservation (Optional)
-                    </label>
-                    <Input
-                      type="text"
-                      value={formData.reservation}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          reservation: e.target.value
-                        }))
-                      }
-                      placeholder="Enter reservation"
-                      className="mt-1"
-                    />
-                  </div>
+                  {!isFieldHidden('reservation') && (
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                        Reservation (Optional)
+                      </label>
+                      <Input
+                        type="text"
+                        value={formData.reservation}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            reservation: e.target.value
+                          }))
+                        }
+                        placeholder="Enter reservation"
+                        className="mt-1"
+                      />
+                    </div>
+                  )}
 
-                  {/* Number of Nodes */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                      Number of Nodes
-                    </label>
-                    <Input
-                      type="number"
-                      min="1"
-                      value={formData.num_of_nodes}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          num_of_nodes: parseInt(e.target.value) || 1
-                        }))
-                      }
-                      placeholder="1"
-                      className="mt-1"
-                    />
-                  </div>
+                  {!isFieldHidden('num_of_nodes') && (
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                        Number of Nodes
+                      </label>
+                      <Input
+                        type="number"
+                        min="1"
+                        value={formData.num_of_nodes}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            num_of_nodes: parseInt(e.target.value) || 1
+                          }))
+                        }
+                        placeholder="1"
+                        className="mt-1"
+                      />
+                    </div>
+                  )}
 
-                  {/* Time Duration */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                      Time Duration (HH:MM:SS) *
-                    </label>
-                    <Input
-                      type="text"
-                      value={formData.time_duration}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          time_duration: e.target.value
-                        }))
-                      }
-                      placeholder="01:00:00"
-                      className={`mt-1 ${errors.time_duration ? 'border-red-500' : ''}`}
-                    />
-                    {errors.time_duration && (
-                      <p className="mt-1 text-sm text-red-600">
-                        {errors.time_duration}
-                      </p>
-                    )}
-                  </div>
+                  {!isFieldHidden('time_duration') && (
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                        Time Duration (HH:MM:SS) *
+                      </label>
+                      <Input
+                        type="text"
+                        value={formData.time_duration}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            time_duration: e.target.value
+                          }))
+                        }
+                        placeholder="01:00:00"
+                        className={`mt-1 ${errors.time_duration ? 'border-red-500' : ''}`}
+                      />
+                      {errors.time_duration && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.time_duration}
+                        </p>
+                      )}
+                    </div>
+                  )}
 
-                  {/* Slurm Options */}
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                      Slurm Options (Optional)
-                    </label>
-                    <Textarea
-                      value={formData.slurm_options}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          slurm_options: e.target.value
-                        }))
-                      }
-                      placeholder="Extra Slurm directives or lines to include in the batch script. 
+                  {!isFieldHidden('slurm_options') && (
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                        Slurm Options (Optional)
+                      </label>
+                      <Textarea
+                        value={formData.slurm_options}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            slurm_options: e.target.value
+                          }))
+                        }
+                        placeholder="Extra Slurm directives or lines to include in the batch script. 
                     e.g., --gpus-per-node=1 or --mem=16G (one per line or space-separated)."
-                      className="mt-1"
-                      rows={3}
-                    />
-                  </div>
+                        className="mt-1"
+                        rows={3}
+                      />
+                    </div>
+                  )}
 
                   {!isFieldHidden('task') && (
                     <div className="md:col-span-2">

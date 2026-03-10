@@ -1,7 +1,15 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Trash2, AlertTriangle, Loader2, Copy, Check } from 'lucide-react';
+import Link from 'next/link';
+import {
+  Trash2,
+  AlertTriangle,
+  Loader2,
+  Copy,
+  Check,
+  MessageSquare
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Task } from '../../tasks.types';
 
@@ -25,6 +33,8 @@ export default function TaskItem({
   const [logError, setLogError] = useState<string | null>(null);
   const [artifactCopied, setArtifactCopied] = useState(false);
   const logPollingRef = useRef<NodeJS.Timeout | null>(null);
+  const isVllmChatTask = task.task_type === 'vllm_chat';
+  const isVllmChatReady = Boolean(isVllmChatTask && task.status === 'RUNNING');
 
   const handleViewLog = (logType: 'stdout' | 'stderr') => {
     const logPath = logType === 'stdout' ? task.result : task.error;
@@ -188,7 +198,7 @@ export default function TaskItem({
               </div>
             </div>
 
-            {(task.result || task.error || task.artifact_path) && (
+            {(task.result || task.error || task.artifact_path || isVllmChatTask) && (
               <div className="border-t border-slate-200/70 pt-4 dark:border-slate-700/70">
                 <div className="space-y-3">
                   <div className="rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
@@ -229,7 +239,38 @@ export default function TaskItem({
                     )}
                   </div>
 
-                  {task.artifact_path && (
+                  {isVllmChatTask && (
+                    <div className="rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
+                      <span className="block text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
+                        Chat Service
+                      </span>
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                        {typeof task.chat?.port === 'number' && (
+                          <span className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-700 dark:border-sky-800/70 dark:bg-sky-950/30 dark:text-sky-200">
+                            vLLM Port {task.chat.port}
+                          </span>
+                        )}
+                        <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200">
+                          Model {task.chat?.model || 'diamond-assistant'}
+                        </span>
+                        {isVllmChatReady ? (
+                          <Button size="sm" asChild className="cursor-pointer">
+                            <Link href={`/tasks/vllm-chat/${encodeURIComponent(task.task_id)}`}>
+                              <MessageSquare className="mr-1 h-3.5 w-3.5" />
+                              Open Chat
+                            </Link>
+                          </Button>
+                        ) : (
+                          <Button size="sm" variant="secondary" disabled>
+                            <Loader2 className="mr-1 h-3.5 w-3.5" />
+                            Waiting For RUNNING
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {task.artifact_path && !isVllmChatTask && (
                     <div className="rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
                       <span className="block text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
                         Artifact Path

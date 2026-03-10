@@ -33,6 +33,7 @@ export interface Task {
   identity_id: string;
   task_name: string;
   status: 'COMPLETED' | 'PENDING' | 'RUNNING' | 'FAILED';
+  task_type?: 'default' | 'vllm_chat' | string;
   details: {
     endpoint_id: string;
     endpoint_name?: string;
@@ -41,6 +42,10 @@ export interface Task {
   result: string | null;
   error: string | null;
   artifact_path?: string | null;
+  chat?: {
+    port?: number | null;
+    model?: string | null;
+  } | null;
 }
 
 export interface TasksApiResponse {
