@@ -44,7 +44,8 @@ export function TaskSubmissionModal({
     input_path: 'prompts.jsonl',
     input_content: '',
     output_path: 'results.json',
-    model: 'Qwen2.5-3B-Instruct',
+    model: 'Qwen3-0.6B',
+    model_path: '',
     engine: 'vllm',
     batch_size: 4,
     hf_token: ''
@@ -387,6 +388,7 @@ export function TaskSubmissionModal({
               input_content: formData.input_content || '',
               output_path: formData.output_path,
               model: formData.model,
+              model_path: formData.model_path || '',
               engine: formData.engine,
               batch_size: formData.batch_size,
               hf_token: formData.hf_token || ''
@@ -843,7 +845,7 @@ export function TaskSubmissionModal({
                   {/* Model */}
                   <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                      Model *
+                      Model name *
                     </label>
                     <Input
                       type="text"
@@ -854,7 +856,7 @@ export function TaskSubmissionModal({
                           model: e.target.value
                         }))
                       }
-                      placeholder="Qwen2.5-3B-Instruct"
+                      placeholder="Qwen3-0.6B"
                       className={`mt-1 ${errors.model ? 'border-red-500' : ''}`}
                     />
                     <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
@@ -863,6 +865,26 @@ export function TaskSubmissionModal({
                     {errors.model && (
                       <p className="mt-1 text-sm text-red-600">{errors.model}</p>
                     )}
+                  </div>
+
+                  {/* Model Path */}
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                      Model Path (Optional)
+                    </label>
+                    <Input
+                      type="text"
+                      value={formData.model_path || ''}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, model_path: e.target.value || '' }))
+                      }
+                      placeholder="/scratch/bcrc/hxie6/output/"
+                      className="mt-1"
+                    />
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                      Hint: Model path is the path to the finetuned model directory.
+                    </p>
                   </div>
 
                   {/* Engine */}
