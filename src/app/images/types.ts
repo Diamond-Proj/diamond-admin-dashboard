@@ -3,6 +3,9 @@ export interface ContainerData {
   location: string;
   container_task_id: string;
   base_image: string;
+  endpoint_id?: string;
+  stdout_path?: string;
+  stderr_path?: string;
   host_name?: string;
   is_public?: boolean;
   is_owner?: boolean;
@@ -14,6 +17,7 @@ export interface BuilderFormData {
   partition: string;
   account: string;
   reservation?: string;
+  slurmOptions?: string;
   containerName: string;
   location?: string;
   baseImage: string;
@@ -62,6 +66,7 @@ export interface ImageBuilderPayload {
   commands: string;
   account: string;
   reservation: string;
+  slurm_options?: string;
 }
 
 export interface ImageBuilderResponse {
