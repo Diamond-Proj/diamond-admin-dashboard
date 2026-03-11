@@ -49,12 +49,6 @@ export function BuilderReview({ formData }: BuilderReviewProps) {
           value: formData.commands ? 'Configured' : 'None',
           expandable: formData.commands,
           content: formData.commands
-        },
-        {
-          label: 'Slurm Options',
-          value: formData.slurmOptions ? 'Configured' : 'None',
-          expandable: formData.slurmOptions,
-          content: formData.slurmOptions
         }
       ]
     }
@@ -88,9 +82,7 @@ export function BuilderReview({ formData }: BuilderReviewProps) {
           >
             <div className="mb-4 flex items-center gap-2">
               {section.icon}
-              <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-                {section.title}
-              </h4>
+              <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{section.title}</h4>
             </div>
 
             <div className="space-y-3">
@@ -107,7 +99,7 @@ export function BuilderReview({ formData }: BuilderReviewProps) {
 
                   {item.expandable && (
                     <div className="mt-2 rounded-md border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
-                      <pre className="font-mono text-xs whitespace-pre-wrap text-slate-600 dark:text-slate-300">
+                      <pre className="whitespace-pre-wrap font-mono text-xs text-slate-600 dark:text-slate-300">
                         {item.content}
                       </pre>
                     </div>

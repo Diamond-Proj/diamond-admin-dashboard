@@ -120,8 +120,7 @@ export function ImageBuilderModal({
         environment: formData.environment || '',
         commands: formData.commands || '',
         account: formData.account || '',
-        reservation: formData.reservation || '',
-        slurm_options: formData.slurmOptions || ''
+        reservation: formData.reservation || ''
       };
 
       const response = await fetch('/api/image_builder', {
@@ -253,7 +252,7 @@ export function ImageBuilderModal({
               <Button
                 onClick={handleNext}
                 disabled={!canProceed()}
-                className="bg-primary text-primary-foreground hover:bg-primary/90 flex cursor-pointer items-center gap-2"
+                className="flex cursor-pointer items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 Next
                 <ChevronRight className="h-4 w-4" />
@@ -262,7 +261,7 @@ export function ImageBuilderModal({
               <Button
                 onClick={handleSubmit}
                 disabled={!canProceed() || isSubmitting}
-                className="bg-primary text-primary-foreground hover:bg-primary/90 flex cursor-pointer items-center gap-2"
+                className="flex cursor-pointer items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 <Play className="h-4 w-4" />
                 {isSubmitting ? 'Starting Build...' : 'Start Build'}

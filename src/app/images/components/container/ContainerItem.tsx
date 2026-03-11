@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Trash2, AlertTriangle, FileText } from 'lucide-react';
+import { Trash2, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ContainerData } from '@/app/images/types';
 
@@ -10,7 +10,6 @@ export default function ContainerItem({
   data,
   deletingContainers,
   deleteContainer,
-  onViewLogs,
   getStatusIcon,
   getStatusBadgeColor
 }: {
@@ -18,7 +17,6 @@ export default function ContainerItem({
   data: ContainerData;
   deletingContainers?: Set<string>;
   deleteContainer?: (name: string, taskId: string) => void;
-  onViewLogs?: (name: string, data: ContainerData) => void;
   getStatusIcon: (status: string) => React.ReactNode;
   getStatusBadgeColor: (status: string) => string;
 }) {
@@ -26,9 +24,6 @@ export default function ContainerItem({
   const deleteSet = deletingContainers ?? new Set<string>();
   const canDelete = !!deleteContainer && data.is_owner;
   const isDeleting = !!(canDelete && deleteSet.has(containerName));
-  const canViewLogs = Boolean(
-    onViewLogs && data.is_owner && data.endpoint_id && data.container_task_id
-  );
 
   const handleDeleteClick = () => setShowConfirmDialog(true);
   const handleConfirmDelete = () => {
@@ -99,33 +94,18 @@ export default function ContainerItem({
             </div>
           </div>
 
-          {(canDelete || canViewLogs) && (
+          {canDelete && (
             <div className="ml-6">
-              <div className="flex flex-col gap-2">
-                {canViewLogs && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onViewLogs?.(containerName, data)}
-                    className="flex cursor-pointer items-center gap-2"
-                  >
-                    <FileText className="h-4 w-4" />
-                    View Logs
-                  </Button>
-                )}
-                {canDelete && (
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={handleDeleteClick}
-                    disabled={isDeleting}
-                    className="flex cursor-pointer items-center gap-2"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    {isDeleting ? 'Deleting...' : 'Delete'}
-                  </Button>
-                )}
-              </div>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleDeleteClick}
+                disabled={isDeleting}
+                className="flex cursor-pointer items-center gap-2"
+              >
+                <Trash2 className="h-4 w-4" />
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </Button>
             </div>
           )}
         </div>
@@ -166,8 +146,7 @@ export default function ContainerItem({
                   )}
                   {data.location && (
                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                      <span className="font-bold">Location:</span>{' '}
-                      {data.location}
+                      <span className="font-bold">Location:</span> {data.location}
                     </p>
                   )}
                   {data.is_public && (

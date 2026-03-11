@@ -1,6 +1,6 @@
 'use client';
 
-import { Package, Settings, SlidersHorizontal, Terminal } from 'lucide-react';
+import { Package, Settings, Terminal } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { BuilderFormData } from '@/app/images/types';
 
@@ -32,11 +32,6 @@ make install
 # COPY ./myapp /opt/myapp
 # RUN chmod +x /opt/myapp/run.sh`;
 
-const slurmOptionsPlaceholder = `# Example extra SBATCH options
-#SBATCH --gpus-per-node=1
-#SBATCH --constraint=a100
-#SBATCH --qos=debug`;
-
 export function BuildStep({ formData, onUpdate }: BuildStepProps) {
   return (
     <div className="space-y-8">
@@ -44,9 +39,7 @@ export function BuildStep({ formData, onUpdate }: BuildStepProps) {
       <div className="space-y-4">
         <div className="mb-3 flex items-center gap-2">
           <Package className="h-5 w-5 text-rose-600 dark:text-rose-300" />
-          <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-            Dependencies (Optional)
-          </h4>
+          <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Dependencies (Optional)</h4>
         </div>
 
         <Textarea
@@ -84,9 +77,7 @@ export function BuildStep({ formData, onUpdate }: BuildStepProps) {
       <div className="space-y-4">
         <div className="mb-3 flex items-center gap-2">
           <Terminal className="h-5 w-5 text-rose-600 dark:text-rose-300" />
-          <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-            Build Commands (Optional)
-          </h4>
+          <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Build Commands (Optional)</h4>
         </div>
 
         <Textarea
@@ -97,26 +88,6 @@ export function BuildStep({ formData, onUpdate }: BuildStepProps) {
         />
         <p className="text-sm text-slate-500 dark:text-slate-400">
           Commands to build and configure your application inside the container
-        </p>
-      </div>
-
-      {/* Slurm Options */}
-      <div className="space-y-4">
-        <div className="mb-3 flex items-center gap-2">
-          <SlidersHorizontal className="h-5 w-5 text-rose-600 dark:text-rose-300" />
-          <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-            Slurm Options (Optional)
-          </h4>
-        </div>
-
-        <Textarea
-          placeholder={slurmOptionsPlaceholder}
-          value={formData.slurmOptions || ''}
-          onChange={(e) => onUpdate({ slurmOptions: e.target.value })}
-          className="min-h-[110px] font-mono text-sm"
-        />
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          Additional SBATCH lines appended to the generated submit script
         </p>
       </div>
     </div>
