@@ -1,15 +1,11 @@
-import { redirect } from 'next/navigation';
+'use client';
+
 import { BadgeCheck, Building2, IdCard, Mail, Shield } from 'lucide-react';
-import { TokenManagerServer } from '@/lib/auth/tokenManager.server';
+import { useAuthSessionContext } from '@/lib/auth/session-context';
 
-export default async function ProfilePage() {
-  const tokens = await TokenManagerServer.getTokensFromServerCookies();
-  const session = TokenManagerServer.buildSession(tokens);
+export default function ProfilePage() {
+  const { session } = useAuthSessionContext();
   const userInfo = session.userInfo;
-
-  if (!session.isAuthenticated) {
-    redirect('/sign-in');
-  }
 
   const name = userInfo?.name || 'Not available';
   const email = userInfo?.email || 'Not available';
