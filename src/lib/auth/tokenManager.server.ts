@@ -6,7 +6,9 @@ import type {
   TokenStore,
   UserInfo,
   GlobusTokenResponse,
-  TokenData
+  TokenData,
+  IdTokenClaims,
+  IdTokenIdentity
 } from './types';
 import {
   GLOBUS_COMPUTE_SCOPE,
@@ -97,13 +99,104 @@ export class TokenManagerServer {
       sub: typeof payload.sub === 'string' ? payload.sub : '',
       name: typeof payload.name === 'string' ? payload.name : undefined,
       email: typeof payload.email === 'string' ? payload.email : undefined,
+      organization:
+        typeof payload.organization === 'string'
+          ? payload.organization
+          : undefined,
       preferred_username:
         typeof payload.preferred_username === 'string'
           ? payload.preferred_username
           : undefined,
+      identity_provider:
+        typeof payload.identity_provider === 'string'
+          ? payload.identity_provider
+          : undefined,
+      identity_provider_display_name:
+        typeof payload.identity_provider_display_name === 'string'
+          ? payload.identity_provider_display_name
+          : undefined,
+      amr: this.parseAuthenticationMethods(payload.amr),
+      acr: typeof payload.acr === 'string' ? payload.acr : undefined,
+      last_authentication:
+        typeof payload.last_authentication === 'number'
+          ? payload.last_authentication
+          : undefined,
+      identity_set: this.parseIdentitySet(payload.identity_set),
+      iss: typeof payload.iss === 'string' ? payload.iss : undefined,
+      aud: this.parseAudience(payload.aud),
+      exp: typeof payload.exp === 'number' ? payload.exp : undefined,
+      iat: typeof payload.iat === 'number' ? payload.iat : undefined,
+      at_hash: typeof payload.at_hash === 'string' ? payload.at_hash : undefined
+    };
+  }
+
+  private static parseAudience(aud: unknown): IdTokenClaims['aud'] {
+    if (typeof aud === 'string') {
+      return aud;
+    }
+
+    if (Array.isArray(aud)) {
+      const values = aud.filter((value): value is string => typeof value === 'string');
+      return values.length > 0 ? values : undefined;
+    }
+
+    return undefined;
+  }
+
+  private static parseAuthenticationMethods(amr: unknown): IdTokenClaims['amr'] {
+    if (amr === null) {
+      return null;
+    }
+
+    if (!Array.isArray(amr)) {
+      return undefined;
+    }
+
+    const values = amr.filter((value): value is string => typeof value === 'string');
+    return values.length > 0 ? values : [];
+  }
+
+  private static parseIdentitySet(identitySet: unknown): IdTokenIdentity[] | undefined {
+    if (!Array.isArray(identitySet)) {
+      return undefined;
+    }
+
+    const identities = identitySet
+      .map((identity) => this.parseIdentitySetEntry(identity))
+      .filter((identity): identity is IdTokenIdentity => !!identity);
+
+    return identities.length > 0 ? identities : undefined;
+  }
+
+  private static parseIdentitySetEntry(identity: unknown): IdTokenIdentity | null {
+    if (!identity || typeof identity !== 'object') {
+      return null;
+    }
+
+    const entry = identity as Record<string, unknown>;
+
+    if (typeof entry.sub !== 'string') {
+      return null;
+    }
+
+    return {
+      sub: entry.sub,
       organization:
-        typeof payload.organization === 'string'
-          ? payload.organization
+        typeof entry.organization === 'string' ? entry.organization : undefined,
+      name: typeof entry.name === 'string' ? entry.name : undefined,
+      username: typeof entry.username === 'string' ? entry.username : undefined,
+      identity_provider:
+        typeof entry.identity_provider === 'string'
+          ? entry.identity_provider
+          : undefined,
+      identity_provider_display_name:
+        typeof entry.identity_provider_display_name === 'string'
+          ? entry.identity_provider_display_name
+          : undefined,
+      email: typeof entry.email === 'string' ? entry.email : undefined,
+      last_authentication:
+        typeof entry.last_authentication === 'number'
+          ? entry.last_authentication
           : undefined
     };
   }
@@ -198,10 +291,23 @@ export class TokenManagerServer {
   static needsRefresh(tokens: TokenStore): boolean {
     const now = Math.floor(Date.now() / 1000);
 
-    return Object.values(tokens.by_resource_server).some((token) => {
-      const expiresIn = token.expires_at_seconds - now;
-      return expiresIn <= REFRESH_BUFFER_SECONDS;
-    });
+    const tokenNeedsRefresh = Object.values(tokens.by_resource_server).some(
+      (token) => {
+        const expiresIn = token.expires_at_seconds - now;
+        return expiresIn <= REFRESH_BUFFER_SECONDS;
+      }
+    );
+
+    if (tokenNeedsRefresh) {
+      return true;
+    }
+
+    const idTokenExpiry = this.getIdTokenExpiry(tokens);
+    if (!idTokenExpiry) {
+      return true;
+    }
+
+    return idTokenExpiry - now <= REFRESH_BUFFER_SECONDS;
   }
 
   /**
@@ -212,8 +318,14 @@ export class TokenManagerServer {
   static isExpired(tokens: TokenStore): boolean {
     const now = Math.floor(Date.now() / 1000);
     const primaryToken = this.getPrimaryToken(tokens);
+    const idTokenExpiry = this.getIdTokenExpiry(tokens);
 
-    return !primaryToken || primaryToken.expires_at_seconds <= now;
+    return (
+      !primaryToken ||
+      primaryToken.expires_at_seconds <= now ||
+      !idTokenExpiry ||
+      idTokenExpiry <= now
+    );
   }
 
   /**
@@ -224,6 +336,36 @@ export class TokenManagerServer {
       (t) => t.refresh_token
     );
     return token?.refresh_token || null;
+  }
+
+  static getRefreshableResourceServers(tokens: TokenStore): string[] {
+    return Object.entries(tokens.by_resource_server)
+      .filter(([, token]) => !!token.refresh_token)
+      .map(([resourceServer]) => resourceServer)
+      .sort((left, right) => {
+        if (left === 'auth.globus.org') {
+          return -1;
+        }
+
+        if (right === 'auth.globus.org') {
+          return 1;
+        }
+
+        return left.localeCompare(right);
+      });
+  }
+
+  static getUnrefreshableResourceServers(tokens: TokenStore): string[] {
+    return Object.entries(tokens.by_resource_server)
+      .filter(([, token]) => !token.refresh_token)
+      .map(([resourceServer]) => resourceServer)
+      .sort((left, right) => left.localeCompare(right));
+  }
+
+  static getIdTokenExpiry(tokens: TokenStore): number | null {
+    return typeof tokens.id_token_claims?.exp === 'number'
+      ? tokens.id_token_claims.exp
+      : null;
   }
 
   /**
@@ -237,8 +379,13 @@ export class TokenManagerServer {
       id: claims.sub,
       name: claims.name,
       email: claims.email,
-      username: claims.preferred_username,
-      organization: claims.organization
+      username: claims.preferred_username || claims.identity_set?.[0]?.username,
+      organization: claims.organization,
+      identityProvider: claims.identity_provider,
+      identityProviderDisplayName: claims.identity_provider_display_name,
+      lastAuthentication: claims.last_authentication,
+      identitySet: claims.identity_set,
+      idTokenExpiresAtSeconds: claims.exp
     };
   }
 
@@ -251,7 +398,10 @@ export class TokenManagerServer {
       };
     }
 
-    const hasRefreshToken = !!this.getRefreshToken(tokens);
+    const hasRefreshToken =
+      this.getRefreshableResourceServers(tokens).length > 0 &&
+      this.getUnrefreshableResourceServers(tokens).length === 0 &&
+      !!tokens.by_resource_server['auth.globus.org']?.refresh_token;
     const isExpired = this.isExpired(tokens);
 
     return {
@@ -302,6 +452,59 @@ export class TokenManagerServer {
       console.error('Error refreshing tokens:', error);
       return null;
     }
+  }
+
+  static async refreshTokenStore(tokens: TokenStore): Promise<TokenStore | null> {
+    const unrefreshableResourceServers = this.getUnrefreshableResourceServers(tokens);
+
+    if (unrefreshableResourceServers.length > 0) {
+      console.error(
+        'Token store cannot be fully refreshed. Missing refresh tokens for:',
+        unrefreshableResourceServers
+      );
+      return null;
+    }
+
+    const refreshableResourceServers = this.getRefreshableResourceServers(tokens);
+
+    if (refreshableResourceServers.length === 0) {
+      return null;
+    }
+
+    let nextTokens = tokens;
+
+    for (const resourceServer of refreshableResourceServers) {
+      const currentToken = nextTokens.by_resource_server[resourceServer];
+      const refreshToken = currentToken?.refresh_token;
+
+      if (!refreshToken) {
+        console.error(`Missing refresh token for ${resourceServer}`);
+        return null;
+      }
+
+      const refreshedTokens = await this.refreshTokens(refreshToken);
+
+      if (!refreshedTokens) {
+        console.error(`Failed to refresh token for ${resourceServer}`);
+        return null;
+      }
+
+      nextTokens = this.mergeTokenStores(nextTokens, refreshedTokens);
+    }
+
+    if (this.isExpired(nextTokens)) {
+      console.error('Token refresh completed but the token bundle is still expired');
+      return null;
+    }
+
+    if (this.needsRefresh(nextTokens)) {
+      console.error(
+        'Token refresh completed but the token bundle still needs refresh'
+      );
+      return null;
+    }
+
+    return nextTokens;
   }
 
   static mergeTokenStores(

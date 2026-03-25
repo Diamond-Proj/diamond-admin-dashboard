@@ -108,14 +108,12 @@ async function maybeRefreshTokens(
 
   console.log('Tokens need refresh, attempting refresh...');
 
-  const refreshToken = TokenManagerServer.getRefreshToken(tokens);
-
-  if (!refreshToken) {
-    console.log('No refresh token for expired session, redirecting to sign-in');
+  if (TokenManagerServer.getRefreshableResourceServers(tokens).length === 0) {
+    console.log('No refreshable tokens for expired session, redirecting to sign-in');
     return getExpiredSessionRedirect(request, tokens);
   }
 
-  const refreshedTokens = await TokenManagerServer.refreshTokens(refreshToken);
+  const refreshedTokens = await TokenManagerServer.refreshTokenStore(tokens);
 
   if (!refreshedTokens) {
     console.log('Token refresh failed for expired session, redirecting to sign-in');
@@ -123,10 +121,7 @@ async function maybeRefreshTokens(
   }
 
   console.log('Tokens refreshed in proxy');
-  return createAuthenticatedResponse(
-    request,
-    TokenManagerServer.mergeTokenStores(tokens, refreshedTokens)
-  );
+  return createAuthenticatedResponse(request, refreshedTokens);
 }
 
 export async function auth(request: NextRequest): Promise<NextResponse> {

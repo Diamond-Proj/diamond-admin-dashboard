@@ -18,6 +18,8 @@ export async function GET() {
   return NextResponse.json({
     authenticated: true,
     resource_servers: Object.keys(tokens.by_resource_server),
+    unrefreshable_resource_servers:
+      TokenManagerServer.getUnrefreshableResourceServers(tokens),
     tokens: Object.fromEntries(
       Object.entries(tokens.by_resource_server).map(([key, value]) => [
         key,
@@ -30,6 +32,8 @@ export async function GET() {
       ])
     ),
     has_id_token: !!tokens.id_token,
-    has_user_claims: !!tokens.id_token_claims
+    has_user_claims: !!tokens.id_token_claims,
+    id_token_expires_at_seconds: tokens.id_token_claims?.exp ?? null,
+    id_token_claims: tokens.id_token_claims ?? null
   });
 }

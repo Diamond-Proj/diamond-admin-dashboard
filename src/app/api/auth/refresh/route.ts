@@ -19,35 +19,30 @@ export async function POST() {
       return unauthorized('No tokens found');
     }
 
-    // Get refresh token
-    const refreshToken = TokenManagerServer.getRefreshToken(tokens);
+    const refreshableResourceServers =
+      TokenManagerServer.getRefreshableResourceServers(tokens);
 
-    if (!refreshToken) {
-      console.error('No refresh token available');
+    if (refreshableResourceServers.length === 0) {
+      console.error('No refreshable tokens available');
       return unauthorized('No refresh token available');
     }
 
-    // Refresh tokens
-    const refreshedTokens = await TokenManagerServer.refreshTokens(refreshToken);
+    // Refresh all resource-server tokens plus id_token
+    const refreshedTokens = await TokenManagerServer.refreshTokenStore(tokens);
 
     if (!refreshedTokens) {
       console.error('Failed to refresh tokens');
       return unauthorized('Failed to refresh tokens');
     }
 
-    const newTokens = TokenManagerServer.mergeTokenStores(
-      tokens,
-      refreshedTokens
-    );
-
     console.log('Tokens refreshed successfully');
 
     const response = NextResponse.json({
       success: true,
-      session: TokenManagerServer.buildSession(newTokens)
+      session: TokenManagerServer.buildSession(refreshedTokens)
     });
 
-    TokenManagerServer.setTokensOnResponse(response, newTokens);
+    TokenManagerServer.setTokensOnResponse(response, refreshedTokens);
 
     return response;
   } catch (error) {
