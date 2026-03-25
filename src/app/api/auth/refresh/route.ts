@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server';
 import { TokenManagerServer } from '@/lib/auth/tokenManager.server';
 
 function unauthorized(error: string) {
-  return NextResponse.json({ error }, { status: 401 });
+  const response = NextResponse.json({ error }, { status: 401 });
+  TokenManagerServer.clearCookiesOnResponse(response);
+  return response;
 }
 
 export async function POST() {
