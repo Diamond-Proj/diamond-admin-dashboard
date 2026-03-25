@@ -19,7 +19,6 @@ import { EndpointOnboarding } from '@/components/onboarding/endpoint-onboarding'
 import { Toaster } from '@/components/ui/toaster';
 import { AuthSessionProvider } from '@/lib/auth/session-context';
 import { useAuthSession } from '@/lib/auth/useAuthSession';
-import { useTokenRefresh } from '@/lib/auth/useTokenRefresh';
 import type { AuthSession } from '@/lib/auth/types';
 
 const routeTitles = [
@@ -52,7 +51,6 @@ export function AppShell({
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [desktopNavCollapsed, setDesktopNavCollapsed] = useState(false);
   const { session, isLoading } = useAuthSession(initialSession);
-  useTokenRefresh();
   const currentTitle =
     routeTitles.find((item) => item.match(pathname))?.title ||
     getFallbackTitle(pathname);
