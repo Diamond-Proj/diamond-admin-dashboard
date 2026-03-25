@@ -48,12 +48,46 @@ type ExpireTarget =
   | 'transfer.api.globus.org'
   | 'funcx_service';
 
+function encodeBase64Url(value: string): string {
+  return Buffer.from(value, 'utf8')
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/g, '');
+}
+
+function expireIdToken(idToken: string, expiredAt: number): string {
+  try {
+    const [header, payload, signature] = idToken.split('.');
+
+    if (!header || !payload || !signature) {
+      return idToken;
+    }
+
+    const normalizedPayload = payload
+      .replace(/-/g, '+')
+      .replace(/_/g, '/')
+      .padEnd(Math.ceil(payload.length / 4) * 4, '=');
+
+    const parsedPayload = JSON.parse(
+      Buffer.from(normalizedPayload, 'base64').toString('utf8')
+    ) as Record<string, unknown>;
+
+    parsedPayload.exp = expiredAt;
+
+    return `${header}.${encodeBase64Url(JSON.stringify(parsedPayload))}.${signature}`;
+  } catch {
+    return idToken;
+  }
+}
+
 function expireTokens(
   tokens: TokenStore,
   mode: ExpireMode,
   target: ExpireTarget
 ): TokenStore {
   const expiredAt = Math.floor(Date.now() / 1000) - 60;
+  const shouldExpireIdToken = target === 'all' || target === 'id_token';
 
   const byResourceServer = Object.fromEntries(
     Object.entries(tokens.by_resource_server).map(([resourceServer, token]) => {
@@ -75,13 +109,17 @@ function expireTokens(
   return {
     ...tokens,
     by_resource_server: byResourceServer,
+    id_token:
+      shouldExpireIdToken && tokens.id_token
+        ? expireIdToken(tokens.id_token, expiredAt)
+        : tokens.id_token,
     id_token_claims:
-      (target === 'all' || target === 'id_token') && tokens.id_token_claims
-      ? {
-          ...tokens.id_token_claims,
-          exp: expiredAt
-        }
-      : tokens.id_token_claims
+      shouldExpireIdToken && tokens.id_token_claims
+        ? {
+            ...tokens.id_token_claims,
+            exp: expiredAt
+          }
+        : tokens.id_token_claims
   };
 }
 

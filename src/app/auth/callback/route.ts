@@ -8,7 +8,9 @@ import { TokenManagerServer } from '@/lib/auth/tokenManager.server';
 import { type GlobusTokenResponse } from '@/lib/auth/types';
 
 function redirectWithError(request: NextRequest, error: string) {
-  return NextResponse.redirect(new URL(`${SIGN_IN_ROUTE}?error=${error}`, request.url));
+  const redirectUrl = new URL(SIGN_IN_ROUTE, request.url);
+  redirectUrl.searchParams.set('error', error);
+  return NextResponse.redirect(redirectUrl);
 }
 
 export async function GET(request: NextRequest) {
