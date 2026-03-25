@@ -1,20 +1,63 @@
 import { NextRequest, NextResponse } from 'next/server';
+import {
+  AUTH_EXEMPT_API_ROUTES,
+  DEFAULT_GLOBUS_SCOPES,
+  GLOBUS_AUTHORIZE_URL,
+  LOGIN_ROUTE,
+  LOGOUT_ROUTE,
+  PUBLIC_AUTH_ROUTES,
+  SIGN_IN_ROUTE,
+  pathnameMatches
+} from './constants';
 import { TokenManagerServer } from './tokenManager.server';
-
-// Public routes that don't require authentication
-const PUBLIC_ROUTES = ['/sign-in', '/auth/callback'];
-
-// API routes that don't need auth check
-const API_ROUTES = ['/api/auth', '/api/healthcheck'];
+import type { TokenStore } from './types';
 
 function getBaseUrl(request: NextRequest): string {
   return request.nextUrl.origin;
 }
 
-function redirectToSignIn(request: NextRequest): NextResponse {
-  const signInUrl = new URL('/sign-in', getBaseUrl(request));
+function createSignInRedirect(
+  request: NextRequest,
+  clearCookies = false
+): NextResponse {
+  const signInUrl = new URL(SIGN_IN_ROUTE, getBaseUrl(request));
   console.log('Redirecting to sign-in:', signInUrl.toString());
-  return NextResponse.redirect(signInUrl);
+  const response = NextResponse.redirect(signInUrl);
+
+  if (clearCookies) {
+    TokenManagerServer.clearCookiesOnResponse(response);
+  }
+
+  return response;
+}
+
+function createAuthenticatedResponse(
+  request: NextRequest,
+  tokens: TokenStore
+): NextResponse {
+  TokenManagerServer.setTokensOnRequest(request, tokens);
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('cookie', request.cookies.toString());
+
+  const response = NextResponse.next({
+    request: {
+      headers: requestHeaders
+    }
+  });
+
+  TokenManagerServer.setTokensOnResponse(response, tokens);
+  return response;
+}
+
+function getExpiredSessionRedirect(
+  request: NextRequest,
+  tokens: TokenStore
+): NextResponse | null {
+  if (!TokenManagerServer.isExpired(tokens)) {
+    return null;
+  }
+
+  return createSignInRedirect(request, true);
 }
 
 function initiateGlobusLogin(request: NextRequest): NextResponse {
@@ -31,29 +74,59 @@ function initiateGlobusLogin(request: NextRequest): NextResponse {
       client_id: clientId,
       redirect_uri: redirectUri,
       response_type: 'code',
-      scope: scopes || 'openid email profile urn:globus:auth:scope:transfer.api.globus.org:all https://auth.globus.org/scopes/facd7ccc-c5f4-42aa-916b-a0e270e2c2a9/all',
+      scope: scopes || DEFAULT_GLOBUS_SCOPES,
       access_type: 'offline'
     });
 
-    const loginUrl = `https://auth.globus.org/v2/oauth2/authorize?${params.toString()}`;
+    const loginUrl = `${GLOBUS_AUTHORIZE_URL}?${params.toString()}`;
     console.log('Initiating Globus login:', loginUrl);
 
     return NextResponse.redirect(loginUrl);
   } catch (error) {
     console.error('Error initiating Globus login:', error);
-    return redirectToSignIn(request);
+    return createSignInRedirect(request);
   }
 }
 
 async function signOut(request: NextRequest): Promise<NextResponse> {
   console.log('Processing sign-out...');
 
-  await TokenManagerServer.clearServerCookies();
-
-  const response = NextResponse.redirect(new URL('/sign-in', request.url));
+  const response = NextResponse.redirect(new URL(SIGN_IN_ROUTE, request.url));
+  TokenManagerServer.clearCookiesOnResponse(response);
 
   console.log('Sign-out successful');
   return response;
+}
+
+async function maybeRefreshTokens(
+  request: NextRequest,
+  tokens: TokenStore
+): Promise<NextResponse | null> {
+  if (!TokenManagerServer.needsRefresh(tokens)) {
+    return null;
+  }
+
+  console.log('Tokens need refresh, attempting refresh...');
+
+  const refreshToken = TokenManagerServer.getRefreshToken(tokens);
+
+  if (!refreshToken) {
+    console.log('No refresh token for expired session, redirecting to sign-in');
+    return getExpiredSessionRedirect(request, tokens);
+  }
+
+  const refreshedTokens = await TokenManagerServer.refreshTokens(refreshToken);
+
+  if (!refreshedTokens) {
+    console.log('Token refresh failed for expired session, redirecting to sign-in');
+    return getExpiredSessionRedirect(request, tokens);
+  }
+
+  console.log('Tokens refreshed in proxy');
+  return createAuthenticatedResponse(
+    request,
+    TokenManagerServer.mergeTokenStores(tokens, refreshedTokens)
+  );
 }
 
 export async function auth(request: NextRequest): Promise<NextResponse> {
@@ -62,59 +135,39 @@ export async function auth(request: NextRequest): Promise<NextResponse> {
     console.log('Auth check for:', pathname);
 
     // Handle logout
-    if (pathname.startsWith('/logout')) {
+    if (pathname.startsWith(LOGOUT_ROUTE)) {
       return signOut(request);
     }
 
     // Handle login initiation
-    if (pathname.startsWith('/login')) {
+    if (pathname.startsWith(LOGIN_ROUTE)) {
       return initiateGlobusLogin(request);
     }
 
     // Allow public routes without any auth check
-    if (PUBLIC_ROUTES.some((route) => pathname.startsWith(route))) {
+    if (pathnameMatches(pathname, PUBLIC_AUTH_ROUTES)) {
       console.log('Public route, allowing access');
       return NextResponse.next();
     }
 
     // Allow API routes (they handle their own auth)
-    if (API_ROUTES.some((route) => pathname.startsWith(route))) {
+    if (pathnameMatches(pathname, AUTH_EXEMPT_API_ROUTES)) {
       console.log('API route, allowing access');
       return NextResponse.next();
     }
 
     // Check authentication for protected routes
-    const tokens = await TokenManagerServer.getTokensFromServerCookies();
+    const tokens = TokenManagerServer.getTokensFromRequest(request);
 
     if (!tokens) {
       console.log('No tokens found, redirecting to sign-in');
-      return redirectToSignIn(request);
+      return createSignInRedirect(request, true);
     }
 
-    // Check if tokens are expired
-    if (TokenManagerServer.isExpired(tokens)) {
-      console.log('Tokens expired, attempting refresh...');
+    const refreshResponse = await maybeRefreshTokens(request, tokens);
 
-      const refreshToken = TokenManagerServer.getRefreshToken(tokens);
-
-      if (!refreshToken) {
-        console.log('No refresh token, redirecting to sign-in');
-        await TokenManagerServer.clearServerCookies();
-        return redirectToSignIn(request);
-      }
-
-      // Try to refresh
-      const newTokens = await TokenManagerServer.refreshTokens(refreshToken);
-
-      if (!newTokens) {
-        console.log('Token refresh failed, redirecting to sign-in');
-        await TokenManagerServer.clearServerCookies();
-        return redirectToSignIn(request);
-      }
-
-      // Save refreshed tokens
-      await TokenManagerServer.setTokensInServerCookies(newTokens);
-      console.log('Tokens refreshed in middleware');
+    if (refreshResponse) {
+      return refreshResponse;
     }
 
     // Allow authenticated request
@@ -122,8 +175,6 @@ export async function auth(request: NextRequest): Promise<NextResponse> {
     return NextResponse.next();
   } catch (error) {
     console.error('Error in auth middleware:', error);
-    return redirectToSignIn(request);
+    return createSignInRedirect(request);
   }
 }
-
-export { initiateGlobusLogin as signIn, signOut };

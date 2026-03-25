@@ -17,6 +17,9 @@ import ThemeToggle from '@/components/layout/theme-toggle';
 import { SideNav } from '@/components/layout/SideNav';
 import { EndpointOnboarding } from '@/components/onboarding/endpoint-onboarding';
 import { Toaster } from '@/components/ui/toaster';
+import { useAuthSession } from '@/lib/auth/useAuthSession';
+import { useTokenRefresh } from '@/lib/auth/useTokenRefresh';
+import type { AuthSession } from '@/lib/auth/types';
 
 const routeTitles = [
   { match: (path: string) => path === '/', title: 'Dashboard' },
@@ -39,14 +42,16 @@ const getFallbackTitle = (path: string) => {
 
 export function AppShell({
   children,
-  isAuthenticated
+  initialSession
 }: {
   children: ReactNode;
-  isAuthenticated: boolean;
+  initialSession: AuthSession;
 }) {
   const pathname = usePathname();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [desktopNavCollapsed, setDesktopNavCollapsed] = useState(false);
+  const { session, isLoading } = useAuthSession(initialSession);
+  useTokenRefresh();
   const currentTitle =
     routeTitles.find((item) => item.match(pathname))?.title ||
     getFallbackTitle(pathname);
@@ -122,7 +127,7 @@ export function AppShell({
             <div className="flex items-center gap-3">
               <DocsButton />
               <ThemeToggle />
-              <AuthStatus />
+              <AuthStatus session={session} isLoading={isLoading} />
             </div>
           </header>
 
@@ -181,7 +186,10 @@ export function AppShell({
       </div>
 
       <Toaster />
-      <EndpointOnboarding isAuthenticated={isAuthenticated} />
+      <EndpointOnboarding
+        isAuthenticated={session.isAuthenticated}
+        primaryIdentity={session.userInfo?.id}
+      />
     </div>
   );
 }

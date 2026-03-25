@@ -27,6 +27,12 @@ export interface UserInfo {
   organization?: string;
 }
 
+export interface AuthSession {
+  isAuthenticated: boolean;
+  userInfo: UserInfo | null;
+  needsRefresh: boolean;
+}
+
 export interface GlobusTokenResponse {
   access_token: string;
   refresh_token?: string;
@@ -45,5 +51,7 @@ export interface GlobusTokenResponse {
   }>;
 }
 
+export const GLOBUS_COMPUTE_SCOPE =
+  'https://auth.globus.org/scopes/facd7ccc-c5f4-42aa-916b-a0e270e2c2a9/all';
 export const REFRESH_BUFFER_SECONDS = 300; // 5 minutes before expiry
 export const TOKEN_COOKIE_MAX_AGE = 7 * 24 * 60 * 60; // 7 days

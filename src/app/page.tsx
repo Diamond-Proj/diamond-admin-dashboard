@@ -12,8 +12,7 @@ import type {
 } from '@/components/dashboard/dashboard.types';
 
 import { getUserProfile, updateUserProfile } from '@/lib/taskHandlers';
-import { TokenManager } from '@/lib/auth/tokenManager.client';
-import { useTokenRefresh } from '@/lib/auth/useTokenRefresh';
+import { useAuthSession } from '@/lib/auth/useAuthSession';
 
 import { SetupGuide } from '@/components/dashboard/setup-guide';
 import { DashboardStatsCards } from '@/components/dashboard/dashboard-stats';
@@ -21,53 +20,24 @@ import { RecentActivity } from '@/components/dashboard/recent-activity';
 import { QuickActions } from '@/components/dashboard/quick-actions';
 
 export default function DashboardPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentTasks, setRecentTasks] = useState<RecentTask[]>([]);
   const [isPending, startTransition] = useTransition();
-
-  useTokenRefresh();
-
-  useEffect(() => {
-    const checkAuth = () => {
-      const tokens = TokenManager.getTokensFromClientCookies();
-      const hasAuth = !!tokens;
-
-      setIsAuthenticated(hasAuth);
-
-      if (hasAuth) {
-        const tokenUserInfo = tokens ? TokenManager.getUserInfo(tokens) : null;
-
-        if (tokenUserInfo) {
-          setUserInfo({
-            name: tokenUserInfo.name || '',
-            email: tokenUserInfo.email || '',
-            primary_identity: tokenUserInfo.id || '',
-            institution: tokenUserInfo.organization || ''
-          });
-          return;
+  const { session, isLoading } = useAuthSession();
+  const isAuthenticated = session.isAuthenticated;
+  const userName = session.userInfo?.name || '';
+  const userEmail = session.userInfo?.email || '';
+  const primaryIdentity = session.userInfo?.id || '';
+  const institution = session.userInfo?.organization || '';
+  const userInfo: UserInfo | null =
+    session.isAuthenticated && primaryIdentity
+      ? {
+          name: userName,
+          email: userEmail,
+          primary_identity: primaryIdentity,
+          institution
         }
-
-        const cookies = document.cookie.split(';');
-        const cookieObj: Record<string, string> = {};
-
-        cookies.forEach((cookie) => {
-          const [name, value] = cookie.trim().split('=');
-          if (name && value) cookieObj[name] = decodeURIComponent(value);
-        });
-
-        setUserInfo({
-          name: cookieObj['name'] || '',
-          email: cookieObj['email'] || '',
-          primary_identity: cookieObj['primary_identity'] || '',
-          institution: cookieObj['institution'] || ''
-        });
-      }
-    };
-
-    checkAuth();
-  }, []);
+      : null;
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -106,21 +76,21 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const checkAndUpdateProfile = async () => {
-      if (!isAuthenticated || !userInfo || !userInfo.primary_identity) {
+      if (!isAuthenticated || !primaryIdentity) {
         return;
       }
 
       try {
         const profile = await getUserProfile({
-          identity_id: userInfo.primary_identity
+          identity_id: primaryIdentity
         });
 
-        if (!profile.profile || profile.profile.institution !== userInfo.institution) {
+        if (!profile.profile || profile.profile.institution !== institution) {
           await updateUserProfile({
-            identity_id: userInfo.primary_identity,
-            name: userInfo.name,
-            email: userInfo.email,
-            institution: userInfo.institution
+            identity_id: primaryIdentity,
+            name: userName,
+            email: userEmail,
+            institution
           });
         }
       } catch (error) {
@@ -129,9 +99,9 @@ export default function DashboardPage() {
     };
 
     checkAndUpdateProfile();
-  }, [isAuthenticated, userInfo]);
+  }, [institution, isAuthenticated, primaryIdentity, userEmail, userName]);
 
-  if (isAuthenticated === null) {
+  if (isLoading) {
     return (
       <section className="flex flex-1 flex-col items-center justify-center p-6">
         <div className="dashboard-card w-full max-w-md p-8 text-center">

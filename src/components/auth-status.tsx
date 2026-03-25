@@ -1,41 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { usePathname } from 'next/navigation';
-
 import { LoginButton } from './login-button';
 import { UserAvatar } from './user-avatar';
-import { useTokenRefresh } from '@/lib/auth/useTokenRefresh';
+import type { AuthSession } from '@/lib/auth/types';
 
-export function AuthStatus() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const pathname = usePathname();
-
-  useTokenRefresh();
-
-  useEffect(() => {
-    const checkAuth = () => {
-      const cookies = document.cookie.split(';');
-      const hasAuthCookie = cookies.some((cookie) => {
-        const cookieName = cookie.trim().split('=')[0];
-        return cookieName === 'is_authenticated' || cookieName === 'tokens';
-      });
-
-      setIsAuthenticated(hasAuthCookie);
-      setIsLoading(false);
-    };
-
-    checkAuth();
-    const interval = setInterval(checkAuth, 2000);
-    const handleFocus = () => checkAuth();
-    window.addEventListener('focus', handleFocus);
-
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener('focus', handleFocus);
-    };
-  }, [pathname]);
+export function AuthStatus({
+  session,
+  isLoading
+}: {
+  session: AuthSession;
+  isLoading: boolean;
+}) {
 
   if (isLoading) {
     return (
@@ -45,7 +20,11 @@ export function AuthStatus() {
 
   return (
     <div className="flex items-center">
-      {isAuthenticated ? <UserAvatar /> : <LoginButton />}
+      {session.isAuthenticated ? (
+        <UserAvatar userInfo={session.userInfo} />
+      ) : (
+        <LoginButton />
+      )}
     </div>
   );
 }
