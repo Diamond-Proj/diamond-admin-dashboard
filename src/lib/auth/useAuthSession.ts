@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { AUTH_SESSION_CHANGED_EVENT } from './constants';
 import { createDefaultAuthSession, fetchAuthSession } from './client';
@@ -8,6 +8,7 @@ import type { AuthSession } from './types';
 
 export function useAuthSession(initialSession?: AuthSession) {
   const pathname = usePathname();
+  const isFirstSessionEffectRef = useRef(true);
   const [session, setSession] = useState<AuthSession>(
     initialSession ?? createDefaultAuthSession()
   );
@@ -29,8 +30,16 @@ export function useAuthSession(initialSession?: AuthSession) {
   }, []);
 
   useEffect(() => {
+    if (isFirstSessionEffectRef.current) {
+      isFirstSessionEffectRef.current = false;
+
+      if (initialSession) {
+        return;
+      }
+    }
+
     void refreshSession();
-  }, [pathname, refreshSession]);
+  }, [initialSession, pathname, refreshSession]);
 
   useEffect(() => {
     const handleFocus = () => {
