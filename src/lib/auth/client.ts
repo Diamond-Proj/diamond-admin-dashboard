@@ -1,10 +1,6 @@
 'use client';
 
-import {
-  AUTH_SESSION_CHANGED_EVENT,
-  AUTH_SESSION_ENDPOINT,
-  DEFAULT_AUTH_SESSION
-} from './constants';
+import { AUTH_SESSION_ENDPOINT, DEFAULT_AUTH_SESSION } from './constants';
 import type { AuthSession } from './types';
 
 export async function fetchAuthSession(): Promise<AuthSession> {
@@ -23,8 +19,4 @@ export async function fetchAuthSession(): Promise<AuthSession> {
 
 export function createDefaultAuthSession(): AuthSession {
   return { ...DEFAULT_AUTH_SESSION };
-}
-
-export function notifyAuthSessionChanged(): void {
-  window.dispatchEvent(new Event(AUTH_SESSION_CHANGED_EVENT));
 }

@@ -5,7 +5,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
   AUTH_REFRESH_CHECK_INTERVAL_MS,
   AUTH_REFRESH_ENDPOINT,
-  AUTH_SESSION_CHANGED_EVENT,
   CLIENT_AUTH_REDIRECT_EXEMPT_ROUTES,
   SIGN_IN_ROUTE,
   pathnameMatches
@@ -43,8 +42,6 @@ export function useAuthSession(initialSession?: AuthSession) {
       setIsLoading(false);
     }
   }, []);
-
-  const refreshSession = useCallback(async () => loadSession(true), [loadSession]);
 
   const redirectToSignIn = useCallback(() => {
     if (!pathnameMatches(pathname, CLIENT_AUTH_REDIRECT_EXEMPT_ROUTES)) {
@@ -145,12 +142,7 @@ export function useAuthSession(initialSession?: AuthSession) {
       void syncSession(true);
     };
 
-    const handleSessionChanged = () => {
-      void syncSession(true);
-    };
-
     window.addEventListener('focus', handleFocus);
-    window.addEventListener(AUTH_SESSION_CHANGED_EVENT, handleSessionChanged);
 
     refreshTimerRef.current = setInterval(() => {
       void syncSession(false);
@@ -161,17 +153,11 @@ export function useAuthSession(initialSession?: AuthSession) {
         clearInterval(refreshTimerRef.current);
       }
       window.removeEventListener('focus', handleFocus);
-      window.removeEventListener(
-        AUTH_SESSION_CHANGED_EVENT,
-        handleSessionChanged
-      );
     };
   }, [syncSession]);
 
   return {
     session,
-    isLoading,
-    refreshSession,
-    setSession
+    isLoading
   };
 }

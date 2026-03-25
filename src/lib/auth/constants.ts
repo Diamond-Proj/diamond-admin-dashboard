@@ -2,7 +2,6 @@ import type { AuthSession } from './types';
 
 export const AUTH_SESSION_ENDPOINT = '/api/auth/session';
 export const AUTH_REFRESH_ENDPOINT = '/api/auth/refresh';
-export const AUTH_SESSION_CHANGED_EVENT = 'auth-session-changed';
 export const AUTH_REFRESH_CHECK_INTERVAL_MS = 60 * 1000;
 
 export const LOGIN_ROUTE = '/login';

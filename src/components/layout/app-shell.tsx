@@ -56,7 +56,7 @@ export function AppShell({
     getFallbackTitle(pathname);
 
   return (
-    <AuthSessionProvider value={{ session, isLoading }}>
+    <AuthSessionProvider value={{ session }}>
       <div className="relative h-screen overflow-hidden">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(229,57,84,0.03),transparent_36%),radial-gradient(circle_at_top_right,rgba(14,121,178,0.03),transparent_40%)]" />
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(148,163,184,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.04)_1px,transparent_1px)] bg-size-[48px_48px] opacity-25 dark:opacity-20" />

@@ -5,7 +5,6 @@ import type { AuthSession } from './types';
 
 type AuthSessionContextValue = {
   session: AuthSession;
-  isLoading: boolean;
 };
 
 const AuthSessionContext = createContext<AuthSessionContextValue | null>(null);
