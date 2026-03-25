@@ -333,6 +333,8 @@ export class TokenManagerServer {
       .filter(([, token]) => !!token.refresh_token)
       .map(([resourceServer]) => resourceServer)
       .sort((left, right) => {
+        // Refresh auth.globus.org first because that refresh response is the
+        // source of renewed openid/profile/email claims and the new id_token.
         if (left === 'auth.globus.org') {
           return -1;
         }
@@ -356,6 +358,17 @@ export class TokenManagerServer {
     return typeof tokens.id_token_claims?.exp === 'number'
       ? tokens.id_token_claims.exp
       : null;
+  }
+
+  static isIdTokenStale(tokens: TokenStore): boolean {
+    const idTokenExpiry = this.getIdTokenExpiry(tokens);
+
+    if (!idTokenExpiry) {
+      return true;
+    }
+
+    const now = Math.floor(Date.now() / 1000);
+    return idTokenExpiry - now <= REFRESH_BUFFER_SECONDS;
   }
 
   static canRefreshTokenStore(tokens: TokenStore): boolean {
@@ -459,6 +472,7 @@ export class TokenManagerServer {
     }
 
     const refreshableResourceServers = this.getRefreshableResourceServers(tokens);
+    const requiresIdTokenRefresh = this.isIdTokenStale(tokens);
 
     if (refreshableResourceServers.length === 0) {
       return null;
@@ -479,6 +493,17 @@ export class TokenManagerServer {
 
       if (!refreshedTokens) {
         console.error(`Failed to refresh token for ${resourceServer}`);
+        return null;
+      }
+
+      if (
+        resourceServer === 'auth.globus.org' &&
+        requiresIdTokenRefresh &&
+        !refreshedTokens.id_token
+      ) {
+        console.error(
+          'auth.globus.org refresh did not return a renewed id_token when one was required'
+        );
         return null;
       }
 
