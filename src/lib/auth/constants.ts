@@ -2,7 +2,8 @@ import type { AuthSession } from './types';
 
 export const AUTH_SESSION_ENDPOINT = '/api/auth/session';
 export const AUTH_REFRESH_ENDPOINT = '/api/auth/refresh';
-export const AUTH_REFRESH_CHECK_INTERVAL_MS = 60 * 1000;
+export const AUTH_REFRESH_RETRY_INTERVAL_MS = 60 * 1000;
+export const AUTH_REFRESH_MIN_DELAY_MS = 1000;
 
 export const LOGIN_ROUTE = '/login';
 export const LOGOUT_ROUTE = '/logout';
@@ -25,7 +26,8 @@ export const AUTH_COOKIE_NAMES = [
 export const DEFAULT_AUTH_SESSION: AuthSession = {
   isAuthenticated: false,
   userInfo: null,
-  needsRefresh: false
+  needsRefresh: false,
+  nextRefreshAtSeconds: null
 };
 
 export const GLOBUS_AUTHORIZE_URL = 'https://auth.globus.org/v2/oauth2/authorize';

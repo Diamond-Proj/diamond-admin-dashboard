@@ -371,6 +371,23 @@ export class TokenManagerServer {
     return idTokenExpiry - now <= REFRESH_BUFFER_SECONDS;
   }
 
+  static getNextRefreshAtSeconds(tokens: TokenStore): number | null {
+    const expiries = Object.values(tokens.by_resource_server).map(
+      (token) => token.expires_at_seconds
+    );
+    const idTokenExpiry = this.getIdTokenExpiry(tokens);
+
+    if (idTokenExpiry) {
+      expiries.push(idTokenExpiry);
+    }
+
+    if (expiries.length === 0) {
+      return null;
+    }
+
+    return Math.min(...expiries) - REFRESH_BUFFER_SECONDS;
+  }
+
   static canRefreshTokenStore(tokens: TokenStore): boolean {
     return (
       this.getRefreshableResourceServers(tokens).length > 0 &&
@@ -400,7 +417,8 @@ export class TokenManagerServer {
       return {
         isAuthenticated: false,
         userInfo: null,
-        needsRefresh: false
+        needsRefresh: false,
+        nextRefreshAtSeconds: null
       };
     }
 
@@ -410,7 +428,8 @@ export class TokenManagerServer {
     return {
       isAuthenticated: !isExpired || hasRefreshToken,
       userInfo: this.getUserInfo(tokens),
-      needsRefresh: this.needsRefresh(tokens)
+      needsRefresh: this.needsRefresh(tokens),
+      nextRefreshAtSeconds: this.getNextRefreshAtSeconds(tokens)
     };
   }
 

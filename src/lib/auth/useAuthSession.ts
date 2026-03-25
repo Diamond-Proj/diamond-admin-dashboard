@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import {
-  AUTH_REFRESH_CHECK_INTERVAL_MS,
+  AUTH_REFRESH_MIN_DELAY_MS,
   AUTH_REFRESH_ENDPOINT,
+  AUTH_REFRESH_RETRY_INTERVAL_MS,
   CLIENT_AUTH_REDIRECT_EXEMPT_ROUTES,
   SIGN_IN_ROUTE,
   pathnameMatches
@@ -16,7 +17,7 @@ export function useAuthSession(initialSession?: AuthSession) {
   const pathname = usePathname();
   const router = useRouter();
   const isFirstSessionEffectRef = useRef(true);
-  const refreshTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isRefreshingRef = useRef(false);
   const [session, setSession] = useState<AuthSession>(
     initialSession ?? createDefaultAuthSession()
@@ -121,6 +122,25 @@ export function useAuthSession(initialSession?: AuthSession) {
     [loadSession, redirectToSignIn, refreshTokens]
   );
 
+  const getNextSyncDelayMs = useCallback((currentSession: AuthSession) => {
+    if (!currentSession.isAuthenticated) {
+      return null;
+    }
+
+    if (currentSession.needsRefresh) {
+      return AUTH_REFRESH_RETRY_INTERVAL_MS;
+    }
+
+    if (!currentSession.nextRefreshAtSeconds) {
+      return AUTH_REFRESH_RETRY_INTERVAL_MS;
+    }
+
+    return Math.max(
+      currentSession.nextRefreshAtSeconds * 1000 - Date.now(),
+      AUTH_REFRESH_MIN_DELAY_MS
+    );
+  }, []);
+
   useEffect(() => {
     if (isFirstSessionEffectRef.current) {
       isFirstSessionEffectRef.current = false;
@@ -134,7 +154,7 @@ export function useAuthSession(initialSession?: AuthSession) {
     }
 
     void syncSession(true);
-  }, [initialSession, pathname, refreshTokens, syncSession]);
+  }, [initialSession, refreshTokens, syncSession]);
 
   useEffect(() => {
     const handleFocus = () => {
@@ -144,17 +164,38 @@ export function useAuthSession(initialSession?: AuthSession) {
 
     window.addEventListener('focus', handleFocus);
 
-    refreshTimerRef.current = setInterval(() => {
-      void syncSession(false);
-    }, AUTH_REFRESH_CHECK_INTERVAL_MS);
-
     return () => {
       if (refreshTimerRef.current) {
-        clearInterval(refreshTimerRef.current);
+        clearTimeout(refreshTimerRef.current);
+        refreshTimerRef.current = null;
       }
       window.removeEventListener('focus', handleFocus);
     };
   }, [syncSession]);
+
+  useEffect(() => {
+    const nextSyncDelayMs = getNextSyncDelayMs(session);
+
+    if (refreshTimerRef.current) {
+      clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = null;
+    }
+
+    if (nextSyncDelayMs === null) {
+      return;
+    }
+
+    refreshTimerRef.current = setTimeout(() => {
+      void syncSession(false);
+    }, nextSyncDelayMs);
+
+    return () => {
+      if (refreshTimerRef.current) {
+        clearTimeout(refreshTimerRef.current);
+        refreshTimerRef.current = null;
+      }
+    };
+  }, [getNextSyncDelayMs, session, syncSession]);
 
   return {
     session,

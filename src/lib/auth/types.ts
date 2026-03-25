@@ -55,6 +55,7 @@ export interface AuthSession {
   isAuthenticated: boolean;
   userInfo: UserInfo | null;
   needsRefresh: boolean;
+  nextRefreshAtSeconds: number | null;
 }
 
 export interface GlobusTokenResponse {
