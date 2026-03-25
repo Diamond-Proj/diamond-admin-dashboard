@@ -7,12 +7,11 @@ import { AlertCircle, ArrowRight, ExternalLink } from 'lucide-react';
 import type {
   DashboardStats,
   RecentTask,
-  UserInfo,
   StatsResponse
 } from '@/components/dashboard/dashboard.types';
 
 import { getUserProfile, updateUserProfile } from '@/lib/taskHandlers';
-import { useAuthSession } from '@/lib/auth/useAuthSession';
+import { useAuthSessionContext } from '@/lib/auth/session-context';
 
 import { SetupGuide } from '@/components/dashboard/setup-guide';
 import { DashboardStatsCards } from '@/components/dashboard/dashboard-stats';
@@ -23,27 +22,15 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentTasks, setRecentTasks] = useState<RecentTask[]>([]);
   const [isPending, startTransition] = useTransition();
-  const { session, isLoading } = useAuthSession();
-  const isAuthenticated = session.isAuthenticated;
-  const userName = session.userInfo?.name || '';
-  const userEmail = session.userInfo?.email || '';
-  const primaryIdentity = session.userInfo?.id || '';
-  const institution = session.userInfo?.organization || '';
-  const userInfo: UserInfo | null =
-    session.isAuthenticated && primaryIdentity
-      ? {
-          name: userName,
-          email: userEmail,
-          primary_identity: primaryIdentity,
-          institution
-        }
-      : null;
+  const { session } = useAuthSessionContext();
+  const user = {
+    name: session.userInfo?.name || '',
+    email: session.userInfo?.email || '',
+    primaryIdentity: session.userInfo?.id || '',
+    institution: session.userInfo?.organization || ''
+  };
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      return;
-    }
-
     startTransition(async () => {
       try {
         const response = await fetch('/api/stats', {
@@ -72,25 +59,28 @@ export default function DashboardPage() {
         console.error('Error fetching stats:', error);
       }
     });
-  }, [isAuthenticated]);
+  }, [startTransition]);
 
   useEffect(() => {
     const checkAndUpdateProfile = async () => {
-      if (!isAuthenticated || !primaryIdentity) {
+      if (!user.primaryIdentity) {
         return;
       }
 
       try {
         const profile = await getUserProfile({
-          identity_id: primaryIdentity
+          identity_id: user.primaryIdentity
         });
 
-        if (!profile.profile || profile.profile.institution !== institution) {
+        if (
+          !profile.profile ||
+          profile.profile.institution !== user.institution
+        ) {
           await updateUserProfile({
-            identity_id: primaryIdentity,
-            name: userName,
-            email: userEmail,
-            institution
+            identity_id: user.primaryIdentity,
+            name: user.name,
+            email: user.email,
+            institution: user.institution
           });
         }
       } catch (error) {
@@ -98,36 +88,8 @@ export default function DashboardPage() {
       }
     };
 
-    checkAndUpdateProfile();
-  }, [institution, isAuthenticated, primaryIdentity, userEmail, userName]);
-
-  if (isLoading) {
-    return (
-      <section className="flex flex-1 flex-col items-center justify-center p-6">
-        <div className="dashboard-card w-full max-w-md p-8 text-center">
-          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
-          <p className="mt-4 text-sm font-medium text-slate-600 dark:text-slate-300">
-            Loading dashboard...
-          </p>
-        </div>
-      </section>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <section className="flex flex-1 flex-col">
-        <div className="dashboard-card p-7">
-          <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
-            Welcome to Diamond HPC Platform
-          </h2>
-          <div className="mt-4 rounded-xl border border-amber-300/45 bg-amber-50/80 p-4 text-amber-900 dark:border-amber-600/40 dark:bg-amber-900/20 dark:text-amber-200">
-            Please sign in to access your dashboard and start managing your HPC workloads.
-          </div>
-        </div>
-      </section>
-    );
-  }
+    void checkAndUpdateProfile();
+  }, [user.email, user.institution, user.name, user.primaryIdentity]);
 
   return (
     <section className="flex flex-1 flex-col space-y-6">
@@ -138,7 +100,7 @@ export default function DashboardPage() {
         <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-              Welcome back, {userInfo?.name?.split(' ')[0] || 'Researcher'}
+              Welcome back, {user.name.split(' ')[0] || 'Researcher'}
             </h1>
           </div>
           <Link
