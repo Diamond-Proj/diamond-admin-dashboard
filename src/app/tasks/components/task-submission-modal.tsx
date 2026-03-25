@@ -863,7 +863,7 @@ export function TaskSubmissionModal({
                       className={`mt-1 ${errors.model ? 'border-red-500' : ''}`}
                     />
                     <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                      Hint: Model name should be a valid Hugging Face model repo name (e.g. "Qwen2.5-3B-Instruct").
+                      {`Hint: Model name should be a valid Hugging Face model repo name (e.g. "Qwen2.5-3B-Instruct").`}
                     </p>
                     {errors.model && (
                       <p className="mt-1 text-sm text-red-600">{errors.model}</p>
