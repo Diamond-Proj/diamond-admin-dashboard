@@ -49,11 +49,6 @@ export interface UserInfo {
   email?: string;
   username?: string;
   organization?: string;
-  identityProvider?: string;
-  identityProviderDisplayName?: string;
-  lastAuthentication?: number;
-  identitySet?: IdTokenIdentity[];
-  idTokenExpiresAtSeconds?: number;
 }
 
 export interface AuthSession {

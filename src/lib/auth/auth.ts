@@ -108,8 +108,8 @@ async function maybeRefreshTokens(
 
   console.log('Tokens need refresh, attempting refresh...');
 
-  if (TokenManagerServer.getRefreshableResourceServers(tokens).length === 0) {
-    console.log('No refreshable tokens for expired session, redirecting to sign-in');
+  if (!TokenManagerServer.canRefreshTokenStore(tokens)) {
+    console.log('Token bundle is not fully refreshable, redirecting to sign-in');
     return getExpiredSessionRedirect(request, tokens);
   }
 

@@ -19,11 +19,8 @@ export async function POST() {
       return unauthorized('No tokens found');
     }
 
-    const refreshableResourceServers =
-      TokenManagerServer.getRefreshableResourceServers(tokens);
-
-    if (refreshableResourceServers.length === 0) {
-      console.error('No refreshable tokens available');
+    if (!TokenManagerServer.canRefreshTokenStore(tokens)) {
+      console.error('Token bundle is not fully refreshable');
       return unauthorized('No refresh token available');
     }
 

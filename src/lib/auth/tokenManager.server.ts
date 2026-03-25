@@ -328,16 +328,6 @@ export class TokenManagerServer {
     );
   }
 
-  /**
-   * Get refresh token from token store
-   */
-  static getRefreshToken(tokens: TokenStore): string | null {
-    const token = Object.values(tokens.by_resource_server).find(
-      (t) => t.refresh_token
-    );
-    return token?.refresh_token || null;
-  }
-
   static getRefreshableResourceServers(tokens: TokenStore): string[] {
     return Object.entries(tokens.by_resource_server)
       .filter(([, token]) => !!token.refresh_token)
@@ -368,6 +358,14 @@ export class TokenManagerServer {
       : null;
   }
 
+  static canRefreshTokenStore(tokens: TokenStore): boolean {
+    return (
+      this.getRefreshableResourceServers(tokens).length > 0 &&
+      this.getUnrefreshableResourceServers(tokens).length === 0 &&
+      !!tokens.by_resource_server['auth.globus.org']?.refresh_token
+    );
+  }
+
   /**
    * Extract user info from tokens
    */
@@ -380,12 +378,7 @@ export class TokenManagerServer {
       name: claims.name,
       email: claims.email,
       username: claims.preferred_username || claims.identity_set?.[0]?.username,
-      organization: claims.organization,
-      identityProvider: claims.identity_provider,
-      identityProviderDisplayName: claims.identity_provider_display_name,
-      lastAuthentication: claims.last_authentication,
-      identitySet: claims.identity_set,
-      idTokenExpiresAtSeconds: claims.exp
+      organization: claims.organization
     };
   }
 
@@ -398,10 +391,7 @@ export class TokenManagerServer {
       };
     }
 
-    const hasRefreshToken =
-      this.getRefreshableResourceServers(tokens).length > 0 &&
-      this.getUnrefreshableResourceServers(tokens).length === 0 &&
-      !!tokens.by_resource_server['auth.globus.org']?.refresh_token;
+    const hasRefreshToken = this.canRefreshTokenStore(tokens);
     const isExpired = this.isExpired(tokens);
 
     return {
@@ -455,12 +445,15 @@ export class TokenManagerServer {
   }
 
   static async refreshTokenStore(tokens: TokenStore): Promise<TokenStore | null> {
-    const unrefreshableResourceServers = this.getUnrefreshableResourceServers(tokens);
+    if (!this.canRefreshTokenStore(tokens)) {
+      const unrefreshableResourceServers =
+        this.getUnrefreshableResourceServers(tokens);
 
-    if (unrefreshableResourceServers.length > 0) {
       console.error(
-        'Token store cannot be fully refreshed. Missing refresh tokens for:',
-        unrefreshableResourceServers
+        'Token store cannot be fully refreshed.',
+        unrefreshableResourceServers.length > 0
+          ? { unrefreshableResourceServers }
+          : { missingPrimaryRefreshToken: true }
       );
       return null;
     }
