@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Trash2, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ContainerData } from '@/app/images/types';
+import { ContainerData } from '@/app/(workspace)/images/types';
 
 export default function ContainerItem({
   containerName,

@@ -22,7 +22,7 @@ import { useTokenRefresh } from '@/lib/auth/useTokenRefresh';
 import type { AuthSession } from '@/lib/auth/types';
 
 const routeTitles = [
-  { match: (path: string) => path === '/', title: 'Dashboard' },
+  { match: (path: string) => path === '/dashboard', title: 'Dashboard' },
   { match: (path: string) => path.startsWith('/sign-in'), title: 'Sign In' },
   { match: (path: string) => path.startsWith('/images'), title: 'Images' },
   { match: (path: string) => path.startsWith('/datasets'), title: 'Datasets' },
@@ -76,7 +76,10 @@ export function AppShell({
             <div
               className={`flex h-16 shrink-0 items-center border-b border-slate-200/60 dark:border-slate-700/60 px-6`}
             >
-              <Link className="flex items-center gap-2 font-semibold" href="/">
+              <Link
+                className="flex items-center gap-2 font-semibold"
+                href="/dashboard"
+              >
                 <Logo className="drop-shadow-sm" />
                 <span
                   className={`text-rose_red dark:text-honolulu_blue overflow-hidden whitespace-nowrap text-lg font-bold tracking-wide transition-[max-width,opacity,margin] duration-300 ease-out ${
@@ -160,7 +163,7 @@ export function AppShell({
           <div className="flex h-16 items-center justify-between border-b border-slate-200/60 px-5 dark:border-slate-700/60">
             <Link
               className="flex items-center gap-2 font-semibold"
-              href="/"
+              href="/dashboard"
               onClick={() => setMobileNavOpen(false)}
             >
               <Logo className="drop-shadow-sm" />

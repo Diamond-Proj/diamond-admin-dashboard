@@ -15,7 +15,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { BuildLogResponse } from '@/app/images/types';
+import { BuildLogResponse } from '@/app/(workspace)/images/types';
 
 interface BuilderLogsProps {
   taskId: string;
