@@ -23,9 +23,9 @@ export const landingPageContent = {
       alt: 'Diamond workspace dashboard showing endpoint and workload management views.',
       sideCardLabel: 'What you can do',
       sideCardItems: [
-        'Sign in through Globus Auth and enter a shared workspace built for research teams.',
-        'Refresh and manage endpoints, load endpoint metadata, and keep online systems ready for use.',
-        'Build container images, register datasets, and launch tasks without jumping across separate admin tools.'
+        'Sign in with Globus Auth and enter the shared workspace.',
+        'Refresh endpoints and load the metadata needed to run work.',
+        'Build images, register datasets, and launch tasks from one place.'
       ]
     },
     primaryCta: {
@@ -45,121 +45,119 @@ export const landingPageContent = {
       value: 'Endpoints',
       label: 'managed and available views',
       detail:
-        'Diamond distinguishes managed systems from available ones and can refresh endpoint state and preparation metadata.'
+        'Refresh state, load preparation metadata, and keep managed systems ready.'
     },
     {
       value: 'Images',
       label: 'container build workflows',
       detail:
-        'Users can launch image build flows from the same workspace that tracks the endpoints and jobs those containers support.'
+        'Build runtime images in the same workspace used for endpoints and jobs.'
     },
     {
       value: 'Tasks',
       label: 'template-driven submission',
       detail:
-        'The platform supports reusable submission patterns including vLLM inference and DeepSpeed SFT workflows.'
+        'Submit repeatable jobs with built-in templates such as vLLM and DeepSpeed SFT.'
     }
   ],
   highlights: {
-    eyebrow: 'Core capabilities',
-    title: 'What the platform already does',
+    eyebrow: '',
+    title: 'Core workflows in one place',
     description:
-      'Diamond brings the operational pieces of HPC work into one interface so teams can move from platform setup to workload execution with less friction.',
+      'Diamond keeps endpoint setup, runtime packaging, datasets, and task launch in one workspace.',
     supportPanel: {
-      eyebrow: 'In practice',
-      title:
-        'Diamond helps teams spend less time coordinating between tools and more time getting workloads ready to run.',
+      eyebrow: '',
+      title: '',
       points: [
-        'Operators can keep endpoint readiness, runtime packaging, and task launch in view at the same time.',
-        'Researchers get a clearer path from available infrastructure to a validated first run.',
-        'Shared teams can standardize repeatable workflows without hiding the operational details that still matter.'
+        'Operators can keep readiness, images, and submissions in view together.',
+        'Researchers get a shorter path from infrastructure to first run.',
+        'Shared teams can standardize workflows without losing operational context.'
       ]
     },
     items: [
       {
         icon: 'cpu',
-        eyebrow: 'Endpoints',
-        title: 'Register, refresh, and prepare execution targets.',
+        eyebrow: '',
+        title: 'Prepare endpoints',
         description:
-          'Diamond surfaces managed and available endpoints, checks endpoint details, and runs preparation steps that load account and partition metadata for online managed systems.'
+          'Track managed and available systems, inspect details, and load account and partition metadata.'
       },
       {
         icon: 'layers',
-        eyebrow: 'Container images',
-        title: 'Build the runtime environment inside the same workspace.',
+        eyebrow: '',
+        title: 'Build images',
         description:
-          'The image area lets users launch container build workflows so application environments stay connected to the endpoints and jobs that will use them.'
+          'Launch container builds so runtime environments stay tied to the endpoints and jobs that use them.'
       },
       {
         icon: 'database',
-        eyebrow: 'Datasets',
-        title: 'Register datasets with searchable paths and visibility controls.',
+        eyebrow: '',
+        title: 'Register datasets',
         description:
-          'Dataset records include Globus paths, system paths, machine context, and public or private visibility so teams can find the right inputs before submission.'
+          'Store paths, machine context, and visibility settings so inputs are easy to find before submission.'
       },
       {
         icon: 'rocket',
-        eyebrow: 'Tasks',
-        title: 'Launch work through reusable task templates.',
+        eyebrow: '',
+        title: 'Launch tasks',
         description:
-          'Diamond supports task submission against active managed endpoints and includes template flows for workloads such as vLLM inference and DeepSpeed supervised fine-tuning.'
+          'Submit work against active managed endpoints with reusable task templates.'
       }
     ]
   },
   workflow: {
-    eyebrow: 'Workflow',
-    title: 'A practical path from platform setup to workload execution',
+    eyebrow: '',
+    title: 'From setup to run',
     steps: [
       {
         title: 'Connect and prepare endpoints',
         description:
-          'Bring endpoint state into Diamond, identify which systems are managed, and load the metadata needed for later submissions.'
+          'Refresh endpoint state and load the metadata needed for submission.'
       },
       {
         title: 'Stage runtime and data',
         description:
-          'Build or select the container image, then register datasets with the machine and path information jobs will need.'
+          'Choose the image and register the datasets a job will use.'
       },
       {
         title: 'Submit and monitor tasks',
         description:
-          'Choose a template, submit against an active managed endpoint, and track task status from pending to running to completion.'
+          'Pick a template, submit the task, and follow it through completion.'
       }
     ]
   },
   personas: {
-    eyebrow: 'Who it helps',
-    title: 'Built for the teams operating shared HPC workflows',
+    eyebrow: '',
+    title: 'For shared HPC teams',
     items: [
       {
         title: 'Platform operators',
         description:
-          'Keep endpoint management, metadata preparation, and runtime packaging visible in one place instead of scattering them across scripts and internal notes.'
+          'Keep endpoint prep, runtime packaging, and submission flow visible in one place.'
       },
       {
         title: 'Researchers and ML practitioners',
         description:
-          'Move from authenticated access to dataset selection and task submission with fewer hidden handoffs between systems.'
+          'Move from access to dataset selection and task submission with fewer handoffs.'
       },
       {
         title: 'Programs supporting repeatable compute workflows',
         description:
-          'Use one interface to expose the supported path from infrastructure readiness through containerized, template-backed job execution.'
+          'Share a repeatable path from ready infrastructure to containerized job execution.'
       }
     ]
   },
   audiencePanel: {
-    eyebrow: 'Why teams use it',
-    title:
-      'Diamond makes the path from infrastructure readiness to job launch easier to understand and easier to repeat.',
+    eyebrow: '',
+    title: 'A clearer path from ready infrastructure to submitted jobs.',
     description:
-      'Instead of splitting endpoint setup, container workflows, dataset registration, and submission across separate tools, Diamond presents them as one connected operating flow.'
+      'Diamond replaces scattered tools with one connected operating flow.'
   },
   closing: {
-    eyebrow: 'Next step',
-    title: 'Bring the operational workflow into one place with Diamond.',
+    eyebrow: '',
+    title: 'Run the workflow in Diamond.',
     description:
-      'Use Diamond to bring endpoints online, prepare runtime environments, register datasets, and launch reusable task workflows from a single interface designed for shared HPC operations.',
+      'Bring endpoints online, prepare runtime environments, register datasets, and launch reusable tasks from one interface.',
     primaryCta: {
       label: 'Open workspace',
       authenticatedLabel: 'Return to workspace',

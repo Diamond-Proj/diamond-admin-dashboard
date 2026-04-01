@@ -84,11 +84,7 @@ function HeaderActionLink({
   );
 }
 
-export function LandingPage({
-  isAuthenticated
-}: {
-  isAuthenticated: boolean;
-}) {
+export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
   const {
     header,
     hero,
@@ -146,7 +142,7 @@ export function LandingPage({
         </div>
       </header>
 
-      <div className="container relative z-10 pt-28 pb-8 md:pt-32 md:pb-10">
+      <div className="relative z-10 container pt-28 pb-8 md:pt-32 md:pb-10">
         <section className={`${landingBodyFont.className} px-1 py-10 lg:py-18`}>
           <div className="mx-auto max-w-4xl text-center">
             <h1
@@ -215,7 +211,7 @@ export function LandingPage({
                             <p className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200/80 bg-[linear-gradient(180deg,#ffffff,#f8fafc)] text-[11px] font-semibold tracking-[0.18em] text-slate-500 uppercase shadow-[0_8px_20px_rgba(15,23,42,0.06)] dark:border-slate-700/80 dark:bg-[linear-gradient(180deg,rgba(30,41,59,0.92),rgba(15,23,42,0.92))] dark:text-slate-300 dark:shadow-none">
                               0{index + 1}
                             </p>
-                            <p className="pt-1 text-[0.98rem] leading-7 text-slate-700 dark:text-slate-200 lg:pr-1">
+                            <p className="pt-1 text-[0.98rem] leading-7 text-slate-700 lg:pr-1 dark:text-slate-200">
                               {item}
                             </p>
                           </article>
@@ -251,25 +247,33 @@ export function LandingPage({
         <section className="grid gap-8 py-16 lg:grid-cols-[0.85fr_minmax(0,1.15fr)] lg:py-20">
           <div className="max-w-xl space-y-6">
             <div>
-              <p className="text-sm font-semibold tracking-[0.18em] text-primary uppercase">
-                {highlights.eyebrow}
-              </p>
-              <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em] text-slate-950 md:text-4xl dark:text-slate-50">
+              {highlights.eyebrow ? (
+                <p className="text-primary text-sm font-semibold tracking-[0.18em] uppercase">
+                  {highlights.eyebrow}
+                </p>
+              ) : null}
+              <h2 className="text-3xl font-semibold tracking-[-0.03em] text-slate-950 md:text-4xl dark:text-slate-50">
                 {highlights.title}
               </h2>
-              <p className="mt-4 text-base leading-8 text-slate-600 dark:text-slate-300">
-                {highlights.description}
-              </p>
+              {highlights.description ? (
+                <p className="mt-4 text-base leading-8 text-slate-600 dark:text-slate-300">
+                  {highlights.description}
+                </p>
+              ) : null}
             </div>
 
             <div className="rounded-3xl border border-slate-200/80 bg-white/80 p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] backdrop-blur dark:border-slate-800/80 dark:bg-slate-950/70 dark:shadow-[0_18px_70px_rgba(2,6,23,0.28)]">
-              <p className="text-xs font-semibold tracking-[0.16em] text-slate-500 uppercase dark:text-slate-400">
-                {highlights.supportPanel.eyebrow}
-              </p>
-              <h3 className="mt-3 text-xl font-semibold tracking-[-0.02em] text-slate-950 dark:text-slate-50">
-                {highlights.supportPanel.title}
-              </h3>
-              <ul className="mt-5 space-y-3 text-sm leading-7 text-slate-600 dark:text-slate-300">
+              {highlights.supportPanel.eyebrow ? (
+                <p className="text-xs font-semibold tracking-[0.16em] text-slate-500 uppercase dark:text-slate-400">
+                  {highlights.supportPanel.eyebrow}
+                </p>
+              ) : null}
+              {highlights.supportPanel.title ? (
+                <h3 className="mt-3 text-xl font-semibold tracking-[-0.02em] text-slate-950 dark:text-slate-50">
+                  {highlights.supportPanel.title}
+                </h3>
+              ) : null}
+              <ul className="space-y-3 text-sm leading-7 text-slate-600 dark:text-slate-300">
                 {highlights.supportPanel.points.map((point) => (
                   <li
                     key={point}
@@ -284,20 +288,23 @@ export function LandingPage({
 
           <div className="grid gap-4 md:grid-cols-2">
             {highlights.items.map((item) => {
-              const Icon = highlightIcons[item.icon as keyof typeof highlightIcons];
+              const Icon =
+                highlightIcons[item.icon as keyof typeof highlightIcons];
 
               return (
                 <article
                   key={item.title}
                   className="rounded-[1.75rem] border border-slate-200/80 bg-white/80 p-6 shadow-[0_24px_70px_rgba(15,23,42,0.06)] dark:border-slate-800/80 dark:bg-slate-950/70 dark:shadow-[0_24px_90px_rgba(2,6,23,0.28)]"
                 >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary dark:bg-primary/18">
+                  <div className="bg-primary/10 text-primary dark:bg-primary/18 flex h-12 w-12 items-center justify-center rounded-2xl">
                     <Icon className="h-5 w-5" />
                   </div>
-                  <p className="mt-5 text-xs font-semibold tracking-[0.16em] text-slate-500 uppercase dark:text-slate-400">
-                    {item.eyebrow}
-                  </p>
-                  <h3 className="mt-3 text-xl font-semibold tracking-[-0.02em] text-slate-950 dark:text-slate-50">
+                  {item.eyebrow ? (
+                    <p className="mt-5 text-xs font-semibold tracking-[0.16em] text-slate-500 uppercase dark:text-slate-400">
+                      {item.eyebrow}
+                    </p>
+                  ) : null}
+                  <h3 className="mt-5 text-xl font-semibold tracking-[-0.02em] text-slate-950 dark:text-slate-50">
                     {item.title}
                   </h3>
                   <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">
@@ -312,10 +319,12 @@ export function LandingPage({
         <section className="rounded-4xl border border-slate-200/80 bg-white/75 p-6 shadow-[0_24px_90px_rgba(15,23,42,0.08)] backdrop-blur md:p-8 dark:border-slate-800/80 dark:bg-slate-950/65 dark:shadow-[0_28px_100px_rgba(2,6,23,0.34)]">
           <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
             <div className="max-w-xl">
-              <p className="text-sm font-semibold tracking-[0.18em] text-primary uppercase">
-                {workflow.eyebrow}
-              </p>
-              <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em] text-slate-950 dark:text-slate-50">
+              {workflow.eyebrow ? (
+                <p className="text-primary text-sm font-semibold tracking-[0.18em] uppercase">
+                  {workflow.eyebrow}
+                </p>
+              ) : null}
+              <h2 className="text-3xl font-semibold tracking-[-0.03em] text-slate-950 dark:text-slate-50">
                 {workflow.title}
               </h2>
             </div>
@@ -343,10 +352,12 @@ export function LandingPage({
 
         <section className="grid gap-6 py-16 lg:grid-cols-[minmax(0,1fr)_360px] lg:py-20">
           <div className="rounded-4xl border border-slate-200/80 bg-white/75 p-8 shadow-[0_24px_90px_rgba(15,23,42,0.08)] backdrop-blur dark:border-slate-800/80 dark:bg-slate-950/65 dark:shadow-[0_28px_100px_rgba(2,6,23,0.34)]">
-            <p className="text-sm font-semibold tracking-[0.18em] text-primary uppercase">
-              {personas.eyebrow}
-            </p>
-            <h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-[-0.03em] text-slate-950 dark:text-slate-50">
+            {personas.eyebrow ? (
+              <p className="text-primary text-sm font-semibold tracking-[0.18em] uppercase">
+                {personas.eyebrow}
+              </p>
+            ) : null}
+            <h2 className="max-w-2xl text-3xl font-semibold tracking-[-0.03em] text-slate-950 dark:text-slate-50">
               {personas.title}
             </h2>
             <div className="mt-8 grid gap-4 md:grid-cols-3">
@@ -367,10 +378,12 @@ export function LandingPage({
           </div>
 
           <aside className="rounded-4xl border border-slate-200/80 bg-slate-950 p-8 text-slate-50 shadow-[0_28px_100px_rgba(15,23,42,0.18)] dark:border-slate-700/80 dark:bg-slate-100 dark:text-slate-950 dark:shadow-[0_24px_80px_rgba(2,6,23,0.2)]">
-            <p className="text-xs font-semibold tracking-[0.18em] text-slate-300 uppercase dark:text-slate-600">
-              {audiencePanel.eyebrow}
-            </p>
-            <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em]">
+            {audiencePanel.eyebrow ? (
+              <p className="text-xs font-semibold tracking-[0.18em] text-slate-300 uppercase dark:text-slate-600">
+                {audiencePanel.eyebrow}
+              </p>
+            ) : null}
+            <h2 className="text-3xl font-semibold tracking-[-0.03em]">
               {audiencePanel.title}
             </h2>
             <p className="mt-4 text-sm leading-7 text-slate-300 dark:text-slate-700">
@@ -380,15 +393,17 @@ export function LandingPage({
         </section>
 
         <section className="relative overflow-hidden rounded-[2.5rem] border border-slate-200/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.95),rgba(251,243,246,0.92),rgba(239,248,255,0.92))] px-6 py-8 shadow-[0_30px_100px_rgba(15,23,42,0.1)] md:px-8 md:py-10 dark:border-slate-800/80 dark:bg-[linear-gradient(135deg,rgba(15,23,42,0.94),rgba(58,10,31,0.9),rgba(10,38,55,0.92))] dark:shadow-[0_30px_110px_rgba(2,6,23,0.42)]">
-          <div className="pointer-events-none absolute -right-20 -top-20 h-48 w-48 rounded-full bg-primary/18 blur-3xl" />
-          <div className="pointer-events-none absolute -left-16 -bottom-20 h-44 w-44 rounded-full bg-sky-400/16 blur-3xl" />
+          <div className="bg-primary/18 pointer-events-none absolute -top-20 -right-20 h-48 w-48 rounded-full blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 -left-16 h-44 w-44 rounded-full bg-sky-400/16 blur-3xl" />
 
           <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl">
-              <p className="text-sm font-semibold tracking-[0.18em] text-primary uppercase">
-                {closing.eyebrow}
-              </p>
-              <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em] text-slate-950 md:text-4xl dark:text-slate-50">
+              {closing.eyebrow ? (
+                <p className="text-primary text-sm font-semibold tracking-[0.18em] uppercase">
+                  {closing.eyebrow}
+                </p>
+              ) : null}
+              <h2 className="text-3xl font-semibold tracking-[-0.03em] text-slate-950 md:text-4xl dark:text-slate-50">
                 {closing.title}
               </h2>
               <p className="mt-4 text-base leading-8 text-slate-700 dark:text-slate-200">
