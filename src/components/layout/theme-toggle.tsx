@@ -9,8 +9,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
 
-export default function ThemeToggle() {
+export default function ThemeToggle({
+  triggerClassName
+}: {
+  triggerClassName?: string;
+}) {
   const { theme, setTheme } = useTheme();
   const themeIcon =
     theme === 'light' ? (
@@ -27,7 +32,10 @@ export default function ThemeToggle() {
         <Button
           variant="outline"
           size="icon"
-          className="h-10 w-10 cursor-pointer rounded-lg border border-slate-300/70 bg-transparent text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+          className={cn(
+            'h-10 w-10 cursor-pointer rounded-lg border border-slate-300/70 bg-transparent text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-slate-100',
+            triggerClassName
+          )}
         >
           {themeIcon}
           <span className="sr-only">Toggle theme</span>

@@ -51,6 +51,27 @@ function CtaLink({
   );
 }
 
+function HeaderActionLink({
+  href,
+  label,
+  external = false
+}: {
+  href: string;
+  label: string;
+  external?: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      target={external ? '_blank' : undefined}
+      rel={external ? 'noopener noreferrer' : undefined}
+      className="hidden h-10 items-center rounded-lg border border-slate-400/85 bg-transparent px-4 text-sm font-medium text-slate-700 shadow-[0_1px_2px_rgba(15,23,42,0.05)] transition-colors hover:border-slate-500 hover:bg-slate-100 hover:text-slate-900 md:inline-flex dark:border-slate-500/85 dark:text-slate-200 dark:shadow-[0_1px_2px_rgba(2,6,23,0.28)] dark:hover:border-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+    >
+      {label}
+    </Link>
+  );
+}
+
 export function LandingPage({
   isAuthenticated
 }: {
@@ -89,23 +110,18 @@ export function LandingPage({
             </div>
 
             <div className="flex items-center gap-2">
-              <Link
+              <HeaderActionLink
                 href={header.docsHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hidden rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:text-slate-950 md:inline-flex dark:text-slate-300 dark:hover:text-white"
-              >
-                {header.docsLabel}
-              </Link>
+                label={header.docsLabel}
+                external
+              />
               {!isAuthenticated ? (
-                <Link
+                <HeaderActionLink
                   href={header.signInHref}
-                  className="hidden rounded-full px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:text-slate-950 md:inline-flex dark:text-slate-300 dark:hover:text-white"
-                >
-                  {header.signInLabel}
-                </Link>
+                  label={header.signInLabel}
+                />
               ) : null}
-              <ThemeToggle />
+              <ThemeToggle triggerClassName="border-slate-400/85 shadow-[0_1px_2px_rgba(15,23,42,0.05)] dark:border-slate-500/85 dark:shadow-[0_1px_2px_rgba(2,6,23,0.28)]" />
               <CtaLink
                 href={header.primaryCta.href}
                 label={
