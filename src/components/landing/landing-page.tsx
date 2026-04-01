@@ -1,4 +1,6 @@
+import Image from 'next/image';
 import Link from 'next/link';
+import { Lora, Plus_Jakarta_Sans } from 'next/font/google';
 import {
   ArrowRight,
   Cpu,
@@ -11,6 +13,16 @@ import {
 import { Logo } from '@/components/icons';
 import ThemeToggle from '@/components/layout/theme-toggle';
 import { landingPageContent } from '@/content/landing-page-content';
+
+const landingDisplayFont = Lora({
+  subsets: ['latin'],
+  display: 'swap'
+});
+
+const landingBodyFont = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  display: 'swap'
+});
 
 const highlightIcons = {
   cpu: Cpu,
@@ -80,7 +92,6 @@ export function LandingPage({
   const {
     header,
     hero,
-    showcase,
     stats,
     highlights,
     workflow,
@@ -136,19 +147,21 @@ export function LandingPage({
       </header>
 
       <div className="container relative z-10 pt-28 pb-8 md:pt-32 md:pb-10">
-        <section className="grid gap-10 px-1 py-14 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)] lg:items-end lg:py-20">
-          <div>
+        <section className={`${landingBodyFont.className} px-1 py-10 lg:py-18`}>
+          <div className="mx-auto max-w-4xl text-center">
             <p className="text-sm font-semibold tracking-[0.18em] text-primary uppercase">
               {hero.eyebrow}
             </p>
-            <h1 className="mt-5 max-w-4xl text-4xl leading-[1.05] font-semibold tracking-[-0.04em] text-slate-950 md:text-6xl dark:text-slate-50">
+            <h1
+              className={`${landingDisplayFont.className} mt-5 text-[2.3rem] leading-[0.95] font-medium tracking-[-0.045em] text-slate-950 md:text-[3.8rem] dark:text-slate-50`}
+            >
               {hero.headline}
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">
+            <p className="mx-auto mt-7 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">
               {hero.description}
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-9 flex flex-wrap justify-center gap-3">
               <CtaLink
                 href={hero.primaryCta.href}
                 label={
@@ -172,67 +185,55 @@ export function LandingPage({
                 external={isAuthenticated}
               />
             </div>
-
-            <ul className="mt-8 grid gap-3 text-sm text-slate-600 md:grid-cols-3 dark:text-slate-300">
-              {hero.supportingPoints.map((point) => (
-                <li
-                  key={point}
-                  className="rounded-2xl border border-slate-200/70 bg-white/70 px-4 py-4 shadow-[0_18px_50px_rgba(15,23,42,0.05)] backdrop-blur dark:border-slate-800/80 dark:bg-slate-950/60 dark:shadow-[0_18px_60px_rgba(2,6,23,0.3)]"
-                >
-                  {point}
-                </li>
-              ))}
-            </ul>
           </div>
 
-          <aside className="relative overflow-hidden rounded-4xl border border-slate-200/80 bg-[linear-gradient(160deg,rgba(255,255,255,0.92),rgba(247,248,250,0.75))] p-6 shadow-[0_30px_90px_rgba(15,23,42,0.12)] dark:border-slate-800/80 dark:bg-[linear-gradient(160deg,rgba(15,23,42,0.94),rgba(2,6,23,0.82))] dark:shadow-[0_32px_100px_rgba(2,6,23,0.48)]">
-            <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-primary/18 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-14 -left-12 h-36 w-36 rounded-full bg-sky-400/18 blur-3xl" />
+          <div className="mt-16">
+            <div className="relative mx-auto max-w-376">
+              <div className="pointer-events-none absolute -inset-x-8 -top-8 -bottom-10 bg-[radial-gradient(circle_at_top_left,rgba(191,19,99,0.08),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(14,121,178,0.08),transparent_32%)] blur-3xl" />
+              <div className="pointer-events-none absolute inset-x-6 -bottom-8 h-16 bg-[radial-gradient(circle,rgba(15,23,42,0.12),transparent_68%)] blur-2xl dark:bg-[radial-gradient(circle,rgba(2,6,23,0.38),transparent_68%)]" />
 
-            <div className="relative">
-              <div className="rounded-2xl border border-slate-200/80 bg-white/70 px-4 py-3 dark:border-slate-700/80 dark:bg-slate-900/70">
-                <div>
-                  <p className="text-xs font-semibold tracking-[0.16em] text-slate-500 uppercase dark:text-slate-400">
-                    {showcase.entryCard.eyebrow}
-                  </p>
-                  <p className="mt-1 text-sm font-medium text-slate-900 dark:text-slate-100">
-                    {showcase.entryCard.title}
-                  </p>
+              <div className="relative min-h-56 rounded-[1.9rem] border border-slate-200/80 bg-white p-6 shadow-[0_26px_70px_rgba(15,23,42,0.06)] dark:border-slate-800/80 dark:bg-slate-950">
+                <div className="grid gap-8 lg:grid-cols-[minmax(0,1.28fr)_minmax(280px,0.72fr)] lg:items-center">
+                  <div className="space-y-3">
+                    <div className="px-1 text-[11px] font-semibold tracking-[0.18em] text-slate-500 uppercase dark:text-slate-400">
+                      {hero.screenshot.sideCardTitle}
+                    </div>
+                    <div className="overflow-hidden bg-white shadow-[0_28px_90px_rgba(15,23,42,0.14)] dark:bg-slate-950 dark:shadow-[0_34px_110px_rgba(2,6,23,0.5)]">
+                      <Image
+                        src={hero.screenshot.src}
+                        alt={hero.screenshot.alt}
+                        width={2516}
+                        height={1332}
+                        priority
+                        className="h-auto w-full"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="px-1 lg:px-0">
+                    <p className="text-[11px] font-semibold tracking-[0.18em] text-slate-400 uppercase dark:text-slate-500">
+                      {hero.screenshot.sideCardLabel}
+                    </p>
+                    <div className="mt-5 space-y-4 border-t border-slate-200/80 pt-5 dark:border-slate-800/80">
+                      {hero.screenshot.sideCardItems.map((item, index) => (
+                        <div
+                          key={item}
+                          className="grid gap-2 border-b border-slate-200/70 pb-4 last:border-b-0 last:pb-0 dark:border-slate-800/70"
+                        >
+                          <p className="text-[11px] font-semibold tracking-[0.18em] text-slate-400 uppercase dark:text-slate-500">
+                            0{index + 1}
+                          </p>
+                          <p className="text-base leading-7 text-slate-700 dark:text-slate-200">
+                            {item}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              <div className="mt-4 rounded-2xl border border-slate-200/80 bg-slate-950 p-5 text-slate-50 dark:border-slate-700/80 dark:bg-slate-100 dark:text-slate-950">
-                <p className="text-xs font-semibold tracking-[0.18em] text-slate-300 uppercase dark:text-slate-600">
-                  {showcase.workspaceCard.eyebrow}
-                </p>
-                <p className="mt-3 text-2xl font-semibold tracking-[-0.03em]">
-                  {showcase.workspaceCard.title}
-                </p>
-                <p className="mt-3 text-sm leading-6 text-slate-300 dark:text-slate-700">
-                  {showcase.workspaceCard.description}
-                </p>
-              </div>
-
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                {stats.slice(0, 2).map((stat) => (
-                  <div
-                    key={stat.label}
-                    className="rounded-2xl border border-slate-200/80 bg-white/80 p-4 dark:border-slate-700/80 dark:bg-slate-900/75"
-                  >
-                    <p className="text-2xl font-semibold tracking-[-0.03em] text-slate-950 dark:text-slate-50">
-                      {stat.value}
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100">
-                      {stat.label}
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                      {stat.detail}
-                    </p>
-                  </div>
-                ))}
-              </div>
             </div>
-          </aside>
+          </div>
         </section>
 
         <section className="grid gap-4 md:grid-cols-3">

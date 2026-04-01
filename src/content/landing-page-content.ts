@@ -1,6 +1,5 @@
 export const landingPageContent = {
   seo: {
-    title: 'Diamond HPC',
     description:
       'Diamond HPC is a unified control plane for managed endpoints, container images, datasets, and task submission workflows.'
   },
@@ -23,11 +22,17 @@ export const landingPageContent = {
       'Manage endpoints, images, datasets, and jobs from one Diamond workspace.',
     description:
       'Diamond gives research teams one place to prepare infrastructure, package runtime environments, register data, and launch work. Instead of stitching together separate operational tools, teams can move through the full execution path in a single workspace.',
-    supportingPoints: [
-      'Sign in through Globus Auth and enter a shared workspace built for research teams.',
-      'Refresh and manage endpoints, load endpoint metadata, and keep online systems ready for use.',
-      'Build container images, register datasets, and launch tasks without jumping across separate admin tools.'
-    ],
+    screenshot: {
+      src: '/screenshot/dashboard.png',
+      alt: 'Diamond workspace dashboard showing endpoint and workload management views.',
+      sideCardTitle: 'Current dashboard',
+      sideCardLabel: 'What you can do',
+      sideCardItems: [
+        'Sign in through Globus Auth and enter a shared workspace built for research teams.',
+        'Refresh and manage endpoints, load endpoint metadata, and keep online systems ready for use.',
+        'Build container images, register datasets, and launch tasks without jumping across separate admin tools.'
+      ]
+    },
     primaryCta: {
       label: 'Open workspace',
       authenticatedLabel: 'Return to workspace',
@@ -38,18 +43,6 @@ export const landingPageContent = {
       authenticatedLabel: 'Read the docs',
       href: '/sign-in',
       authenticatedHref: 'https://docs.diamondhpc.ai'
-    }
-  },
-  showcase: {
-    entryCard: {
-      eyebrow: 'Platform overview',
-      title: 'See how Diamond connects infrastructure, data, and workloads.'
-    },
-    workspaceCard: {
-      eyebrow: 'Operations workspace',
-      title: 'Move from setup to execution in one interface.',
-      description:
-        'Diamond keeps endpoint management, container workflows, dataset registration, and task submission close together so the operational path stays clear.'
     }
   },
   stats: [
