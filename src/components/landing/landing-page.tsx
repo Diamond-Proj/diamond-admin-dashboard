@@ -31,6 +31,25 @@ const highlightIcons = {
   rocket: Rocket
 } as const;
 
+const statCardStyles = [
+  'border-white/75 bg-[linear-gradient(160deg,rgba(255,255,255,0.94),rgba(244,247,251,0.96))]',
+  'border-white/75 bg-[linear-gradient(160deg,rgba(255,255,255,0.94),rgba(247,244,246,0.96))]',
+  'border-white/75 bg-[linear-gradient(160deg,rgba(255,255,255,0.94),rgba(242,246,250,0.96))]'
+] as const;
+
+const highlightCardStyles = [
+  'bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(245,247,251,0.92))]',
+  'bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(247,244,246,0.92))]',
+  'bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(244,246,250,0.92))]',
+  'bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,245,248,0.92))]'
+] as const;
+
+const personaCardStyles = [
+  'bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(245,247,251,0.92))]',
+  'bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(247,244,246,0.92))]',
+  'bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(244,246,250,0.92))]'
+] as const;
+
 function CtaLink({
   href,
   label,
@@ -49,8 +68,8 @@ function CtaLink({
       rel={external ? 'noopener noreferrer' : undefined}
       className={
         variant === 'primary'
-          ? 'inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition-transform duration-200 hover:-translate-y-0.5 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-950 dark:hover:bg-white'
-          : 'inline-flex items-center justify-center gap-2 rounded-full border border-slate-300/75 bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 transition-transform duration-200 hover:-translate-y-0.5 hover:border-slate-400 hover:text-slate-950 dark:border-slate-700 dark:bg-slate-900/75 dark:text-slate-200 dark:hover:border-slate-500 dark:hover:text-white'
+          ? 'inline-flex items-center justify-center gap-2 rounded-full bg-[#c90a37] px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(201,10,55,0.16)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#b50931] hover:shadow-[0_18px_34px_rgba(201,10,55,0.2)] dark:bg-[#c90a37] dark:text-white dark:shadow-[0_14px_30px_rgba(0,0,0,0.24)]'
+          : 'inline-flex items-center justify-center gap-2 rounded-full border border-white/75 bg-white/78 px-5 py-3 text-sm font-semibold text-slate-700 shadow-[0_10px_26px_rgba(15,23,42,0.08)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-0.5 hover:border-white hover:bg-white hover:text-slate-950 dark:border-slate-700/80 dark:bg-slate-950/72 dark:text-slate-200 dark:shadow-[0_18px_40px_rgba(2,6,23,0.25)] dark:hover:border-slate-500 dark:hover:bg-slate-900'
       }
     >
       {label}
@@ -77,7 +96,7 @@ function HeaderActionLink({
       href={href}
       target={external ? '_blank' : undefined}
       rel={external ? 'noopener noreferrer' : undefined}
-      className="hidden h-10 items-center rounded-lg border border-slate-400/60 bg-transparent px-4 text-sm font-medium text-slate-700 shadow-[0_1px_2px_rgba(15,23,42,0.05)] transition-colors hover:border-slate-500/65 hover:bg-slate-100 hover:text-slate-900 md:inline-flex dark:border-slate-500/60 dark:text-slate-200 dark:shadow-[0_1px_2px_rgba(2,6,23,0.28)] dark:hover:border-slate-400/70 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+      className="hidden h-10 items-center rounded-full border border-white/80 bg-white/72 px-4 text-sm font-medium text-slate-700 shadow-[0_8px_22px_rgba(15,23,42,0.06)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-0.5 hover:bg-white hover:text-slate-950 md:inline-flex dark:border-slate-700/80 dark:bg-slate-950/68 dark:text-slate-200 dark:shadow-[0_14px_30px_rgba(2,6,23,0.24)] dark:hover:border-slate-500 dark:hover:bg-slate-900"
     >
       {label}
     </Link>
@@ -97,20 +116,23 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
   } = landingPageContent;
 
   return (
-    <main className="relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(191,19,99,0.12),transparent_30%),radial-gradient(circle_at_top_right,rgba(14,121,178,0.1),transparent_34%),linear-gradient(to_bottom,rgba(255,255,255,0.35),transparent_45%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(191,19,99,0.18),transparent_24%),radial-gradient(circle_at_top_right,rgba(14,121,178,0.16),transparent_30%),linear-gradient(to_bottom,rgba(15,23,42,0.35),transparent_45%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(148,163,184,0.12)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.12)_1px,transparent_1px)] bg-size-[56px_56px] opacity-40 dark:opacity-20" />
+    <main className="relative overflow-hidden bg-[#f4f6f9] dark:bg-[#0b1018]">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(201,10,55,0.08),transparent_24%),radial-gradient(circle_at_top_right,rgba(14,121,178,0.06),transparent_28%),radial-gradient(circle_at_50%_18%,rgba(255,255,255,0.94),transparent_38%),linear-gradient(180deg,#f3f6fa_0%,#f7f9fc_34%,#f4f6f9_100%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(201,10,55,0.12),transparent_22%),radial-gradient(circle_at_top_right,rgba(14,121,178,0.08),transparent_26%),radial-gradient(circle_at_50%_18%,rgba(15,23,42,0.72),transparent_36%),linear-gradient(180deg,#0b1018_0%,#0d1320_34%,#101623_100%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(100,116,139,0.18)_1px,transparent_1px),linear-gradient(to_bottom,rgba(100,116,139,0.18)_1px,transparent_1px)] [mask-image:linear-gradient(to_bottom,white,transparent_90%)] bg-size-[56px_56px] opacity-60 dark:opacity-35" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[36rem] bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.92),transparent_72%)] dark:bg-[radial-gradient(circle_at_top,rgba(15,23,42,0.82),transparent_72%)]" />
 
       <header className="fixed inset-x-0 top-0 z-50">
         <div className="container py-4">
-          <div className="flex items-center justify-between gap-4 rounded-full border border-white/70 bg-white/80 px-4 py-3 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl md:px-5 dark:border-slate-800/80 dark:bg-slate-950/78 dark:shadow-[0_24px_80px_rgba(2,6,23,0.45)]">
+          <div className="mx-auto flex max-w-[1240px] items-center justify-between gap-4 rounded-[1.75rem] border border-white/70 bg-white/64 px-4 py-3 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-2xl md:px-5 dark:border-slate-800/80 dark:bg-slate-950/72 dark:shadow-[0_28px_90px_rgba(2,6,23,0.4)]">
             <div className="flex min-w-0 items-center gap-3">
-              <Logo width={44} height={44} className="shrink-0" />
+              <div className="rounded-2xl border border-white/80 bg-white/78 p-1.5 shadow-[0_8px_24px_rgba(15,23,42,0.08)] dark:border-slate-800/80 dark:bg-slate-900/86 dark:shadow-none">
+                <Logo width={42} height={42} className="shrink-0" />
+              </div>
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-slate-950 dark:text-slate-50">
                   {header.eyebrow}
                 </p>
-                <p className="truncate text-xs tracking-[0.16em] text-slate-500 uppercase dark:text-slate-400">
+                <p className="truncate text-xs tracking-[0.18em] text-slate-500 uppercase dark:text-slate-400">
                   {header.label}
                 </p>
               </div>
@@ -128,7 +150,7 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
                   label={header.signInLabel}
                 />
               ) : null}
-              <ThemeToggle triggerClassName="border-slate-400/60 shadow-[0_1px_2px_rgba(15,23,42,0.05)] dark:border-slate-500/60 dark:shadow-[0_1px_2px_rgba(2,6,23,0.28)]" />
+              <ThemeToggle triggerClassName="rounded-full border-white/80 bg-white/72 shadow-[0_8px_22px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-slate-700/80 dark:bg-slate-950/68 dark:shadow-[0_14px_30px_rgba(2,6,23,0.24)]" />
               <CtaLink
                 href={header.primaryCta.href}
                 label={
@@ -142,81 +164,85 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
         </div>
       </header>
 
-      <div className="relative z-10 container pt-28 pb-8 md:pt-32 md:pb-10">
-        <section className={`${landingBodyFont.className} px-1 py-10 lg:py-18`}>
-          <div className="mx-auto max-w-4xl text-center">
-            <h1
-              className={`${landingDisplayFont.className} text-[2.3rem] leading-[1.05] font-medium tracking-[-0.045em] text-slate-950 md:text-[3.8rem] dark:text-slate-50`}
-            >
-              {hero.headline}
-            </h1>
+      <div className="relative z-10 container pt-28 pb-10 md:pt-32 md:pb-12">
+        <section className={`${landingBodyFont.className} px-1 py-8 lg:py-12`}>
+          <div className="relative overflow-hidden rounded-[2.8rem] border border-white/70 bg-[linear-gradient(135deg,rgba(245,247,251,0.97),rgba(255,255,255,0.97),rgba(247,244,246,0.97))] p-4 shadow-[0_40px_120px_rgba(15,23,42,0.1)] md:p-6 lg:p-7 dark:border-slate-800/80 dark:bg-[linear-gradient(135deg,rgba(12,18,30,0.96),rgba(16,22,34,0.94),rgba(28,14,24,0.94))] dark:shadow-[0_42px_120px_rgba(2,6,23,0.48)]">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[linear-gradient(180deg,rgba(255,255,255,0.5),transparent)] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.03),transparent)]" />
+            <div className="pointer-events-none absolute -top-20 left-[8%] h-48 w-48 rounded-full bg-[rgba(201,10,55,0.08)] blur-3xl dark:bg-[rgba(201,10,55,0.12)]" />
+            <div className="pointer-events-none absolute right-[6%] -bottom-20 h-56 w-56 rounded-full bg-sky-500/10 blur-3xl dark:bg-sky-500/10" />
 
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <CtaLink
-                href={hero.primaryCta.href}
-                label={
-                  isAuthenticated
-                    ? hero.primaryCta.authenticatedLabel
-                    : hero.primaryCta.label
-                }
-              />
-              <CtaLink
-                href={
-                  isAuthenticated
-                    ? hero.secondaryCta.authenticatedHref
-                    : hero.secondaryCta.href
-                }
-                label={
-                  isAuthenticated
-                    ? hero.secondaryCta.authenticatedLabel
-                    : hero.secondaryCta.label
-                }
-                variant="secondary"
-                external={isAuthenticated}
-              />
-            </div>
-          </div>
+            <div className="relative rounded-[2.25rem] border border-white/80 bg-white/50 px-5 py-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] backdrop-blur-sm md:px-8 md:py-10 lg:px-10 lg:py-12 dark:border-slate-700/70 dark:bg-slate-950/44 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+              <div className="mx-auto max-w-4xl text-center">
+                <h1
+                  className={`${landingDisplayFont.className} text-[2.45rem] leading-[1.14] font-semibold tracking-[-0.06em] text-slate-950 md:text-[4.4rem] dark:text-slate-50`}
+                >
+                  {hero.headline}
+                </h1>
 
-          <div className="mt-16">
-            <div className="relative mx-auto max-w-376">
-              <div className="pointer-events-none absolute -inset-x-8 -top-8 -bottom-10 bg-[radial-gradient(circle_at_top_left,rgba(191,19,99,0.08),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(14,121,178,0.08),transparent_32%)] blur-3xl" />
-              <div className="pointer-events-none absolute inset-x-6 -bottom-8 h-16 bg-[radial-gradient(circle,rgba(15,23,42,0.12),transparent_68%)] blur-2xl dark:bg-[radial-gradient(circle,rgba(2,6,23,0.38),transparent_68%)]" />
+                <div className="mt-8 flex flex-wrap justify-center gap-3">
+                  <CtaLink
+                    href={hero.primaryCta.href}
+                    label={
+                      isAuthenticated
+                        ? hero.primaryCta.authenticatedLabel
+                        : hero.primaryCta.label
+                    }
+                  />
+                  <CtaLink
+                    href={
+                      isAuthenticated
+                        ? hero.secondaryCta.authenticatedHref
+                        : hero.secondaryCta.href
+                    }
+                    label={
+                      isAuthenticated
+                        ? hero.secondaryCta.authenticatedLabel
+                        : hero.secondaryCta.label
+                    }
+                    variant="secondary"
+                    external={isAuthenticated}
+                  />
+                </div>
+              </div>
 
-              <div className="relative min-h-56 rounded-[1.9rem] border border-slate-200/80 bg-white p-6 shadow-[0_26px_70px_rgba(15,23,42,0.06)] dark:border-slate-800/80 dark:bg-slate-950">
-                <div className="grid gap-8 lg:grid-cols-[minmax(0,1.28fr)_minmax(300px,0.72fr)] lg:items-stretch">
-                  <div>
-                    <div className="overflow-hidden bg-white shadow-[0_28px_90px_rgba(15,23,42,0.14)] dark:bg-slate-950 dark:shadow-[0_34px_110px_rgba(2,6,23,0.5)]">
-                      <Image
-                        src={hero.screenshot.src}
-                        alt={hero.screenshot.alt}
-                        width={2516}
-                        height={1332}
-                        priority
-                        className="h-auto w-full"
-                      />
-                    </div>
-                  </div>
+              <div className="mt-12">
+                <div className="relative mx-auto max-w-[92rem]">
+                  <div className="pointer-events-none absolute inset-x-10 bottom-0 h-20 bg-[radial-gradient(circle,rgba(15,23,42,0.14),transparent_72%)] blur-3xl dark:bg-[radial-gradient(circle,rgba(2,6,23,0.42),transparent_72%)]" />
 
-                  <div className="px-1 lg:px-0">
-                    <div className="flex h-full flex-col">
-                      <p className="text-[11px] font-semibold tracking-[0.22em] text-slate-500 uppercase dark:text-slate-400">
-                        {hero.screenshot.sideCardLabel}
-                      </p>
-                      <div className="mt-4 flex flex-1 flex-col justify-between gap-3">
-                        {hero.screenshot.sideCardItems.map((item, index) => (
-                          <article
-                            key={item}
-                            className="grid flex-1 grid-cols-[2.75rem_minmax(0,1fr)] items-start gap-3 rounded-[1.25rem] border border-slate-200/80 bg-white/92 px-3 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.04)] dark:border-slate-800/80 dark:bg-slate-950/82 dark:shadow-none"
-                          >
-                            <p className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200/80 bg-[linear-gradient(180deg,#ffffff,#f8fafc)] text-[11px] font-semibold tracking-[0.18em] text-slate-500 uppercase shadow-[0_8px_20px_rgba(15,23,42,0.06)] dark:border-slate-700/80 dark:bg-[linear-gradient(180deg,rgba(30,41,59,0.92),rgba(15,23,42,0.92))] dark:text-slate-300 dark:shadow-none">
-                              0{index + 1}
-                            </p>
-                            <p className="pt-1 text-[0.98rem] leading-7 text-slate-700 lg:pr-1 dark:text-slate-200">
-                              {item}
-                            </p>
-                          </article>
-                        ))}
+                  <div className="relative grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
+                    <div className="rounded-[2rem] border border-white/80 bg-white/72 p-3 shadow-[0_30px_80px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/78 dark:shadow-[0_30px_90px_rgba(2,6,23,0.4)]">
+                      <div className="overflow-hidden rounded-[1.55rem] border border-slate-200/80 bg-white shadow-[0_16px_40px_rgba(15,23,42,0.08)] dark:border-slate-800/80 dark:bg-slate-950 dark:shadow-none">
+                        <Image
+                          src={hero.screenshot.src}
+                          alt={hero.screenshot.alt}
+                          width={2516}
+                          height={1332}
+                          priority
+                          className="h-auto w-full"
+                        />
                       </div>
+                    </div>
+
+                    <div className="grid gap-3">
+                      <div className="rounded-[1.6rem] border border-white/80 bg-white/70 px-5 py-4 shadow-[0_16px_40px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/72 dark:shadow-[0_18px_40px_rgba(2,6,23,0.24)]">
+                        <p className="text-[11px] font-semibold tracking-[0.24em] text-slate-500 uppercase dark:text-slate-400">
+                          {hero.screenshot.sideCardLabel}
+                        </p>
+                      </div>
+
+                      {hero.screenshot.sideCardItems.map((item, index) => (
+                        <article
+                          key={item}
+                          className="grid grid-cols-[3rem_minmax(0,1fr)] items-start gap-3 rounded-[1.6rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(244,247,251,0.94))] px-4 py-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-[linear-gradient(180deg,rgba(16,22,34,0.9),rgba(13,18,29,0.96))] dark:shadow-[0_18px_44px_rgba(2,6,23,0.22)]"
+                        >
+                          <p className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/80 bg-[linear-gradient(180deg,#ffffff,#f8fafc)] text-[11px] font-semibold tracking-[0.18em] text-slate-500 uppercase shadow-[0_10px_22px_rgba(15,23,42,0.08)] dark:border-slate-700/80 dark:bg-[linear-gradient(180deg,rgba(30,41,59,0.92),rgba(15,23,42,0.94))] dark:text-slate-300 dark:shadow-none">
+                            0{index + 1}
+                          </p>
+                          <p className="pt-1 text-[0.98rem] leading-7 text-slate-700 dark:text-slate-200">
+                            {item}
+                          </p>
+                        </article>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -225,16 +251,16 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
           </div>
         </section>
 
-        <section className="grid gap-4 md:grid-cols-3">
-          {stats.map((stat) => (
+        <section className="mt-4 grid gap-4 md:grid-cols-3">
+          {stats.map((stat, index) => (
             <article
               key={`${stat.value}-${stat.label}`}
-              className="rounded-[1.75rem] border border-slate-200/80 bg-white/75 p-6 shadow-[0_24px_80px_rgba(15,23,42,0.06)] backdrop-blur dark:border-slate-800/80 dark:bg-slate-950/65 dark:shadow-[0_24px_90px_rgba(2,6,23,0.32)]"
+              className={`rounded-[1.9rem] border p-6 shadow-[0_24px_80px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/70 dark:shadow-[0_26px_90px_rgba(2,6,23,0.32)] ${statCardStyles[index % statCardStyles.length]}`}
             >
-              <p className="text-3xl font-semibold tracking-[-0.04em] text-slate-950 dark:text-slate-50">
+              <p className="text-3xl font-semibold tracking-[-0.05em] text-slate-950 dark:text-slate-50">
                 {stat.value}
               </p>
-              <p className="mt-2 text-sm font-semibold tracking-[0.14em] text-slate-500 uppercase dark:text-slate-400">
+              <p className="mt-2 text-sm font-semibold tracking-[0.16em] text-slate-500 uppercase dark:text-slate-400">
                 {stat.label}
               </p>
               <p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-300">
@@ -244,25 +270,25 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
           ))}
         </section>
 
-        <section className="grid gap-8 py-16 lg:grid-cols-[0.85fr_minmax(0,1.15fr)] lg:py-20">
+        <section className="grid gap-8 py-16 lg:grid-cols-[0.86fr_minmax(0,1.14fr)] lg:py-20">
           <div className="max-w-xl space-y-6">
             <div>
               {highlights.eyebrow ? (
-                <p className="text-primary text-sm font-semibold tracking-[0.18em] uppercase">
+                <p className="text-sm font-semibold tracking-[0.18em] text-[#c90a37] uppercase">
                   {highlights.eyebrow}
                 </p>
               ) : null}
-              <h2 className="text-3xl font-semibold tracking-[-0.03em] text-slate-950 md:text-4xl dark:text-slate-50">
+              <h2 className="text-3xl font-semibold tracking-[-0.04em] text-slate-950 md:text-4xl dark:text-slate-50">
                 {highlights.title}
               </h2>
               {highlights.description ? (
-                <p className="mt-4 text-base leading-8 text-slate-600 dark:text-slate-300">
+                <p className="mt-4 max-w-lg text-base leading-8 text-slate-600 dark:text-slate-300">
                   {highlights.description}
                 </p>
               ) : null}
             </div>
 
-            <div className="rounded-3xl border border-slate-200/80 bg-white/80 p-6 shadow-[0_18px_60px_rgba(15,23,42,0.06)] backdrop-blur dark:border-slate-800/80 dark:bg-slate-950/70 dark:shadow-[0_18px_70px_rgba(2,6,23,0.28)]">
+            <div className="rounded-[2rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.82),rgba(240,247,255,0.9))] p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.8),rgba(12,18,30,0.92))] dark:shadow-[0_20px_60px_rgba(2,6,23,0.26)]">
               {highlights.supportPanel.eyebrow ? (
                 <p className="text-xs font-semibold tracking-[0.16em] text-slate-500 uppercase dark:text-slate-400">
                   {highlights.supportPanel.eyebrow}
@@ -277,7 +303,7 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
                 {highlights.supportPanel.points.map((point) => (
                   <li
                     key={point}
-                    className="rounded-2xl border border-slate-200/70 bg-slate-50/80 px-4 py-3 dark:border-slate-800/70 dark:bg-slate-900/70"
+                    className="rounded-[1.35rem] border border-white/80 bg-white/72 px-4 py-3 shadow-[0_12px_30px_rgba(15,23,42,0.05)] dark:border-slate-800/80 dark:bg-slate-900/72 dark:shadow-none"
                   >
                     {point}
                   </li>
@@ -287,16 +313,16 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            {highlights.items.map((item) => {
+            {highlights.items.map((item, index) => {
               const Icon =
                 highlightIcons[item.icon as keyof typeof highlightIcons];
 
               return (
                 <article
                   key={item.title}
-                  className="rounded-[1.75rem] border border-slate-200/80 bg-white/80 p-6 shadow-[0_24px_70px_rgba(15,23,42,0.06)] dark:border-slate-800/80 dark:bg-slate-950/70 dark:shadow-[0_24px_90px_rgba(2,6,23,0.28)]"
+                  className={`rounded-[1.9rem] border border-white/80 p-6 shadow-[0_24px_70px_rgba(15,23,42,0.07)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/72 dark:shadow-[0_24px_80px_rgba(2,6,23,0.28)] ${highlightCardStyles[index % highlightCardStyles.length]}`}
                 >
-                  <div className="bg-primary/10 text-primary dark:bg-primary/18 flex h-12 w-12 items-center justify-center rounded-2xl">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#c90a37] text-white shadow-[0_10px_24px_rgba(201,10,55,0.16)] dark:shadow-none">
                     <Icon className="h-5 w-5" />
                   </div>
                   {item.eyebrow ? (
@@ -304,7 +330,7 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
                       {item.eyebrow}
                     </p>
                   ) : null}
-                  <h3 className="mt-5 text-xl font-semibold tracking-[-0.02em] text-slate-950 dark:text-slate-50">
+                  <h3 className="mt-5 text-xl font-semibold tracking-[-0.03em] text-slate-950 dark:text-slate-50">
                     {item.title}
                   </h3>
                   <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">
@@ -316,15 +342,15 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
           </div>
         </section>
 
-        <section className="rounded-4xl border border-slate-200/80 bg-white/75 p-6 shadow-[0_24px_90px_rgba(15,23,42,0.08)] backdrop-blur md:p-8 dark:border-slate-800/80 dark:bg-slate-950/65 dark:shadow-[0_28px_100px_rgba(2,6,23,0.34)]">
+        <section className="rounded-[2.25rem] border border-white/80 bg-white/62 p-6 shadow-[0_24px_90px_rgba(15,23,42,0.08)] backdrop-blur-xl md:p-8 dark:border-slate-800/80 dark:bg-slate-950/68 dark:shadow-[0_28px_100px_rgba(2,6,23,0.34)]">
           <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
             <div className="max-w-xl">
               {workflow.eyebrow ? (
-                <p className="text-primary text-sm font-semibold tracking-[0.18em] uppercase">
+                <p className="text-sm font-semibold tracking-[0.18em] text-[#c90a37] uppercase">
                   {workflow.eyebrow}
                 </p>
               ) : null}
-              <h2 className="text-3xl font-semibold tracking-[-0.03em] text-slate-950 dark:text-slate-50">
+              <h2 className="text-3xl font-semibold tracking-[-0.04em] text-slate-950 dark:text-slate-50">
                 {workflow.title}
               </h2>
             </div>
@@ -333,9 +359,9 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
               {workflow.steps.map((step, index) => (
                 <li
                   key={step.title}
-                  className="rounded-3xl border border-slate-200/80 bg-slate-50/80 p-5 dark:border-slate-800/80 dark:bg-slate-900/65"
+                  className="rounded-[1.8rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.84),rgba(244,247,251,0.92))] p-5 shadow-[0_14px_32px_rgba(15,23,42,0.05)] dark:border-slate-800/80 dark:bg-[linear-gradient(180deg,rgba(16,22,34,0.84),rgba(13,18,29,0.94))] dark:shadow-none"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-950 text-sm font-semibold text-white dark:bg-slate-100 dark:text-slate-950">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#c90a37] text-sm font-semibold text-white shadow-[0_10px_20px_rgba(201,10,55,0.16)] dark:shadow-none">
                     {index + 1}
                   </div>
                   <h3 className="mt-4 text-lg font-semibold text-slate-950 dark:text-slate-50">
@@ -351,20 +377,20 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
         </section>
 
         <section className="grid gap-6 py-16 lg:grid-cols-[minmax(0,1fr)_360px] lg:py-20">
-          <div className="rounded-4xl border border-slate-200/80 bg-white/75 p-8 shadow-[0_24px_90px_rgba(15,23,42,0.08)] backdrop-blur dark:border-slate-800/80 dark:bg-slate-950/65 dark:shadow-[0_28px_100px_rgba(2,6,23,0.34)]">
+          <div className="rounded-[2.25rem] border border-white/80 bg-white/62 p-8 shadow-[0_24px_90px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/68 dark:shadow-[0_28px_100px_rgba(2,6,23,0.34)]">
             {personas.eyebrow ? (
-              <p className="text-primary text-sm font-semibold tracking-[0.18em] uppercase">
+              <p className="text-sm font-semibold tracking-[0.18em] text-[#c90a37] uppercase">
                 {personas.eyebrow}
               </p>
             ) : null}
-            <h2 className="max-w-2xl text-3xl font-semibold tracking-[-0.03em] text-slate-950 dark:text-slate-50">
+            <h2 className="max-w-2xl text-3xl font-semibold tracking-[-0.04em] text-slate-950 dark:text-slate-50">
               {personas.title}
             </h2>
             <div className="mt-8 grid gap-4 md:grid-cols-3">
-              {personas.items.map((persona) => (
+              {personas.items.map((persona, index) => (
                 <article
                   key={persona.title}
-                  className="rounded-3xl border border-slate-200/80 bg-slate-50/80 p-5 dark:border-slate-800/80 dark:bg-slate-900/65"
+                  className={`rounded-[1.8rem] border border-white/80 p-5 shadow-[0_14px_34px_rgba(15,23,42,0.05)] dark:border-slate-800/80 dark:bg-slate-900/70 dark:shadow-none ${personaCardStyles[index % personaCardStyles.length]}`}
                 >
                   <h3 className="text-lg font-semibold text-slate-950 dark:text-slate-50">
                     {persona.title}
@@ -377,33 +403,37 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
             </div>
           </div>
 
-          <aside className="rounded-4xl border border-slate-200/80 bg-slate-950 p-8 text-slate-50 shadow-[0_28px_100px_rgba(15,23,42,0.18)] dark:border-slate-700/80 dark:bg-slate-100 dark:text-slate-950 dark:shadow-[0_24px_80px_rgba(2,6,23,0.2)]">
-            {audiencePanel.eyebrow ? (
-              <p className="text-xs font-semibold tracking-[0.18em] text-slate-300 uppercase dark:text-slate-600">
-                {audiencePanel.eyebrow}
+          <aside className="relative overflow-hidden rounded-[2.25rem] border border-slate-300/60 bg-[linear-gradient(160deg,rgba(20,24,34,0.96),rgba(33,40,56,0.94),rgba(28,16,24,0.96))] p-8 text-slate-50 shadow-[0_28px_100px_rgba(15,23,42,0.18)] dark:border-slate-700/80 dark:bg-[linear-gradient(160deg,rgba(20,24,34,0.96),rgba(33,40,56,0.94),rgba(28,16,24,0.96))] dark:text-slate-50 dark:shadow-[0_24px_80px_rgba(2,6,23,0.2)]">
+            <div className="pointer-events-none absolute -top-10 right-0 h-36 w-36 rounded-full bg-[rgba(201,10,55,0.08)] blur-3xl" />
+            <div className="pointer-events-none absolute bottom-0 left-0 h-32 w-32 rounded-full bg-sky-500/10 blur-3xl" />
+            <div className="relative">
+              {audiencePanel.eyebrow ? (
+                <p className="text-xs font-semibold tracking-[0.18em] text-slate-300 uppercase dark:text-slate-600">
+                  {audiencePanel.eyebrow}
+                </p>
+              ) : null}
+              <h2 className="text-3xl font-semibold tracking-[-0.04em]">
+                {audiencePanel.title}
+              </h2>
+              <p className="mt-4 text-sm leading-7 text-slate-300 dark:text-slate-300">
+                {audiencePanel.description}
               </p>
-            ) : null}
-            <h2 className="text-3xl font-semibold tracking-[-0.03em]">
-              {audiencePanel.title}
-            </h2>
-            <p className="mt-4 text-sm leading-7 text-slate-300 dark:text-slate-700">
-              {audiencePanel.description}
-            </p>
+            </div>
           </aside>
         </section>
 
-        <section className="relative overflow-hidden rounded-[2.5rem] border border-slate-200/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.95),rgba(251,243,246,0.92),rgba(239,248,255,0.92))] px-6 py-8 shadow-[0_30px_100px_rgba(15,23,42,0.1)] md:px-8 md:py-10 dark:border-slate-800/80 dark:bg-[linear-gradient(135deg,rgba(15,23,42,0.94),rgba(58,10,31,0.9),rgba(10,38,55,0.92))] dark:shadow-[0_30px_110px_rgba(2,6,23,0.42)]">
-          <div className="bg-primary/18 pointer-events-none absolute -top-20 -right-20 h-48 w-48 rounded-full blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-20 -left-16 h-44 w-44 rounded-full bg-sky-400/16 blur-3xl" />
+        <section className="relative overflow-hidden rounded-[2.5rem] border border-white/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.9),rgba(244,247,251,0.92),rgba(247,244,246,0.9))] px-6 py-8 shadow-[0_30px_100px_rgba(15,23,42,0.1)] md:px-8 md:py-10 dark:border-slate-800/80 dark:bg-[linear-gradient(135deg,rgba(12,18,30,0.94),rgba(37,15,30,0.9),rgba(17,29,43,0.92))] dark:shadow-[0_30px_110px_rgba(2,6,23,0.42)]">
+          <div className="pointer-events-none absolute -top-20 -right-20 h-48 w-48 rounded-full bg-[rgba(201,10,55,0.08)] blur-3xl dark:bg-[rgba(201,10,55,0.12)]" />
+          <div className="pointer-events-none absolute -bottom-20 -left-16 h-44 w-44 rounded-full bg-sky-500/10 blur-3xl dark:bg-sky-400/12" />
 
           <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl">
               {closing.eyebrow ? (
-                <p className="text-primary text-sm font-semibold tracking-[0.18em] uppercase">
+                <p className="text-sm font-semibold tracking-[0.18em] text-[#c90a37] uppercase">
                   {closing.eyebrow}
                 </p>
               ) : null}
-              <h2 className="text-3xl font-semibold tracking-[-0.03em] text-slate-950 md:text-4xl dark:text-slate-50">
+              <h2 className="text-3xl font-semibold tracking-[-0.04em] text-slate-950 md:text-4xl dark:text-slate-50">
                 {closing.title}
               </h2>
               <p className="mt-4 text-base leading-8 text-slate-700 dark:text-slate-200">
