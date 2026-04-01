@@ -12,6 +12,7 @@ import {
 
 import { Logo } from '@/components/icons';
 import ThemeToggle from '@/components/layout/theme-toggle';
+import { WorkspaceSignal } from '@/components/landing/workspace-signal';
 import { landingPageContent } from '@/content/landing-page-content';
 
 const landingDisplayFont = Lora({
@@ -166,6 +167,8 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
               >
                 {hero.headline}
               </h1>
+
+              <WorkspaceSignal />
 
               <div className="mt-8 flex flex-wrap justify-center gap-3">
                 <CtaLink
