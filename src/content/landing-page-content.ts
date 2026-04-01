@@ -17,15 +17,10 @@ export const landingPageContent = {
     }
   },
   hero: {
-    eyebrow: 'HPC operations without the usual tool sprawl',
-    headline:
-      'Manage endpoints, images, datasets, and jobs from one Diamond workspace.',
-    description:
-      'Diamond gives research teams one place to prepare infrastructure, package runtime environments, register data, and launch work. Instead of stitching together separate operational tools, teams can move through the full execution path in a single workspace.',
+    headline: 'One workspace for endpoints, images, datasets, and jobs.',
     screenshot: {
       src: '/screenshot/dashboard.png',
       alt: 'Diamond workspace dashboard showing endpoint and workload management views.',
-      sideCardTitle: 'Current dashboard',
       sideCardLabel: 'What you can do',
       sideCardItems: [
         'Sign in through Globus Auth and enter a shared workspace built for research teams.',

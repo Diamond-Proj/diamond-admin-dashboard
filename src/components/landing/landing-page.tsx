@@ -149,19 +149,13 @@ export function LandingPage({
       <div className="container relative z-10 pt-28 pb-8 md:pt-32 md:pb-10">
         <section className={`${landingBodyFont.className} px-1 py-10 lg:py-18`}>
           <div className="mx-auto max-w-4xl text-center">
-            <p className="text-sm font-semibold tracking-[0.18em] text-primary uppercase">
-              {hero.eyebrow}
-            </p>
             <h1
-              className={`${landingDisplayFont.className} mt-5 text-[2.3rem] leading-[0.95] font-medium tracking-[-0.045em] text-slate-950 md:text-[3.8rem] dark:text-slate-50`}
+              className={`${landingDisplayFont.className} text-[2.3rem] leading-[0.95] font-medium tracking-[-0.045em] text-slate-950 md:text-[3.8rem] dark:text-slate-50`}
             >
               {hero.headline}
             </h1>
-            <p className="mx-auto mt-7 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">
-              {hero.description}
-            </p>
 
-            <div className="mt-9 flex flex-wrap justify-center gap-3">
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
               <CtaLink
                 href={hero.primaryCta.href}
                 label={
@@ -193,11 +187,8 @@ export function LandingPage({
               <div className="pointer-events-none absolute inset-x-6 -bottom-8 h-16 bg-[radial-gradient(circle,rgba(15,23,42,0.12),transparent_68%)] blur-2xl dark:bg-[radial-gradient(circle,rgba(2,6,23,0.38),transparent_68%)]" />
 
               <div className="relative min-h-56 rounded-[1.9rem] border border-slate-200/80 bg-white p-6 shadow-[0_26px_70px_rgba(15,23,42,0.06)] dark:border-slate-800/80 dark:bg-slate-950">
-                <div className="grid gap-8 lg:grid-cols-[minmax(0,1.28fr)_minmax(280px,0.72fr)] lg:items-center">
-                  <div className="space-y-3">
-                    <div className="px-1 text-[11px] font-semibold tracking-[0.18em] text-slate-500 uppercase dark:text-slate-400">
-                      {hero.screenshot.sideCardTitle}
-                    </div>
+                <div className="grid gap-8 lg:grid-cols-[minmax(0,1.28fr)_minmax(300px,0.72fr)] lg:items-stretch">
+                  <div>
                     <div className="overflow-hidden bg-white shadow-[0_28px_90px_rgba(15,23,42,0.14)] dark:bg-slate-950 dark:shadow-[0_34px_110px_rgba(2,6,23,0.5)]">
                       <Image
                         src={hero.screenshot.src}
@@ -211,23 +202,25 @@ export function LandingPage({
                   </div>
 
                   <div className="px-1 lg:px-0">
-                    <p className="text-[11px] font-semibold tracking-[0.18em] text-slate-400 uppercase dark:text-slate-500">
-                      {hero.screenshot.sideCardLabel}
-                    </p>
-                    <div className="mt-5 space-y-4 border-t border-slate-200/80 pt-5 dark:border-slate-800/80">
-                      {hero.screenshot.sideCardItems.map((item, index) => (
-                        <div
-                          key={item}
-                          className="grid gap-2 border-b border-slate-200/70 pb-4 last:border-b-0 last:pb-0 dark:border-slate-800/70"
-                        >
-                          <p className="text-[11px] font-semibold tracking-[0.18em] text-slate-400 uppercase dark:text-slate-500">
-                            0{index + 1}
-                          </p>
-                          <p className="text-base leading-7 text-slate-700 dark:text-slate-200">
-                            {item}
-                          </p>
-                        </div>
-                      ))}
+                    <div className="flex h-full flex-col">
+                      <p className="text-[11px] font-semibold tracking-[0.22em] text-slate-500 uppercase dark:text-slate-400">
+                        {hero.screenshot.sideCardLabel}
+                      </p>
+                      <div className="mt-4 flex flex-1 flex-col justify-between gap-3">
+                        {hero.screenshot.sideCardItems.map((item, index) => (
+                          <article
+                            key={item}
+                            className="grid flex-1 grid-cols-[2.75rem_minmax(0,1fr)] items-start gap-3 rounded-[1.25rem] border border-slate-200/80 bg-white/92 px-3 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.04)] dark:border-slate-800/80 dark:bg-slate-950/82 dark:shadow-none"
+                          >
+                            <p className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200/80 bg-[linear-gradient(180deg,#ffffff,#f8fafc)] text-[11px] font-semibold tracking-[0.18em] text-slate-500 uppercase shadow-[0_8px_20px_rgba(15,23,42,0.06)] dark:border-slate-700/80 dark:bg-[linear-gradient(180deg,rgba(30,41,59,0.92),rgba(15,23,42,0.92))] dark:text-slate-300 dark:shadow-none">
+                              0{index + 1}
+                            </p>
+                            <p className="pt-1 text-[0.98rem] leading-7 text-slate-700 dark:text-slate-200 lg:pr-1">
+                              {item}
+                            </p>
+                          </article>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
