@@ -77,7 +77,7 @@ function HeaderActionLink({
       href={href}
       target={external ? '_blank' : undefined}
       rel={external ? 'noopener noreferrer' : undefined}
-      className="hidden h-10 items-center rounded-lg border border-slate-400/85 bg-transparent px-4 text-sm font-medium text-slate-700 shadow-[0_1px_2px_rgba(15,23,42,0.05)] transition-colors hover:border-slate-500 hover:bg-slate-100 hover:text-slate-900 md:inline-flex dark:border-slate-500/85 dark:text-slate-200 dark:shadow-[0_1px_2px_rgba(2,6,23,0.28)] dark:hover:border-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+      className="hidden h-10 items-center rounded-lg border border-slate-400/60 bg-transparent px-4 text-sm font-medium text-slate-700 shadow-[0_1px_2px_rgba(15,23,42,0.05)] transition-colors hover:border-slate-500/65 hover:bg-slate-100 hover:text-slate-900 md:inline-flex dark:border-slate-500/60 dark:text-slate-200 dark:shadow-[0_1px_2px_rgba(2,6,23,0.28)] dark:hover:border-slate-400/70 dark:hover:bg-slate-800 dark:hover:text-slate-100"
     >
       {label}
     </Link>
@@ -132,7 +132,7 @@ export function LandingPage({
                   label={header.signInLabel}
                 />
               ) : null}
-              <ThemeToggle triggerClassName="border-slate-400/85 shadow-[0_1px_2px_rgba(15,23,42,0.05)] dark:border-slate-500/85 dark:shadow-[0_1px_2px_rgba(2,6,23,0.28)]" />
+              <ThemeToggle triggerClassName="border-slate-400/60 shadow-[0_1px_2px_rgba(15,23,42,0.05)] dark:border-slate-500/60 dark:shadow-[0_1px_2px_rgba(2,6,23,0.28)]" />
               <CtaLink
                 href={header.primaryCta.href}
                 label={
@@ -150,7 +150,7 @@ export function LandingPage({
         <section className={`${landingBodyFont.className} px-1 py-10 lg:py-18`}>
           <div className="mx-auto max-w-4xl text-center">
             <h1
-              className={`${landingDisplayFont.className} text-[2.3rem] leading-[0.95] font-medium tracking-[-0.045em] text-slate-950 md:text-[3.8rem] dark:text-slate-50`}
+              className={`${landingDisplayFont.className} text-[2.3rem] leading-[1.05] font-medium tracking-[-0.045em] text-slate-950 md:text-[3.8rem] dark:text-slate-50`}
             >
               {hero.headline}
             </h1>
