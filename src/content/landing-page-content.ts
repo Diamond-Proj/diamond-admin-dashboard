@@ -61,13 +61,10 @@ export const landingPageContent = {
     }
   ],
   highlights: {
-    eyebrow: '',
     title: 'Core workflows in one place',
     description:
       'Diamond keeps endpoint setup, runtime packaging, datasets, and task launch in one workspace.',
     supportPanel: {
-      eyebrow: '',
-      title: '',
       points: [
         'Operators can keep readiness, images, and submissions in view together.',
         'Researchers get a shorter path from infrastructure to first run.',
@@ -77,57 +74,31 @@ export const landingPageContent = {
     items: [
       {
         icon: 'cpu',
-        eyebrow: '',
         title: 'Prepare endpoints',
         description:
           'Track managed and available systems, inspect details, and load account and partition metadata.'
       },
       {
         icon: 'layers',
-        eyebrow: '',
         title: 'Build images',
         description:
           'Launch container builds so runtime environments stay tied to the endpoints and jobs that use them.'
       },
       {
         icon: 'database',
-        eyebrow: '',
         title: 'Register datasets',
         description:
           'Store paths, machine context, and visibility settings so inputs are easy to find before submission.'
       },
       {
         icon: 'rocket',
-        eyebrow: '',
         title: 'Launch tasks',
         description:
           'Submit work against active managed endpoints with reusable task templates.'
       }
     ]
   },
-  workflow: {
-    eyebrow: '',
-    title: 'From setup to run',
-    steps: [
-      {
-        title: 'Connect and prepare endpoints',
-        description:
-          'Refresh endpoint state and load the metadata needed for submission.'
-      },
-      {
-        title: 'Stage runtime and data',
-        description:
-          'Choose the image and register the datasets a job will use.'
-      },
-      {
-        title: 'Submit and monitor tasks',
-        description:
-          'Pick a template, submit the task, and follow it through completion.'
-      }
-    ]
-  },
   personas: {
-    eyebrow: '',
     title: 'For shared HPC teams',
     items: [
       {
@@ -147,14 +118,7 @@ export const landingPageContent = {
       }
     ]
   },
-  audiencePanel: {
-    eyebrow: '',
-    title: 'A clearer path from ready infrastructure to submitted jobs.',
-    description:
-      'Diamond replaces scattered tools with one connected operating flow.'
-  },
   closing: {
-    eyebrow: '',
     title: 'Run the workflow in Diamond.',
     description:
       'Bring endpoints online, prepare runtime environments, register datasets, and launch reusable tasks from one interface.',

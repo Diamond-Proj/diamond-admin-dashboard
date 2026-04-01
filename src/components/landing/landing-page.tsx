@@ -104,16 +104,8 @@ function HeaderActionLink({
 }
 
 export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
-  const {
-    header,
-    hero,
-    stats,
-    highlights,
-    workflow,
-    personas,
-    audiencePanel,
-    closing
-  } = landingPageContent;
+  const { header, hero, stats, highlights, personas, closing } =
+    landingPageContent;
 
   return (
     <main className="relative overflow-hidden bg-[#f4f6f9] dark:bg-[#0b1018]">
@@ -164,8 +156,8 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
         </div>
       </header>
 
-      <div className="relative z-10 container pt-28 pb-10 md:pt-32 md:pb-12">
-        <section className={`${landingBodyFont.className} px-1 py-8 lg:py-12`}>
+      <div className="relative z-10 container pt-28 pb-8 md:pt-32 md:pb-10">
+        <section className={`${landingBodyFont.className} px-1 py-6 lg:py-10`}>
           <div className="relative mx-auto max-w-4xl px-2 text-center">
             <div className="pointer-events-none absolute -top-12 left-[10%] h-36 w-36 rounded-full bg-[rgba(201,10,55,0.07)] blur-3xl dark:bg-[rgba(201,10,55,0.1)]" />
             <div className="relative">
@@ -202,7 +194,7 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
             </div>
           </div>
 
-          <div className="relative mx-auto mt-8 max-w-[92rem]">
+          <div className="relative mx-auto mt-6 max-w-[92rem]">
             <div className="pointer-events-none absolute inset-x-10 bottom-0 h-20 bg-[radial-gradient(circle,rgba(15,23,42,0.14),transparent_72%)] blur-3xl dark:bg-[radial-gradient(circle,rgba(2,6,23,0.42),transparent_72%)]" />
             <div className="pointer-events-none absolute -top-10 right-[6%] h-48 w-48 rounded-full bg-sky-500/10 blur-3xl dark:bg-sky-500/10" />
 
@@ -263,14 +255,9 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
           ))}
         </section>
 
-        <section className="grid gap-8 py-16 lg:grid-cols-[0.86fr_minmax(0,1.14fr)] lg:py-20">
+        <section className="grid gap-8 py-12 lg:grid-cols-[0.86fr_minmax(0,1.14fr)] lg:pt-12 lg:pb-8">
           <div className="max-w-xl space-y-6">
             <div>
-              {highlights.eyebrow ? (
-                <p className="text-sm font-semibold tracking-[0.18em] text-[#c90a37] uppercase">
-                  {highlights.eyebrow}
-                </p>
-              ) : null}
               <h2 className="text-3xl font-semibold tracking-[-0.04em] text-slate-950 md:text-4xl dark:text-slate-50">
                 {highlights.title}
               </h2>
@@ -282,16 +269,6 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
             </div>
 
             <div className="rounded-[2rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.82),rgba(240,247,255,0.9))] p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.8),rgba(12,18,30,0.92))] dark:shadow-[0_20px_60px_rgba(2,6,23,0.26)]">
-              {highlights.supportPanel.eyebrow ? (
-                <p className="text-xs font-semibold tracking-[0.16em] text-slate-500 uppercase dark:text-slate-400">
-                  {highlights.supportPanel.eyebrow}
-                </p>
-              ) : null}
-              {highlights.supportPanel.title ? (
-                <h3 className="mt-3 text-xl font-semibold tracking-[-0.02em] text-slate-950 dark:text-slate-50">
-                  {highlights.supportPanel.title}
-                </h3>
-              ) : null}
               <ul className="space-y-3 text-sm leading-7 text-slate-600 dark:text-slate-300">
                 {highlights.supportPanel.points.map((point) => (
                   <li
@@ -318,11 +295,6 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#c90a37] text-white shadow-[0_10px_24px_rgba(201,10,55,0.16)] dark:shadow-none">
                     <Icon className="h-5 w-5" />
                   </div>
-                  {item.eyebrow ? (
-                    <p className="mt-5 text-xs font-semibold tracking-[0.16em] text-slate-500 uppercase dark:text-slate-400">
-                      {item.eyebrow}
-                    </p>
-                  ) : null}
                   <h3 className="mt-5 text-xl font-semibold tracking-[-0.03em] text-slate-950 dark:text-slate-50">
                     {item.title}
                   </h3>
@@ -335,47 +307,8 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
           </div>
         </section>
 
-        <section className="rounded-[2.25rem] border border-white/80 bg-white/62 p-6 shadow-[0_24px_90px_rgba(15,23,42,0.08)] backdrop-blur-xl md:p-8 dark:border-slate-800/80 dark:bg-slate-950/68 dark:shadow-[0_28px_100px_rgba(2,6,23,0.34)]">
-          <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
-            <div className="max-w-xl">
-              {workflow.eyebrow ? (
-                <p className="text-sm font-semibold tracking-[0.18em] text-[#c90a37] uppercase">
-                  {workflow.eyebrow}
-                </p>
-              ) : null}
-              <h2 className="text-3xl font-semibold tracking-[-0.04em] text-slate-950 dark:text-slate-50">
-                {workflow.title}
-              </h2>
-            </div>
-
-            <ol className="grid flex-1 gap-4 md:grid-cols-3">
-              {workflow.steps.map((step, index) => (
-                <li
-                  key={step.title}
-                  className="rounded-[1.8rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.84),rgba(244,247,251,0.92))] p-5 shadow-[0_14px_32px_rgba(15,23,42,0.05)] dark:border-slate-800/80 dark:bg-[linear-gradient(180deg,rgba(16,22,34,0.84),rgba(13,18,29,0.94))] dark:shadow-none"
-                >
-                  <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#c90a37] text-sm font-semibold text-white shadow-[0_10px_20px_rgba(201,10,55,0.16)] dark:shadow-none">
-                    {index + 1}
-                  </div>
-                  <h3 className="mt-4 text-lg font-semibold text-slate-950 dark:text-slate-50">
-                    {step.title}
-                  </h3>
-                  <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">
-                    {step.description}
-                  </p>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </section>
-
-        <section className="grid gap-6 py-16 lg:grid-cols-[minmax(0,1fr)_360px] lg:py-20">
+        <section className="pt-8 pb-12 lg:pt-8 lg:pb-16">
           <div className="rounded-[2.25rem] border border-white/80 bg-white/62 p-8 shadow-[0_24px_90px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/68 dark:shadow-[0_28px_100px_rgba(2,6,23,0.34)]">
-            {personas.eyebrow ? (
-              <p className="text-sm font-semibold tracking-[0.18em] text-[#c90a37] uppercase">
-                {personas.eyebrow}
-              </p>
-            ) : null}
             <h2 className="max-w-2xl text-3xl font-semibold tracking-[-0.04em] text-slate-950 dark:text-slate-50">
               {personas.title}
             </h2>
@@ -395,24 +328,6 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
               ))}
             </div>
           </div>
-
-          <aside className="relative overflow-hidden rounded-[2.25rem] border border-slate-300/60 bg-[linear-gradient(160deg,rgba(20,24,34,0.96),rgba(33,40,56,0.94),rgba(28,16,24,0.96))] p-8 text-slate-50 shadow-[0_28px_100px_rgba(15,23,42,0.18)] dark:border-slate-700/80 dark:bg-[linear-gradient(160deg,rgba(20,24,34,0.96),rgba(33,40,56,0.94),rgba(28,16,24,0.96))] dark:text-slate-50 dark:shadow-[0_24px_80px_rgba(2,6,23,0.2)]">
-            <div className="pointer-events-none absolute -top-10 right-0 h-36 w-36 rounded-full bg-[rgba(201,10,55,0.08)] blur-3xl" />
-            <div className="pointer-events-none absolute bottom-0 left-0 h-32 w-32 rounded-full bg-sky-500/10 blur-3xl" />
-            <div className="relative">
-              {audiencePanel.eyebrow ? (
-                <p className="text-xs font-semibold tracking-[0.18em] text-slate-300 uppercase dark:text-slate-600">
-                  {audiencePanel.eyebrow}
-                </p>
-              ) : null}
-              <h2 className="text-3xl font-semibold tracking-[-0.04em]">
-                {audiencePanel.title}
-              </h2>
-              <p className="mt-4 text-sm leading-7 text-slate-300 dark:text-slate-300">
-                {audiencePanel.description}
-              </p>
-            </div>
-          </aside>
         </section>
 
         <section className="relative overflow-hidden rounded-[2.5rem] border border-white/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.9),rgba(244,247,251,0.92),rgba(247,244,246,0.9))] px-6 py-8 shadow-[0_30px_100px_rgba(15,23,42,0.1)] md:px-8 md:py-10 dark:border-slate-800/80 dark:bg-[linear-gradient(135deg,rgba(12,18,30,0.94),rgba(37,15,30,0.9),rgba(17,29,43,0.92))] dark:shadow-[0_30px_110px_rgba(2,6,23,0.42)]">
@@ -421,11 +336,6 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
 
           <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl">
-              {closing.eyebrow ? (
-                <p className="text-sm font-semibold tracking-[0.18em] text-[#c90a37] uppercase">
-                  {closing.eyebrow}
-                </p>
-              ) : null}
               <h2 className="text-3xl font-semibold tracking-[-0.04em] text-slate-950 md:text-4xl dark:text-slate-50">
                 {closing.title}
               </h2>
