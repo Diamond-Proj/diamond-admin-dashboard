@@ -10,9 +10,8 @@ import {
   Rocket
 } from 'lucide-react';
 
-import { Logo } from '@/components/icons';
+import { LandingHeader } from '@/components/landing/landing-header';
 import { LandingReveal } from '@/components/landing/landing-reveal';
-import ThemeToggle from '@/components/layout/theme-toggle';
 import { WorkspaceSignal } from '@/components/landing/workspace-signal';
 import { landingPageContent } from '@/content/landing-page-content';
 
@@ -84,27 +83,6 @@ function CtaLink({
   );
 }
 
-function HeaderActionLink({
-  href,
-  label,
-  external = false
-}: {
-  href: string;
-  label: string;
-  external?: boolean;
-}) {
-  return (
-    <Link
-      href={href}
-      target={external ? '_blank' : undefined}
-      rel={external ? 'noopener noreferrer' : undefined}
-      className="hidden h-10 items-center rounded-full border border-white/80 bg-white/72 px-4 text-sm font-medium text-slate-700 shadow-[0_8px_22px_rgba(15,23,42,0.06)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-0.5 hover:bg-white hover:text-slate-950 md:inline-flex dark:border-slate-700/80 dark:bg-slate-950/68 dark:text-slate-200 dark:shadow-[0_14px_30px_rgba(2,6,23,0.24)] dark:hover:border-slate-500 dark:hover:bg-slate-900"
-    >
-      {label}
-    </Link>
-  );
-}
-
 export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
   const { header, hero, stats, highlights, personas, closing } =
     landingPageContent;
@@ -115,48 +93,7 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(100,116,139,0.18)_1px,transparent_1px),linear-gradient(to_bottom,rgba(100,116,139,0.18)_1px,transparent_1px)] [mask-image:linear-gradient(to_bottom,white,transparent_90%)] bg-size-[56px_56px] opacity-60 dark:opacity-35" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[36rem] bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.92),transparent_72%)] dark:bg-[radial-gradient(circle_at_top,rgba(15,23,42,0.82),transparent_72%)]" />
 
-      <header className="fixed inset-x-0 top-0 z-50">
-        <div className="container py-4">
-          <div className="mx-auto flex max-w-[1240px] items-center justify-between gap-4 rounded-[1.75rem] border border-white/70 bg-white/64 px-4 py-3 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-2xl md:px-5 dark:border-slate-800/80 dark:bg-slate-950/72 dark:shadow-[0_28px_90px_rgba(2,6,23,0.4)]">
-            <div className="flex min-w-0 items-center gap-3">
-              <div className="rounded-2xl border border-white/80 bg-white/78 p-1.5 shadow-[0_8px_24px_rgba(15,23,42,0.08)] dark:border-slate-800/80 dark:bg-slate-900/86 dark:shadow-none">
-                <Logo width={42} height={42} className="shrink-0" />
-              </div>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-slate-950 dark:text-slate-50">
-                  {header.eyebrow}
-                </p>
-                <p className="truncate text-xs tracking-[0.18em] text-slate-500 uppercase dark:text-slate-400">
-                  {header.label}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <HeaderActionLink
-                href={header.docsHref}
-                label={header.docsLabel}
-                external
-              />
-              {!isAuthenticated ? (
-                <HeaderActionLink
-                  href={header.signInHref}
-                  label={header.signInLabel}
-                />
-              ) : null}
-              <ThemeToggle triggerClassName="rounded-full border-white/80 bg-white/72 shadow-[0_8px_22px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-slate-700/80 dark:bg-slate-950/68 dark:shadow-[0_14px_30px_rgba(2,6,23,0.24)]" />
-              <CtaLink
-                href={header.primaryCta.href}
-                label={
-                  isAuthenticated
-                    ? header.primaryCta.authenticatedLabel
-                    : header.primaryCta.label
-                }
-              />
-            </div>
-          </div>
-        </div>
-      </header>
+      <LandingHeader header={header} isAuthenticated={isAuthenticated} />
 
       <div className="relative z-10 container pt-28 pb-8 md:pt-32 md:pb-10">
         <section className={`${landingBodyFont.className} px-1 py-6 lg:py-10`}>
