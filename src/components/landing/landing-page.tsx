@@ -33,22 +33,22 @@ const highlightIcons = {
 } as const;
 
 const statCardStyles = [
-  'border-white/75 bg-[linear-gradient(160deg,rgba(255,255,255,0.94),rgba(244,247,251,0.96))]',
-  'border-white/75 bg-[linear-gradient(160deg,rgba(255,255,255,0.94),rgba(247,244,246,0.96))]',
-  'border-white/75 bg-[linear-gradient(160deg,rgba(255,255,255,0.94),rgba(242,246,250,0.96))]'
+  'border-white/75 bg-linear-to-br from-white/95 to-slate-50/95 dark:from-slate-950 dark:to-slate-900',
+  'border-white/75 bg-linear-to-br from-white/95 to-rose-50/70 dark:from-slate-950 dark:to-slate-950',
+  'border-white/75 bg-linear-to-br from-white/95 to-sky-50/80 dark:from-slate-950 dark:to-slate-900'
 ] as const;
 
 const highlightCardStyles = [
-  'bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(245,247,251,0.92))]',
-  'bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(247,244,246,0.92))]',
-  'bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(244,246,250,0.92))]',
-  'bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(246,245,248,0.92))]'
+  'bg-linear-to-b from-white/95 to-slate-50/90 dark:from-slate-950 dark:to-slate-900',
+  'bg-linear-to-b from-white/95 to-rose-50/70 dark:from-slate-950 dark:to-slate-950',
+  'bg-linear-to-b from-white/95 to-sky-50/80 dark:from-slate-950 dark:to-slate-900',
+  'bg-linear-to-b from-white/95 to-stone-50/80 dark:from-slate-950 dark:to-slate-950'
 ] as const;
 
 const personaCardStyles = [
-  'bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(245,247,251,0.92))]',
-  'bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(247,244,246,0.92))]',
-  'bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(244,246,250,0.92))]'
+  'bg-linear-to-b from-white/92 to-slate-50/92 dark:from-slate-950 dark:to-slate-900',
+  'bg-linear-to-b from-white/92 to-rose-50/70 dark:from-slate-950 dark:to-slate-950',
+  'bg-linear-to-b from-white/92 to-sky-50/80 dark:from-slate-950 dark:to-slate-900'
 ] as const;
 
 function CtaLink({
@@ -190,7 +190,7 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
             {stats.map((stat, index) => (
               <article
                 key={`${stat.value}-${stat.label}`}
-                className={`rounded-[1.9rem] border p-6 shadow-[0_24px_80px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/70 dark:shadow-[0_26px_90px_rgba(2,6,23,0.32)] ${statCardStyles[index % statCardStyles.length]}`}
+                className={`rounded-[1.9rem] border p-6 shadow-[0_24px_80px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-slate-800/80 dark:shadow-[0_26px_90px_rgba(2,6,23,0.32)] ${statCardStyles[index % statCardStyles.length]}`}
               >
                 <p className="text-3xl font-semibold tracking-[-0.05em] text-slate-950 dark:text-slate-50">
                   {stat.value}
@@ -242,7 +242,7 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
                 return (
                   <article
                     key={item.title}
-                    className={`rounded-[1.9rem] border border-white/80 p-6 shadow-[0_24px_70px_rgba(15,23,42,0.07)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/72 dark:shadow-[0_24px_80px_rgba(2,6,23,0.28)] ${highlightCardStyles[index % highlightCardStyles.length]}`}
+                    className={`rounded-[1.9rem] border border-white/80 p-6 shadow-[0_24px_70px_rgba(15,23,42,0.07)] backdrop-blur-xl dark:border-slate-800/80 dark:shadow-[0_24px_80px_rgba(2,6,23,0.28)] ${highlightCardStyles[index % highlightCardStyles.length]}`}
                   >
                     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#c90a37] text-white shadow-[0_10px_24px_rgba(201,10,55,0.16)] dark:shadow-none">
                       <Icon className="h-5 w-5" />
@@ -270,12 +270,12 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
                 {personas.items.map((persona, index) => (
                   <article
                     key={persona.title}
-                    className={`rounded-[1.8rem] border border-white/80 p-5 shadow-[0_14px_34px_rgba(15,23,42,0.05)] dark:border-slate-800/80 dark:bg-slate-900/70 dark:shadow-none ${personaCardStyles[index % personaCardStyles.length]}`}
+                    className={`rounded-[1.8rem] border border-white/80 p-5 shadow-[0_14px_34px_rgba(15,23,42,0.05)] dark:border-slate-800/80 dark:shadow-none ${personaCardStyles[index % personaCardStyles.length]}`}
                   >
                     <h3 className="text-lg font-semibold text-slate-950 dark:text-slate-50">
                       {persona.title}
                     </h3>
-                    <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">
+                    <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-200">
                       {persona.description}
                     </p>
                   </article>
