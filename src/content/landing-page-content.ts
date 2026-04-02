@@ -17,15 +17,15 @@ export const landingPageContent = {
     }
   },
   hero: {
-    headline: 'One workspace for endpoints, images, datasets, and jobs.',
+    headline: 'Fine-tune and serve models from one workspace.',
     screenshot: {
       src: '/screenshot/dashboard.png',
       alt: 'Diamond workspace dashboard showing endpoint and workload management views.',
       sideCardLabel: 'What you can do',
       sideCardItems: [
-        'Sign in with Globus Auth and enter the shared workspace.',
-        'Refresh endpoints and load the metadata needed to run work.',
-        'Build images, register datasets, and launch tasks from one place.'
+        'Leverage your HPC allocations (e.g. NSF ACCESS)',
+        'Train and fine-tune models for specific applications',
+        'Serve those models on managed endpoints'
       ]
     },
     primaryCta: {
@@ -45,13 +45,13 @@ export const landingPageContent = {
       value: 'Endpoints',
       label: 'managed and available views',
       detail:
-        'Refresh state, load preparation metadata, and keep managed systems ready.'
+        'Register and monitor your available compute resources on HPC systems.'
     },
     {
       value: 'Images',
       label: 'container build workflows',
       detail:
-        'Build runtime images in the same workspace used for endpoints and jobs.'
+        'Build runtime images that can be used to execute custom tasks.'
     },
     {
       value: 'Tasks',
@@ -76,7 +76,7 @@ export const landingPageContent = {
         icon: 'cpu',
         title: 'Prepare endpoints',
         description:
-          'Track managed and available systems, inspect details, and load account and partition metadata.'
+          'Manage available HPC systems to be used for task execution.'
       },
       {
         icon: 'layers',
