@@ -1,22 +1,16 @@
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+'use client';
+
 import { BadgeCheck, Building2, IdCard, Mail, Shield } from 'lucide-react';
+import { useAuthSessionContext } from '@/lib/auth/session-context';
 
-export default async function ProfilePage() {
-  const isAuthenticated = true;
+export default function ProfilePage() {
+  const { session } = useAuthSessionContext();
+  const userInfo = session.userInfo;
 
-  // If not authenticated, redirect to sign-in page
-  if (!isAuthenticated) {
-    redirect('/sign-in');
-  }
-
-  const cookieStore = await cookies();
-  // Get user profile information from cookies
-  const name = cookieStore.get('name')?.value || 'Not available';
-  const email = cookieStore.get('email')?.value || 'Not available';
-  const username =
-    cookieStore.get('primary_username')?.value || 'Not available';
-  const institution = cookieStore.get('institution')?.value || 'Not available';
+  const name = userInfo?.name || 'Not available';
+  const email = userInfo?.email || 'Not available';
+  const username = userInfo?.username || 'Not available';
+  const institution = userInfo?.organization || 'Not available';
   const initials = name
     .split(' ')
     .map((value) => value[0] || '')

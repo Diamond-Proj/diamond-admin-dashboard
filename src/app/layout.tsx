@@ -34,9 +34,8 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Get initial authentication status for server-side rendering
   const tokens = await TokenManagerServer.getTokensFromServerCookies();
-  const isAuthenticated = !!tokens && !TokenManagerServer.isExpired(tokens);
+  const initialSession = TokenManagerServer.buildSession(tokens);
 
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
@@ -49,7 +48,7 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AppShell isAuthenticated={isAuthenticated}>{children}</AppShell>
+          <AppShell initialSession={initialSession}>{children}</AppShell>
         </ThemeProvider>
       </body>
     </html>

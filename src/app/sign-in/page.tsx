@@ -5,12 +5,11 @@ import { redirect } from 'next/navigation';
 import { Cpu, ShieldCheck, Sparkles } from 'lucide-react';
 
 export default async function SignInPage() {
-  // Check for authentication using new TokenManager
   const tokens = await TokenManagerServer.getTokensFromServerCookies();
-  const isAuthenticated = !!tokens && !TokenManagerServer.isExpired(tokens);
+  const session = TokenManagerServer.buildSession(tokens);
 
   // If already authenticated, redirect to home page
-  if (isAuthenticated) {
+  if (session.isAuthenticated) {
     redirect('/');
   }
 

@@ -7,13 +7,11 @@ import { AlertCircle, ArrowRight, ExternalLink } from 'lucide-react';
 import type {
   DashboardStats,
   RecentTask,
-  UserInfo,
   StatsResponse
 } from '@/components/dashboard/dashboard.types';
 
 import { getUserProfile, updateUserProfile } from '@/lib/taskHandlers';
-import { TokenManager } from '@/lib/auth/tokenManager.client';
-import { useTokenRefresh } from '@/lib/auth/useTokenRefresh';
+import { useAuthSessionContext } from '@/lib/auth/session-context';
 
 import { SetupGuide } from '@/components/dashboard/setup-guide';
 import { DashboardStatsCards } from '@/components/dashboard/dashboard-stats';
@@ -21,59 +19,18 @@ import { RecentActivity } from '@/components/dashboard/recent-activity';
 import { QuickActions } from '@/components/dashboard/quick-actions';
 
 export default function DashboardPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentTasks, setRecentTasks] = useState<RecentTask[]>([]);
   const [isPending, startTransition] = useTransition();
-
-  useTokenRefresh();
-
-  useEffect(() => {
-    const checkAuth = () => {
-      const tokens = TokenManager.getTokensFromClientCookies();
-      const hasAuth = !!tokens;
-
-      setIsAuthenticated(hasAuth);
-
-      if (hasAuth) {
-        const tokenUserInfo = tokens ? TokenManager.getUserInfo(tokens) : null;
-
-        if (tokenUserInfo) {
-          setUserInfo({
-            name: tokenUserInfo.name || '',
-            email: tokenUserInfo.email || '',
-            primary_identity: tokenUserInfo.id || '',
-            institution: tokenUserInfo.organization || ''
-          });
-          return;
-        }
-
-        const cookies = document.cookie.split(';');
-        const cookieObj: Record<string, string> = {};
-
-        cookies.forEach((cookie) => {
-          const [name, value] = cookie.trim().split('=');
-          if (name && value) cookieObj[name] = decodeURIComponent(value);
-        });
-
-        setUserInfo({
-          name: cookieObj['name'] || '',
-          email: cookieObj['email'] || '',
-          primary_identity: cookieObj['primary_identity'] || '',
-          institution: cookieObj['institution'] || ''
-        });
-      }
-    };
-
-    checkAuth();
-  }, []);
+  const { session } = useAuthSessionContext();
+  const user = {
+    name: session.userInfo?.name || '',
+    email: session.userInfo?.email || '',
+    primaryIdentity: session.userInfo?.id || '',
+    institution: session.userInfo?.organization || ''
+  };
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      return;
-    }
-
     startTransition(async () => {
       try {
         const response = await fetch('/api/stats', {
@@ -102,25 +59,28 @@ export default function DashboardPage() {
         console.error('Error fetching stats:', error);
       }
     });
-  }, [isAuthenticated]);
+  }, [startTransition]);
 
   useEffect(() => {
     const checkAndUpdateProfile = async () => {
-      if (!isAuthenticated || !userInfo || !userInfo.primary_identity) {
+      if (!user.primaryIdentity) {
         return;
       }
 
       try {
         const profile = await getUserProfile({
-          identity_id: userInfo.primary_identity
+          identity_id: user.primaryIdentity
         });
 
-        if (!profile.profile || profile.profile.institution !== userInfo.institution) {
+        if (
+          !profile.profile ||
+          profile.profile.institution !== user.institution
+        ) {
           await updateUserProfile({
-            identity_id: userInfo.primary_identity,
-            name: userInfo.name,
-            email: userInfo.email,
-            institution: userInfo.institution
+            identity_id: user.primaryIdentity,
+            name: user.name,
+            email: user.email,
+            institution: user.institution
           });
         }
       } catch (error) {
@@ -128,36 +88,8 @@ export default function DashboardPage() {
       }
     };
 
-    checkAndUpdateProfile();
-  }, [isAuthenticated, userInfo]);
-
-  if (isAuthenticated === null) {
-    return (
-      <section className="flex flex-1 flex-col items-center justify-center p-6">
-        <div className="dashboard-card w-full max-w-md p-8 text-center">
-          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
-          <p className="mt-4 text-sm font-medium text-slate-600 dark:text-slate-300">
-            Loading dashboard...
-          </p>
-        </div>
-      </section>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <section className="flex flex-1 flex-col">
-        <div className="dashboard-card p-7">
-          <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
-            Welcome to Diamond HPC Platform
-          </h2>
-          <div className="mt-4 rounded-xl border border-amber-300/45 bg-amber-50/80 p-4 text-amber-900 dark:border-amber-600/40 dark:bg-amber-900/20 dark:text-amber-200">
-            Please sign in to access your dashboard and start managing your HPC workloads.
-          </div>
-        </div>
-      </section>
-    );
-  }
+    void checkAndUpdateProfile();
+  }, [user.email, user.institution, user.name, user.primaryIdentity]);
 
   return (
     <section className="flex flex-1 flex-col space-y-6">
@@ -168,7 +100,7 @@ export default function DashboardPage() {
         <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-              Welcome back, {userInfo?.name?.split(' ')[0] || 'Researcher'}
+              Welcome back, {user.name.split(' ')[0] || 'Researcher'}
             </h1>
           </div>
           <Link

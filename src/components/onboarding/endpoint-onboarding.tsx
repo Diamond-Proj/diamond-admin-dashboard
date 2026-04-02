@@ -7,10 +7,12 @@ import { ArrowRight, Settings, Sparkles, X } from 'lucide-react';
 
 interface EndpointOnboardingProps {
   isAuthenticated: boolean;
+  primaryIdentity?: string;
 }
 
 export function EndpointOnboarding({
-  isAuthenticated
+  isAuthenticated,
+  primaryIdentity
 }: EndpointOnboardingProps) {
   const [isVisible, setIsVisible] = useState(false);
   const pathname = usePathname();
@@ -21,15 +23,6 @@ export function EndpointOnboarding({
         return;
       }
 
-      const cookies = document.cookie.split(';');
-      const cookieObj: Record<string, string> = {};
-
-      cookies.forEach((cookie) => {
-        const [name, value] = cookie.trim().split('=');
-        if (name) cookieObj[name] = decodeURIComponent(value || '');
-      });
-
-      const primaryIdentity = cookieObj['primary_identity'];
       if (!primaryIdentity) {
         return;
       }
@@ -53,7 +46,7 @@ export function EndpointOnboarding({
     }
 
     checkInitialization();
-  }, [isAuthenticated, pathname]);
+  }, [isAuthenticated, pathname, primaryIdentity]);
 
   if (!isVisible) {
     return null;
