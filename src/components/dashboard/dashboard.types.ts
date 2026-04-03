@@ -1,10 +1,3 @@
-export interface UserInfo {
-  name: string;
-  email: string;
-  primary_identity: string;
-  institution: string;
-}
-
 export interface StatsResponse extends DashboardStats {
   recent_tasks: RecentTask[];
 }
