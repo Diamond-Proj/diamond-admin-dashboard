@@ -40,7 +40,7 @@ export default function NotFound() {
               asChild
               className="h-11 gap-2 bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
             >
-              <Link href="/">
+              <Link href="/dashboard">
                 <Home className="h-4 w-4" />
                 Back to Dashboard
               </Link>

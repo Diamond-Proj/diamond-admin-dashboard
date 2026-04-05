@@ -8,7 +8,7 @@ import { TaskIcon } from '@/components/icons';
 import { NavItem } from './nav-item';
 
 const workspaceLinks = [
-  { href: '/', label: 'Dashboard', Icon: DashboardIcon },
+  { href: '/dashboard', label: 'Dashboard', Icon: DashboardIcon },
   { href: '/images', label: 'Images', Icon: Container },
   { href: '/datasets', label: 'Datasets', Icon: Database },
   { href: '/tasks', label: 'Tasks', Icon: TaskIcon }
