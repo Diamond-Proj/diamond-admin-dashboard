@@ -27,7 +27,7 @@ export default function ThemeToggle({
     );
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"

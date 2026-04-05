@@ -10,6 +10,7 @@ import {
   Rocket
 } from 'lucide-react';
 
+import { Logo } from '@/components/icons';
 import { LandingHeader } from '@/components/landing/landing-header';
 import { LandingReveal } from '@/components/landing/landing-reveal';
 import { WorkspaceSignal } from '@/components/landing/workspace-signal';
@@ -108,11 +109,11 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
                 </h1>
               </LandingReveal>
 
-              <LandingReveal delay={0.16}>
+              <LandingReveal delay={0.1}>
                 <WorkspaceSignal />
               </LandingReveal>
 
-              <LandingReveal delay={0.3}>
+              <LandingReveal delay={0.18}>
                 <div className="mt-8 flex flex-wrap justify-center gap-3">
                   <CtaLink
                     href={hero.primaryCta.href}
@@ -145,11 +146,11 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
             <div className="pointer-events-none absolute inset-x-10 bottom-0 h-20 bg-[radial-gradient(circle,rgba(15,23,42,0.14),transparent_72%)] blur-3xl dark:bg-[radial-gradient(circle,rgba(2,6,23,0.42),transparent_72%)]" />
             <div className="pointer-events-none absolute -top-10 right-[6%] h-48 w-48 rounded-full bg-sky-500/10 blur-3xl dark:bg-sky-500/10" />
 
-            <LandingReveal delay={0.44}>
+            <LandingReveal delay={0.26}>
               <div className="relative overflow-hidden rounded-[2.5rem] border border-white/80 bg-[linear-gradient(135deg,rgba(245,247,251,0.94),rgba(255,255,255,0.94),rgba(247,244,246,0.94))] p-4 shadow-[0_32px_90px_rgba(15,23,42,0.1)] md:p-5 dark:border-slate-800/80 dark:bg-[linear-gradient(135deg,rgba(12,18,30,0.94),rgba(16,22,34,0.94),rgba(28,14,24,0.94))] dark:shadow-[0_34px_100px_rgba(2,6,23,0.42)]">
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgba(255,255,255,0.4),transparent)] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.03),transparent)]" />
                 <div className="relative grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
-                  <LandingReveal delay={0.52}>
+                  <LandingReveal delay={0.06}>
                     <div className="overflow-hidden rounded-[1.7rem] border border-slate-200/80 bg-white shadow-[0_16px_40px_rgba(15,23,42,0.08)] dark:border-slate-800/80 dark:bg-slate-950 dark:shadow-none">
                       <Image
                         src={hero.screenshot.src}
@@ -163,14 +164,14 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
                   </LandingReveal>
 
                   <div className="grid gap-3">
-                    <LandingReveal delay={0.58}>
+                    <LandingReveal delay={0.1}>
                       <p className="px-1 text-sm font-semibold tracking-[0.18em] text-slate-600 uppercase dark:text-slate-300">
                         {hero.screenshot.sideCardLabel}
                       </p>
                     </LandingReveal>
 
                     {hero.screenshot.sideCardItems.map((item, index) => (
-                      <LandingReveal key={item} delay={0.64 + index * 0.08}>
+                      <LandingReveal key={item} delay={0.14 + index * 0.06}>
                         <article className="grid grid-cols-[3rem_minmax(0,1fr)] items-start gap-3 rounded-[1.6rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(244,247,251,0.94))] px-4 py-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-[linear-gradient(180deg,rgba(16,22,34,0.9),rgba(13,18,29,0.96))] dark:shadow-[0_18px_44px_rgba(2,6,23,0.22)]">
                           <p className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/80 bg-[linear-gradient(180deg,#ffffff,#f8fafc)] text-[11px] font-semibold tracking-[0.18em] text-slate-500 uppercase shadow-[0_10px_22px_rgba(15,23,42,0.08)] dark:border-slate-700/80 dark:bg-[linear-gradient(180deg,rgba(30,41,59,0.92),rgba(15,23,42,0.94))] dark:text-slate-300 dark:shadow-none">
                             0{index + 1}
@@ -210,7 +211,7 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
 
         <section className="grid gap-8 py-12 lg:grid-cols-[0.86fr_minmax(0,1.14fr)] lg:pt-12 lg:pb-8">
           <div className="max-w-xl space-y-6">
-            <LandingReveal delay={0.22}>
+            <LandingReveal delay={0.1}>
               <div>
                 <h2 className="text-3xl font-semibold tracking-[-0.04em] text-slate-950 md:text-4xl dark:text-slate-50">
                   {highlights.title}
@@ -223,11 +224,11 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
               </div>
             </LandingReveal>
 
-            <LandingReveal delay={0.3}>
+            <LandingReveal delay={0.16}>
               <div className="rounded-[2rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.82),rgba(240,247,255,0.9))] p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.8),rgba(12,18,30,0.92))] dark:shadow-[0_20px_60px_rgba(2,6,23,0.26)]">
                 <ul className="space-y-3 text-sm leading-7 text-slate-600 dark:text-slate-300">
                   {highlights.supportPanel.points.map((point, index) => (
-                    <LandingReveal key={point} delay={0.36 + index * 0.08}>
+                    <LandingReveal key={point} delay={0.2 + index * 0.06}>
                       <li className="rounded-[1.35rem] border border-white/80 bg-white/72 px-4 py-3 shadow-[0_12px_30px_rgba(15,23,42,0.05)] dark:border-slate-800/80 dark:bg-slate-900/72 dark:shadow-none">
                         {point}
                       </li>
@@ -244,7 +245,7 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
                 highlightIcons[item.icon as keyof typeof highlightIcons];
 
               return (
-                <LandingReveal key={item.title} delay={0.28 + index * 0.08}>
+                <LandingReveal key={item.title} delay={0.1 + index * 0.06}>
                   <article
                     className={`rounded-[1.9rem] border border-white/80 p-6 shadow-[0_24px_70px_rgba(15,23,42,0.07)] backdrop-blur-xl dark:border-slate-800/80 dark:shadow-[0_24px_80px_rgba(2,6,23,0.28)] ${highlightCardStyles[index % highlightCardStyles.length]}`}
                   >
@@ -300,7 +301,7 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
           <div className="pointer-events-none absolute -bottom-20 -left-16 h-44 w-44 rounded-full bg-sky-500/10 blur-3xl dark:bg-sky-400/12" />
 
           <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <LandingReveal delay={0.38}>
+            <LandingReveal delay={0.1}>
               <div className="max-w-2xl">
                 <h2 className="text-3xl font-semibold tracking-[-0.04em] text-slate-950 md:text-4xl dark:text-slate-50">
                   {closing.title}
@@ -311,7 +312,7 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
               </div>
             </LandingReveal>
 
-            <LandingReveal delay={0.5}>
+            <LandingReveal delay={0.18}>
               <div className="flex flex-wrap gap-3">
                 <CtaLink
                   href={closing.primaryCta.href}
@@ -332,6 +333,49 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
           </div>
         </section>
       </div>
+
+      <footer className="relative z-10 border-t border-slate-200/60 bg-[linear-gradient(180deg,rgba(244,246,249,0.6),rgba(240,243,247,0.9))] backdrop-blur-xl dark:border-slate-800/60 dark:bg-[linear-gradient(180deg,rgba(11,16,24,0.6),rgba(8,12,20,0.9))]">
+        <div className="container py-6 md:py-8">
+          <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
+            <div className="flex items-center gap-3">
+              <Logo width={28} height={28} className="shrink-0 opacity-70" />
+              <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                Diamond HPC
+              </span>
+            </div>
+
+            <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+              <Link
+                href="https://docs.diamondhpc.ai"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+              >
+                Docs
+              </Link>
+              {isAuthenticated ? (
+                <Link
+                  href="/dashboard"
+                  className="text-sm text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                >
+                  Workspace
+                </Link>
+              ) : (
+                <Link
+                  href="/sign-in"
+                  className="text-sm text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                >
+                  Sign in
+                </Link>
+              )}
+            </nav>
+
+            <p className="text-xs text-slate-400 dark:text-slate-500">
+              &copy; {new Date().getFullYear()} Diamond HPC
+            </p>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }
