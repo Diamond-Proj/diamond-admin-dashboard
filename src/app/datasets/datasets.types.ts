@@ -9,7 +9,7 @@ interface DatasetBase {
 }
 
 export interface Dataset extends DatasetBase {
-  dataset_metadata: string;
+  dataset_metadata: string | DatasetMetadata | null;
 }
 
 export interface DatasetMetadata {
