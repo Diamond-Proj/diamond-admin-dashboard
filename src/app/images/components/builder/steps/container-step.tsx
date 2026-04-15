@@ -15,8 +15,8 @@ export function ContainerStep({ formData, onUpdate }: ContainerStepProps) {
       {/* Container Name */}
       <div className="space-y-4">
         <div className="mb-3 flex items-center gap-2">
-          <Container className="text-primary h-5 w-5" />
-          <h4 className="text-lg font-semibold">Container Name</h4>
+          <Container className="h-5 w-5 text-rose-600 dark:text-rose-300" />
+          <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Container Name</h4>
         </div>
 
         <Input
@@ -25,7 +25,7 @@ export function ContainerStep({ formData, onUpdate }: ContainerStepProps) {
           onChange={(e) => onUpdate({ containerName: e.target.value })}
           className="max-w-md"
         />
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-slate-500 dark:text-slate-400">
           Choose a unique name for your container image
         </p>
       </div>
@@ -33,8 +33,8 @@ export function ContainerStep({ formData, onUpdate }: ContainerStepProps) {
       {/* Build Location */}
       <div className="space-y-4">
         <div className="mb-3 flex items-center gap-2">
-          <MapPin className="text-primary h-5 w-5" />
-          <h4 className="text-lg font-semibold">Build Location (Optional)</h4>
+          <MapPin className="h-5 w-5 text-rose-600 dark:text-rose-300" />
+          <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Build Location (Optional)</h4>
         </div>
 
         <Input
@@ -43,7 +43,7 @@ export function ContainerStep({ formData, onUpdate }: ContainerStepProps) {
           onChange={(e) => onUpdate({ location: e.target.value })}
           className="max-w-md"
         />
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-slate-500 dark:text-slate-400">
           Directory where the container will be built on the HPC system
         </p>
       </div>
@@ -51,8 +51,8 @@ export function ContainerStep({ formData, onUpdate }: ContainerStepProps) {
       {/* Base Image */}
       <div className="space-y-4">
         <div className="mb-3 flex items-center gap-2">
-          <Box className="text-primary h-5 w-5" />
-          <h4 className="text-lg font-semibold">Base Image</h4>
+          <Box className="h-5 w-5 text-rose-600 dark:text-rose-300" />
+          <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Base Image</h4>
         </div>
 
         <Input
@@ -61,7 +61,7 @@ export function ContainerStep({ formData, onUpdate }: ContainerStepProps) {
           onChange={(e) => onUpdate({ baseImage: e.target.value })}
           className="max-w-md"
         />
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-slate-500 dark:text-slate-400">
           Base container image to build from (e.g., ubuntu:22.04, centos:8,
           python:3.9)
         </p>

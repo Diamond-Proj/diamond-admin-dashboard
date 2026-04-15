@@ -11,7 +11,7 @@ export function BuilderReview({ formData }: BuilderReviewProps) {
   const sections: ReviewSection[] = [
     {
       title: 'Computing Resources',
-      icon: <Server className="text-primary h-5 w-5" />,
+      icon: <Server className="h-5 w-5 text-rose-600 dark:text-rose-300" />,
       items: [
         { label: 'Endpoint', value: formData.endpoint },
         { label: 'Partition', value: formData.partition },
@@ -21,7 +21,7 @@ export function BuilderReview({ formData }: BuilderReviewProps) {
     },
     {
       title: 'Container Configuration',
-      icon: <Container className="text-primary h-5 w-5" />,
+      icon: <Container className="h-5 w-5 text-rose-600 dark:text-rose-300" />,
       items: [
         { label: 'Container Name', value: formData.containerName },
         { label: 'Build Location', value: formData.location || 'Default' },
@@ -30,7 +30,7 @@ export function BuilderReview({ formData }: BuilderReviewProps) {
     },
     {
       title: 'Build Configuration',
-      icon: <Terminal className="text-primary h-5 w-5" />,
+      icon: <Terminal className="h-5 w-5 text-rose-600 dark:text-rose-300" />,
       items: [
         {
           label: 'Dependencies',
@@ -57,16 +57,16 @@ export function BuilderReview({ formData }: BuilderReviewProps) {
   return (
     <div className="space-y-8">
       {/* Build Process Information */}
-      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950/30">
+      <div className="rounded-lg border border-slate-200/80 bg-slate-50/70 p-4 dark:border-slate-700/80 dark:bg-slate-800/55">
         <div className="flex items-start gap-3">
-          <div className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-blue-500">
-            <span className="text-xs text-white">i</span>
+          <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-700 dark:bg-slate-200">
+            <span className="text-xs text-white dark:text-slate-900">i</span>
           </div>
           <div className="text-sm">
-            <p className="mb-1 font-medium text-blue-900 dark:text-blue-100">
+            <p className="mb-1 font-medium text-slate-900 dark:text-slate-100">
               Build Process Information
             </p>
-            <p className="text-blue-700 dark:text-blue-300">
+            <p className="text-slate-600 dark:text-slate-400">
               {`The build process may take several minutes to complete depending on your configuration. You'll be able to monitor the build logs in real-time once the process starts.`}
             </p>
           </div>
@@ -78,28 +78,28 @@ export function BuilderReview({ formData }: BuilderReviewProps) {
         {sections.map((section) => (
           <div
             key={section.title}
-            className="bg-card dark:bg-card rounded-lg border p-6 dark:border-gray-800"
+            className="rounded-xl border border-slate-200/80 bg-[hsl(var(--dashboard-surface))] p-6 dark:border-slate-700/80"
           >
             <div className="mb-4 flex items-center gap-2">
               {section.icon}
-              <h4 className="text-lg font-semibold">{section.title}</h4>
+              <h4 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{section.title}</h4>
             </div>
 
             <div className="space-y-3">
               {section.items.map((item) => (
                 <div key={item.label} className="space-y-2">
                   <div className="flex items-start justify-between">
-                    <span className="text-muted-foreground text-sm font-medium">
+                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
                       {item.label}:
                     </span>
-                    <span className="ml-4 flex-1 text-right text-sm">
+                    <span className="ml-4 flex-1 text-right text-sm text-slate-800 dark:text-slate-200">
                       {item.value}
                     </span>
                   </div>
 
                   {item.expandable && (
-                    <div className="bg-muted/50 dark:bg-muted/30 mt-2 rounded-md p-3">
-                      <pre className="text-muted-foreground font-mono text-xs whitespace-pre-wrap">
+                    <div className="mt-2 rounded-md border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
+                      <pre className="whitespace-pre-wrap font-mono text-xs text-slate-600 dark:text-slate-300">
                         {item.content}
                       </pre>
                     </div>

@@ -1,6 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  type KeyboardEvent
+} from 'react';
 import {
   Terminal,
   AlertCircle,
@@ -140,7 +146,7 @@ export function BuilderLogs({
       case 'error':
         return <X className="h-5 w-5 text-red-500" />;
       default:
-        return <RefreshCw className="h-5 w-5 animate-spin text-blue-500" />;
+        return <RefreshCw className="h-5 w-5 animate-spin text-slate-500 dark:text-slate-400" />;
     }
   };
 
@@ -152,13 +158,43 @@ export function BuilderLogs({
       case 'error':
         return 'text-red-600 dark:text-red-400';
       default:
-        return 'text-blue-600 dark:text-blue-400';
+        return 'text-slate-600 dark:text-slate-300';
     }
   };
 
   const handleComplete = () => {
     setIsPolling(false);
     onComplete();
+  };
+
+  const logTabs: Array<'stdout' | 'stderr'> = ['stdout', 'stderr'];
+
+  const handleTabKeyDown = (
+    event: KeyboardEvent<HTMLButtonElement>,
+    tab: 'stdout' | 'stderr'
+  ) => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (event.key === 'Home') {
+      setActiveTab(logTabs[0]);
+      return;
+    }
+
+    if (event.key === 'End') {
+      setActiveTab(logTabs[logTabs.length - 1]);
+      return;
+    }
+
+    const currentIndex = logTabs.indexOf(tab);
+    const nextIndex =
+      event.key === 'ArrowRight'
+        ? (currentIndex + 1) % logTabs.length
+        : (currentIndex - 1 + logTabs.length) % logTabs.length;
+    setActiveTab(logTabs[nextIndex]);
   };
 
   return (
@@ -176,19 +212,30 @@ export function BuilderLogs({
         </div>
 
         {buildStatus === 'completed' && (
-          <Button onClick={handleComplete}>Done</Button>
+          <Button
+            onClick={handleComplete}
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            Done
+          </Button>
         )}
       </div>
 
       {/* Log Tabs */}
-      <div className="border-b">
-        <div className="flex space-x-1">
+      <div className="border-b border-slate-200/70 dark:border-slate-700/70">
+        <div className="flex space-x-1" role="tablist" aria-label="Build logs">
           <button
             onClick={() => setActiveTab('stdout')}
-            className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
+            onKeyDown={(event) => handleTabKeyDown(event, 'stdout')}
+            role="tab"
+            id="builder-logs-tab-stdout"
+            aria-selected={activeTab === 'stdout'}
+            aria-controls="builder-logs-panel-stdout"
+            tabIndex={activeTab === 'stdout' ? 0 : -1}
+            className={`cursor-pointer border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
               activeTab === 'stdout'
-                ? 'border-primary text-primary'
-                : 'text-muted-foreground hover:text-foreground border-transparent'
+                ? 'border-slate-900 text-slate-900 dark:border-slate-100 dark:text-slate-100'
+                : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
             }`}
           >
             <div className="flex items-center gap-2">
@@ -198,10 +245,16 @@ export function BuilderLogs({
           </button>
           <button
             onClick={() => setActiveTab('stderr')}
-            className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
+            onKeyDown={(event) => handleTabKeyDown(event, 'stderr')}
+            role="tab"
+            id="builder-logs-tab-stderr"
+            aria-selected={activeTab === 'stderr'}
+            aria-controls="builder-logs-panel-stderr"
+            tabIndex={activeTab === 'stderr' ? 0 : -1}
+            className={`cursor-pointer border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
               activeTab === 'stderr'
-                ? 'border-primary text-primary'
-                : 'text-muted-foreground hover:text-foreground border-transparent'
+                ? 'border-slate-900 text-slate-900 dark:border-slate-100 dark:text-slate-100'
+                : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
             }`}
           >
             <div className="flex items-center gap-2">
@@ -213,11 +266,24 @@ export function BuilderLogs({
       </div>
 
       {/* Log Content */}
-      <div className="overflow-hidden rounded-lg bg-black/90 p-4 font-mono text-sm text-green-400">
-        <div className="max-h-[400px] overflow-y-auto">
-          <pre className="whitespace-pre-wrap">
-            {activeTab === 'stdout' ? stdoutLogs : stderrLogs}
-          </pre>
+      <div className="overflow-hidden rounded-lg border border-slate-200/70 bg-slate-950 p-4 font-mono text-sm text-slate-200 dark:border-slate-700/70">
+        <div className="max-h-100 overflow-y-auto">
+          <div
+            role="tabpanel"
+            id="builder-logs-panel-stdout"
+            aria-labelledby="builder-logs-tab-stdout"
+            hidden={activeTab !== 'stdout'}
+          >
+            <pre className="whitespace-pre-wrap">{stdoutLogs}</pre>
+          </div>
+          <div
+            role="tabpanel"
+            id="builder-logs-panel-stderr"
+            aria-labelledby="builder-logs-tab-stderr"
+            hidden={activeTab !== 'stderr'}
+          >
+            <pre className="whitespace-pre-wrap">{stderrLogs}</pre>
+          </div>
         </div>
       </div>
 
@@ -225,7 +291,7 @@ export function BuilderLogs({
       {buildStatus === 'completed' && (
         <div className="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950/20">
           <div className="flex items-start gap-3">
-            <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
+            <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-green-500" />
             <div className="text-sm">
               <p className="mb-1 font-medium text-green-900 dark:text-green-100">
                 Build Completed Successfully!
@@ -242,7 +308,7 @@ export function BuilderLogs({
       {(buildStatus === 'failed' || buildStatus === 'error') && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950/20">
           <div className="flex items-start gap-3">
-            <X className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-500" />
+            <X className="mt-0.5 h-5 w-5 shrink-0 text-red-500" />
             <div className="text-sm">
               <p className="mb-1 font-medium text-red-900 dark:text-red-100">
                 Build Failed

@@ -113,12 +113,12 @@ export function ContainerGrid({
         return <CheckCircle2 className="h-4 w-4 text-green-500" />;
       case 'building':
       case 'pending':
-        return <Activity className="h-4 w-4 animate-pulse text-blue-500" />;
+        return <Activity className="h-4 w-4 animate-pulse text-sky-500 dark:text-sky-300" />;
       case 'failed':
       case 'error':
         return <X className="h-4 w-4 text-red-500" />;
       default:
-        return <Clock className="h-4 w-4 text-gray-500" />;
+        return <Clock className="h-4 w-4 text-slate-500 dark:text-slate-400" />;
     }
   };
 
@@ -129,12 +129,12 @@ export function ContainerGrid({
         return 'bg-green-100 text-green-800 dark:bg-green-950/50 dark:text-green-300';
       case 'building':
       case 'pending':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300';
+        return 'bg-sky-100 text-sky-800 dark:bg-sky-950/50 dark:text-sky-300';
       case 'failed':
       case 'error':
         return 'bg-red-100 text-red-800 dark:bg-red-950/50 dark:text-red-300';
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-950/50 dark:text-gray-300';
+        return 'bg-slate-100 text-slate-800 dark:bg-slate-950/50 dark:text-slate-300';
     }
   };
 
@@ -144,7 +144,7 @@ export function ContainerGrid({
         {[...Array(3)].map((_, i) => (
           <div
             key={i}
-            className="animate-pulse rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800"
+            className="dashboard-card animate-pulse p-6"
           >
             <div className="flex items-start gap-4">
               <div className="bg-muted dark:bg-muted h-12 w-12 rounded-lg"></div>
@@ -174,12 +174,14 @@ export function ContainerGrid({
 
   if (!hasPrivate && !hasPublic) {
     return (
-      <div className="py-16 text-center">
-        <div className="bg-muted dark:bg-muted/50 mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full">
-          <Container className="text-muted-foreground h-12 w-12" />
+      <div className="dashboard-card py-16 text-center">
+        <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-slate-200/80 dark:bg-slate-800/80">
+          <Container className="h-12 w-12 text-slate-500 dark:text-slate-300" />
         </div>
-        <h3 className="mb-2 text-xl font-semibold">No containers found</h3>
-        <p className="text-muted-foreground mx-auto mb-6 max-w-md">
+        <h3 className="mb-2 text-xl font-semibold text-slate-900 dark:text-slate-100">
+          No containers found
+        </h3>
+        <p className="mx-auto mb-6 max-w-md text-slate-600 dark:text-slate-300">
           {`You haven't built any container images yet. Click "Build New Image" to get started.`}
         </p>
       </div>
@@ -206,7 +208,7 @@ export function ContainerGrid({
 
       {hasPublic && (
         <div className="mt-6 space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
             Public Images by Host
           </h3>
           {publicHosts.map((host, index) => {
@@ -217,17 +219,17 @@ export function ContainerGrid({
             return (
               <details
                 key={host}
-                className="rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
+                className="dashboard-card"
                 open={index === 0}
               >
-                <summary className="flex cursor-pointer items-center justify-between px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">
+                <summary className="flex cursor-pointer items-center justify-between px-4 py-3 text-sm font-medium text-slate-900 dark:text-slate-100">
                   <span>{host}</span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
                     {Object.keys(hostContainers).length} image
                     {Object.keys(hostContainers).length === 1 ? '' : 's'}
                   </span>
                 </summary>
-                <div className="border-t border-gray-100 px-4 py-4 dark:border-gray-700">
+                <div className="border-t border-slate-200/70 px-4 py-4 dark:border-slate-700/70">
                   <div className="flex flex-col gap-4">
                     {Object.entries(hostContainers).map(
                       ([containerName, data]) => (

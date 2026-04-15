@@ -2,63 +2,62 @@
 
 import Link from 'next/link';
 import { Home, Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function NotFound() {
   return (
-    <div className="bg-background flex min-h-full w-full items-center justify-center">
-      <div className="container mx-auto max-w-xl px-6 py-12">
-        <div className="-translate-y-14 space-y-6 text-center lg:translate-x-[-110px] lg:translate-y-[-60px]">
-          {/* 404 Title */}
+    <div className="relative flex w-full items-center justify-center p-6 min-h-[calc(100dvh-6rem)] md:min-h-[calc(100dvh-7rem)]">
+      <div className="w-full max-w-2xl rounded-2xl border border-slate-200/80 bg-[hsl(var(--dashboard-surface))] p-7 shadow-xl dark:border-slate-700/80">
+        <div className="space-y-6 text-center">
           <div className="space-y-2">
-            <div className="text-primary text-6xl font-bold tracking-tight">
+            <div className="text-5xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
               404
             </div>
-            <h1 className="text-foreground text-3xl font-bold tracking-tight">
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
               Page Not Found
             </h1>
-            <p className="text-muted-foreground">
-              Sorry, we couldn{"'"}t find the page you{"'"}re looking for. The
-              page may have been moved, deleted, or doesn{"'"}t exist.
+            <p className="text-slate-600 dark:text-slate-400">
+              We couldn&apos;t find this page. It may have moved or no longer exists.
             </p>
           </div>
 
-          {/* Search Suggestion */}
-          <div className="bg-card rounded-lg border p-4">
+          <div className="rounded-lg border border-slate-200/80 bg-slate-50/70 p-4 dark:border-slate-700/80 dark:bg-slate-800/55">
             <div className="mb-2 flex items-center gap-2">
-              <Search className="text-muted-foreground h-4 w-4" />
-              <h3 className="text-card-foreground text-sm font-medium">
-                What you can do:
+              <Search className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+              <h3 className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                What you can do
               </h3>
             </div>
-            <ul className="text-muted-foreground space-y-1 text-left text-sm">
+            <ul className="space-y-1 text-left text-sm text-slate-600 dark:text-slate-400">
               <li>• Check the URL for typos</li>
               <li>• Return to the dashboard</li>
-              <li>• Use the navigation menu to find what you need</li>
+              <li>• Use the sidebar navigation</li>
             </ul>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex flex-col justify-center gap-3 sm:flex-row">
-            <Link
-              href="/"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring inline-flex h-11 items-center justify-center gap-2 rounded-md px-8 text-sm font-medium transition-all duration-200 hover:scale-105 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden active:scale-95"
+            <Button
+              asChild
+              className="h-11 gap-2 bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
             >
-              <Home className="h-4 w-4" />
-              Back to Dashboard
-            </Link>
+              <Link href="/">
+                <Home className="h-4 w-4" />
+                Back to Dashboard
+              </Link>
+            </Button>
 
-            <button
+            <Button
+              variant="outline"
+              className="h-11"
               onClick={() => window.history.back()}
-              className="border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-md border px-8 text-sm font-medium transition-all duration-200 hover:scale-105 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden active:scale-95"
             >
               Go Back
-            </button>
+            </Button>
           </div>
 
-          {/* Help Text */}
-          <div className="text-muted-foreground text-sm">
-            <p>Need help? Contact support or visit our documentation.</p>
-          </div>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Need help? Contact support or check docs.
+          </p>
         </div>
       </div>
     </div>

@@ -8,12 +8,15 @@ import { X } from 'lucide-react';
 import { VirtualSelect } from '@/components/ui/virtual-select';
 import {
   TaskSubmissionData,
+  TaskTemplate,
+  TemplateCustomField,
   Endpoint,
-  ContainersResponse,
   DatasetsApiResponse,
   Dataset,
   EndpointContainersApiResponse
 } from '../tasks.types';
+import { TASK_TEMPLATES } from '../templates';
+import { TemplateSelector } from './template-selector';
 
 interface TaskSubmissionModalProps {
   isOpen: boolean;
@@ -26,7 +29,7 @@ export function TaskSubmissionModal({
   onClose,
   onSuccess
 }: TaskSubmissionModalProps) {
-  const [formData, setFormData] = useState<TaskSubmissionData>({
+  const INITIAL_FORM_DATA: TaskSubmissionData = {
     endpoint: '',
     taskName: '',
     partition: '',
@@ -36,8 +39,18 @@ export function TaskSubmissionModal({
     task: '',
     num_of_nodes: 1,
     time_duration: '',
-    dataset_id: ''
-  });
+    dataset_id: '',
+    slurm_options: '',
+    input_path: 'prompts.jsonl',
+    input_content: '',
+    output_path: 'results.json',
+    model: 'Qwen2.5-3B-Instruct',
+    engine: 'vllm',
+    batch_size: 4,
+    hf_token: ''
+  };
+
+  const [formData, setFormData] = useState<TaskSubmissionData>(INITIAL_FORM_DATA);
 
   const [endpoints, setEndpoints] = useState<Endpoint[]>([]);
   const [partitions, setPartitions] = useState<string[]>([]);
@@ -66,6 +79,47 @@ export function TaskSubmissionModal({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [hasDiamondDir, setHasDiamondDir] = useState<boolean>(true);
+  const [activeTemplateId, setActiveTemplateId] = useState<string | null>(null);
+  const activeTemplate = TASK_TEMPLATES.find((t) => t.id === activeTemplateId);
+  const isLlmfluxTemplate =
+    activeTemplate?.submissionEndpoint === '/api/launch_llmflux';
+  const hasCustomSubmitTemplate = Boolean(activeTemplate?.taskTemplate);
+  const activeCustomFields = activeTemplate?.customFields ?? [];
+  const hiddenFields = new Set(activeTemplate?.hiddenFields ?? []);
+  const isFieldHidden = (fieldKey: string) => hiddenFields.has(fieldKey);
+  const resolveCustomFieldOptions = (field: TemplateCustomField) =>
+    (field.optional ?? [])
+      .map((option) =>
+        typeof option === 'string'
+          ? { label: option, value: option }
+          : { label: option.label, value: option.value }
+      )
+      .filter((option) => option.value !== '');
+
+  const applyTemplate = (template: TaskTemplate) => {
+    setActiveTemplateId(template.id);
+    const hiddenFieldDefaults = Object.fromEntries(
+      (template.hiddenFields ?? []).map((key) => [
+        key,
+        INITIAL_FORM_DATA[key as keyof TaskSubmissionData]
+      ])
+    ) as Partial<TaskSubmissionData>;
+    setFormData((prev) => ({ ...prev, ...template.defaults, ...hiddenFieldDefaults }));
+  };
+
+  const clearTemplate = () => {
+    const active = TASK_TEMPLATES.find((t) => t.id === activeTemplateId);
+    if (active) {
+      const revertedFields = Object.fromEntries(
+        Object.keys(active.defaults).map((key) => [
+          key,
+          INITIAL_FORM_DATA[key as keyof TaskSubmissionData]
+        ])
+      ) as Partial<TaskSubmissionData>;
+      setFormData((prev) => ({ ...prev, ...revertedFields }));
+    }
+    setActiveTemplateId(null);
+  };
 
   const checkDiamondDir = useCallback(async (endpointUuid: string) => {
     if (!endpointUuid) {
@@ -252,13 +306,18 @@ export function TaskSubmissionModal({
     } else {
       setHasDiamondDir(true);
     }
-    fetchContainersForEndpoint();
+    if (!isLlmfluxTemplate) {
+      fetchContainersForEndpoint();
+    } else {
+      setContainers([]);
+    }
   }, [
     formData.endpoint,
     fetchPartitions,
     fetchAccounts,
     fetchContainersForEndpoint,
-    checkDiamondDir
+    checkDiamondDir,
+    isLlmfluxTemplate
   ]);
 
   const validateForm = () => {
@@ -271,10 +330,40 @@ export function TaskSubmissionModal({
       newErrors.endpoint = 'Diamond directory not configured for this endpoint. Please configure it in settings.';
     }
     if (!formData.partition) newErrors.partition = 'Partition is required';
-    if (!formData.account) newErrors.account = 'Account is required';
-    if (!formData.container) newErrors.container = 'Container is required';
-    if (!formData.time_duration)
-      newErrors.time_duration = 'Time duration is required';
+    if (!formData.account.trim()) newErrors.account = 'Account is required';
+
+    if (isLlmfluxTemplate) {
+      if (!formData.input_path?.trim()) {
+        newErrors.input_path = 'Input path is required';
+      }
+      if (!formData.output_path?.trim()) {
+        newErrors.output_path = 'Output path is required';
+      }
+      if (!formData.model?.trim()) {
+        newErrors.model = 'Model is required';
+      }
+      if (!formData.engine || !['vllm', 'ollama'].includes(formData.engine)) {
+        newErrors.engine = 'Engine must be vllm or ollama';
+      }
+      if (!formData.batch_size || formData.batch_size < 1) {
+        newErrors.batch_size = 'Batch size must be at least 1';
+      }
+    } else {
+      if (!isFieldHidden('container') && !hasCustomSubmitTemplate && !formData.container) {
+        newErrors.container = 'Container is required';
+      }
+      if (!isFieldHidden('time_duration') && !formData.time_duration) {
+        newErrors.time_duration = 'Time duration is required';
+      }
+    }
+
+    activeCustomFields.forEach((field) => {
+      if (!field.required) return;
+      const value = formData[field.key];
+      if (!String(value ?? '').trim()) {
+        newErrors[field.key] = `${field.label || field.key} is required`;
+      }
+    });
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -285,20 +374,56 @@ export function TaskSubmissionModal({
 
     setLoading((prev) => ({ ...prev, submit: true }));
     try {
-      const payload: TaskSubmissionData = {
-        endpoint: formData.endpoint,
-        taskName: formData.taskName,
-        partition: formData.partition,
-        account: formData.account,
-        reservation: formData.reservation || undefined,
-        container: formData.container,
-        task: formData.task || undefined,
-        num_of_nodes: formData.num_of_nodes,
-        time_duration: formData.time_duration,
-        dataset_id: formData.dataset_id || undefined
-      };
+      const submissionEndpoint =
+        activeTemplate?.submissionEndpoint ?? '/api/submit_task';
+      const payload =
+        submissionEndpoint === '/api/launch_llmflux'
+          ? {
+              endpoint: formData.endpoint,
+              taskName: formData.taskName,
+              account: formData.account,
+              partition: formData.partition,
+              input_path: formData.input_path,
+              input_content: formData.input_content || '',
+              output_path: formData.output_path,
+              model: formData.model,
+              engine: formData.engine,
+              batch_size: formData.batch_size,
+              hf_token: formData.hf_token || ''
+            }
+          : {
+              endpoint: formData.endpoint,
+              taskName: formData.taskName,
+              partition: formData.partition,
+              account: formData.account,
+              reservation: isFieldHidden('reservation')
+                ? undefined
+                : formData.reservation || undefined,
+              container: isFieldHidden('container')
+                ? undefined
+                : formData.container || undefined,
+              task: isFieldHidden('task') ? undefined : formData.task || undefined,
+              num_of_nodes: isFieldHidden('num_of_nodes')
+                ? undefined
+                : formData.num_of_nodes,
+              time_duration: isFieldHidden('time_duration')
+                ? undefined
+                : formData.time_duration,
+              dataset_id: isFieldHidden('dataset_id')
+                ? undefined
+                : formData.dataset_id || undefined,
+              slurm_options: isFieldHidden('slurm_options')
+                ? undefined
+                : formData.slurm_options || undefined,
+              task_template: activeTemplate?.taskTemplate || undefined,
+              task_define: Object.fromEntries(
+                Object.entries(formData).filter(
+                  ([key, value]) => value !== undefined && !isFieldHidden(key)
+                )
+              )
+            };
 
-      const response = await fetch('/api/submit_task', {
+      const response = await fetch(submissionEndpoint, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -309,7 +434,9 @@ export function TaskSubmissionModal({
         onSuccess();
         resetForm();
       } else {
-        const errorData = await response.json();
+        const errorData = await response
+          .json()
+          .catch(() => ({ error: 'Failed to submit task' }));
         setErrors({ submit: errorData.error || 'Failed to submit task' });
       }
     } catch (error) {
@@ -320,20 +447,10 @@ export function TaskSubmissionModal({
   };
 
   const resetForm = () => {
-    setFormData({
-      endpoint: '',
-      taskName: '',
-      partition: '',
-      account: '',
-      reservation: '',
-      container: '',
-      task: '',
-      num_of_nodes: 1,
-      time_duration: '',
-      dataset_id: ''
-    });
+    setFormData(INITIAL_FORM_DATA);
     setErrors({});
     setHasDiamondDir(true);
+    setActiveTemplateId(null);
   };
 
   // Helper functions to get display values for selected items
@@ -358,14 +475,14 @@ export function TaskSubmissionModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="flex h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-900">
+      <div className="flex h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-[hsl(var(--dashboard-surface))] shadow-xl dark:border-slate-700/80">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 p-6 dark:border-gray-700">
+        <div className="flex items-center justify-between border-b border-slate-200/70 p-6 dark:border-slate-700/70">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
               Submit New Task
             </h2>
-            <p className="text-gray-600 dark:text-gray-300">
+            <p className="text-slate-600 dark:text-slate-400">
               Configure and submit a new computational task
             </p>
           </div>
@@ -373,19 +490,27 @@ export function TaskSubmissionModal({
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="cursor-pointer text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            aria-label="Close"
+            className="cursor-pointer text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
           >
             <X className="h-5 w-5" />
           </Button>
         </div>
 
+        {/* Template Selector */}
+        <TemplateSelector
+          templates={TASK_TEMPLATES}
+          activeTemplateId={activeTemplateId}
+          onSelect={applyTemplate}
+          onClear={clearTemplate}
+        />
+
         {/* Content - Scrollable Area */}
-        <div className="flex-1 overflow-y-auto bg-white dark:bg-gray-900">
+        <div className="flex-1 overflow-y-auto">
           <div className="p-6">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              {/* Task Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Task Name *
                 </label>
                 <Input
@@ -407,7 +532,7 @@ export function TaskSubmissionModal({
 
               {/* Endpoint */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Endpoint *
                 </label>
                 <div className="mt-1">
@@ -439,7 +564,7 @@ export function TaskSubmissionModal({
 
               {/* Partition */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Partition *
                 </label>
                 <div className="mt-1">
@@ -463,173 +588,427 @@ export function TaskSubmissionModal({
               </div>
 
               {/* Account */}
-              <div className="md:row-span-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                   Account *
                 </label>
-                <div className="mt-1 space-y-6">
+                <div className="mt-1">
                   <VirtualSelect
                     options={accounts}
-                    selected={
-                      accounts.includes(formData.account)
-                        ? formData.account
-                        : ''
-                    }
+                    selected={formData.account || ''}
                     onSelect={(value) =>
                       setFormData((prev) => ({ ...prev, account: value }))
                     }
                     placeholder="Select account"
+                    allowCustomInput
+                    searchPlaceholder="search or input your project name"
                     loading={loading.accounts}
                     disabled={!formData.endpoint}
                   />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Account Manual Input
-                    </label>
-                    <Input
-                      placeholder="Or enter account manually"
-                      value={formData.account || ''}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          account: e.target.value
-                        }))
-                      }
-                      disabled={!formData.endpoint}
-                      className={`mt-1 ${errors.account ? 'border-red-500' : ''}`}
-                    />
-                  </div>
                 </div>
                 {errors.account && (
                   <p className="mt-1 text-sm text-red-600">{errors.account}</p>
                 )}
               </div>
 
-              {/* Container */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Container *
-                </label>
-                <div className="mt-1">
-                  <VirtualSelect
-                    options={containers}
-                    selected={formData.container}
-                    onSelect={(value) =>
-                      setFormData((prev) => ({ ...prev, container: value }))
-                    }
-                    placeholder="Select container"
-                    loading={loading.containers}
-                    disabled={!formData.endpoint}
-                    className={errors.container ? 'border-red-500' : ''}
-                  />
-                </div>
-                {errors.container && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.container}
+              {!isLlmfluxTemplate ? (
+                <>
+                  {!isFieldHidden('container') && (
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                        Container{hasCustomSubmitTemplate ? '' : ' *'}
+                      </label>
+                      <div className="mt-1">
+                        <VirtualSelect
+                          options={containers}
+                          selected={formData.container}
+                          onSelect={(value) =>
+                            setFormData((prev) => ({ ...prev, container: value }))
+                          }
+                          placeholder="Select container"
+                          loading={loading.containers}
+                          disabled={!formData.endpoint}
+                          className={errors.container ? 'border-red-500' : ''}
+                        />
+                      </div>
+                      {errors.container && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.container}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {!isFieldHidden('dataset_id') && (
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                        Dataset (Optional)
+                      </label>
+                      <div className="mt-1">
+                        <VirtualSelect
+                          options={datasetOptions}
+                          selected={getSelectedDatasetDisplay()}
+                          onSelect={(displayName) => {
+                            const id = datasetMap.get(displayName);
+                            setFormData((prev) => ({
+                              ...prev,
+                              dataset_id: id || ''
+                            }));
+                          }}
+                          placeholder="Select dataset"
+                          loading={loading.datasets}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {!isFieldHidden('reservation') && (
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                        Reservation (Optional)
+                      </label>
+                      <Input
+                        type="text"
+                        value={formData.reservation}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            reservation: e.target.value
+                          }))
+                        }
+                        placeholder="Enter reservation"
+                        className="mt-1"
+                      />
+                    </div>
+                  )}
+
+                  {!isFieldHidden('num_of_nodes') && (
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                        Number of Nodes
+                      </label>
+                      <Input
+                        type="number"
+                        min="1"
+                        value={formData.num_of_nodes}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            num_of_nodes: parseInt(e.target.value) || 1
+                          }))
+                        }
+                        placeholder="1"
+                        className="mt-1"
+                      />
+                    </div>
+                  )}
+
+                  {!isFieldHidden('time_duration') && (
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                        Time Duration (HH:MM:SS) *
+                      </label>
+                      <Input
+                        type="text"
+                        value={formData.time_duration}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            time_duration: e.target.value
+                          }))
+                        }
+                        placeholder="01:00:00"
+                        className={`mt-1 ${errors.time_duration ? 'border-red-500' : ''}`}
+                      />
+                      {errors.time_duration && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.time_duration}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {!isFieldHidden('slurm_options') && (
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                        Slurm Options (Optional)
+                      </label>
+                      <Textarea
+                        value={formData.slurm_options}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            slurm_options: e.target.value
+                          }))
+                        }
+                        placeholder="Extra Slurm directives or lines to include in the batch script. 
+                    e.g., --gpus-per-node=1 or --mem=16G (one per line or space-separated)."
+                        className="mt-1"
+                        rows={3}
+                      />
+                    </div>
+                  )}
+
+                  {!isFieldHidden('task') && (
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                        Task Command (Optional)
+                      </label>
+                      <Textarea
+                        value={formData.task}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, task: e.target.value }))
+                        }
+                        placeholder="Enter command to run inside the container"
+                        className="mt-1"
+                        rows={3}
+                      />
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <div className="rounded-lg border border-sky-200 bg-sky-50 p-3 text-sm text-sky-900 dark:border-sky-900/60 dark:bg-sky-950/30 dark:text-sky-100 md:col-span-2">
+                    LLMFlux manages its own runtime image and will build a container in
+                    your endpoint `diamond_work_dir` when needed.
+                  </div>
+
+                  {/* Input Path */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                      Input Path *
+                    </label>
+                    <Input
+                      type="text"
+                      value={formData.input_path}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          input_path: e.target.value
+                        }))
+                      }
+                      placeholder="prompts.jsonl"
+                      className={`mt-1 ${errors.input_path ? 'border-red-500' : ''}`}
+                    />
+                    {errors.input_path && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.input_path}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Input Prompts */}
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                      Input Prompts
+                    </label>
+                    <Textarea
+                      value={formData.input_content || ''}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          input_content: e.target.value
+                        }))
+                      }
+                      placeholder='{"prompt":"Write a short summary of this paragraph..."}'
+                      className="mt-1"
+                      rows={5}
+                    />
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                      Hint: Enter prompts in JSONL format (one JSON object per
+                      line). This content will be written to the filename in
+                      Input Path before launch.
+                    </p>
+                  </div>
+
+                  {/* Output Path */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                      Output Path *
+                    </label>
+                    <Input
+                      type="text"
+                      value={formData.output_path}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          output_path: e.target.value
+                        }))
+                      }
+                      placeholder="results.json"
+                      className={`mt-1 ${errors.output_path ? 'border-red-500' : ''}`}
+                    />
+                    {errors.output_path && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.output_path}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Model */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                      Model *
+                    </label>
+                    <Input
+                      type="text"
+                      value={formData.model}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          model: e.target.value
+                        }))
+                      }
+                      placeholder="Qwen2.5-3B-Instruct"
+                      className={`mt-1 ${errors.model ? 'border-red-500' : ''}`}
+                    />
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                      {`Hint: Model name should be a valid Hugging Face model repo name (e.g. "Qwen2.5-3B-Instruct").`}
+                    </p>
+                    {errors.model && (
+                      <p className="mt-1 text-sm text-red-600">{errors.model}</p>
+                    )}
+                  </div>
+
+                  {/* Engine */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                      Engine *
+                    </label>
+                    <select
+                      value={formData.engine || 'vllm'}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          engine: e.target.value as 'vllm' | 'ollama'
+                        }))
+                      }
+                      className={`mt-1 h-10 w-full rounded-md border bg-background px-3 text-sm ${errors.engine ? 'border-red-500' : 'border-input'}`}
+                    >
+                      <option value="vllm">vllm</option>
+                      <option value="ollama">ollama</option>
+                    </select>
+                    {errors.engine && (
+                      <p className="mt-1 text-sm text-red-600">{errors.engine}</p>
+                    )}
+                  </div>
+
+                  {/* Batch Size */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                      Batch Size *
+                    </label>
+                    <Input
+                      type="number"
+                      min="1"
+                      value={formData.batch_size}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          batch_size: parseInt(e.target.value, 10) || 1
+                        }))
+                      }
+                      placeholder="4"
+                      className={`mt-1 ${errors.batch_size ? 'border-red-500' : ''}`}
+                    />
+                    {errors.batch_size && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.batch_size}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Hugging Face Token */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                      Hugging Face Token (Optional)
+                    </label>
+                    <Input
+                      type="password"
+                      value={formData.hf_token}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          hf_token: e.target.value
+                        }))
+                      }
+                      placeholder="hf_..."
+                      className="mt-1"
+                    />
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                      Required for gated models such as Llama-3.
+                    </p>
+                  </div>
+                </>
+              )}
+
+              {activeCustomFields.length > 0 && (
+                <div className="md:col-span-2 rounded-xl border border-slate-200 bg-slate-50/70 p-4 dark:border-slate-700 dark:bg-slate-900/40">
+                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                    Template Custom Fields
                   </p>
-                )}
-              </div>
+                  <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                    {activeCustomFields.map((field) => {
+                      const fieldOptions = resolveCustomFieldOptions(field);
 
-              {/* Dataset */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Dataset (Optional)
-                </label>
-                <div className="mt-1">
-                  <VirtualSelect
-                    options={datasetOptions}
-                    selected={getSelectedDatasetDisplay()}
-                    onSelect={(displayName) => {
-                      const id = datasetMap.get(displayName);
-                      setFormData((prev) => ({
-                        ...prev,
-                        dataset_id: id || ''
-                      }));
-                    }}
-                    placeholder="Select dataset"
-                    loading={loading.datasets}
-                  />
+                      return (
+                        <div key={field.key}>
+                          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                            {field.label || field.key}
+                            {field.required ? ' *' : ''}
+                          </label>
+                          {fieldOptions.length > 0 ? (
+                            <select
+                              value={String(formData[field.key] ?? '')}
+                              onChange={(e) =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  [field.key]: e.target.value
+                                }))
+                              }
+                              className={`mt-1 h-10 w-full rounded-md border bg-background px-3 text-sm ${
+                                errors[field.key] ? 'border-red-500' : 'border-input'
+                              }`}
+                            >
+                              <option value="">
+                                {field.placeholder || `Select ${field.label || field.key}`}
+                              </option>
+                              {fieldOptions.map((option) => (
+                                <option
+                                  key={`${field.key}-${option.value}`}
+                                  value={option.value}
+                                >
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <Input
+                              type="text"
+                              value={String(formData[field.key] ?? '')}
+                              onChange={(e) =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  [field.key]: e.target.value
+                                }))
+                              }
+                              placeholder={
+                                field.placeholder || `Enter ${field.label || field.key}`
+                              }
+                              className={`mt-1 ${errors[field.key] ? 'border-red-500' : ''}`}
+                            />
+                          )}
+                          {errors[field.key] && (
+                            <p className="mt-1 text-sm text-red-600">
+                              {errors[field.key]}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-
-              {/* Reservation */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Reservation (Optional)
-                </label>
-                <Input
-                  type="text"
-                  value={formData.reservation}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      reservation: e.target.value
-                    }))
-                  }
-                  placeholder="Enter reservation"
-                  className="mt-1"
-                />
-              </div>
-
-              {/* Number of Nodes */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Number of Nodes
-                </label>
-                <Input
-                  type="number"
-                  min="1"
-                  value={formData.num_of_nodes}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      num_of_nodes: parseInt(e.target.value) || 1
-                    }))
-                  }
-                  placeholder="1"
-                  className="mt-1"
-                />
-              </div>
-
-              {/* Time Duration */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Time Duration (HH:MM:SS) *
-                </label>
-                <Input
-                  type="text"
-                  value={formData.time_duration}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      time_duration: e.target.value
-                    }))
-                  }
-                  placeholder="01:00:00"
-                  className={`mt-1 ${errors.time_duration ? 'border-red-500' : ''}`}
-                />
-                {errors.time_duration && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.time_duration}
-                  </p>
-                )}
-              </div>
-
-              {/* Task Command */}
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Task Command (Optional)
-                </label>
-                <Textarea
-                  value={formData.task}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, task: e.target.value }))
-                  }
-                  placeholder="Enter command to run inside the container"
-                  className="mt-1"
-                  rows={3}
-                />
-              </div>
+              )}
             </div>
 
             {/* Error Display */}
@@ -644,7 +1023,7 @@ export function TaskSubmissionModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 border-t border-gray-200 bg-gray-50 p-6 dark:border-gray-700 dark:bg-gray-800">
+        <div className="flex items-center justify-end gap-3 border-t border-slate-200/70 bg-slate-50/70 p-6 dark:border-slate-700/70 dark:bg-slate-900/60">
           <Button
             variant="outline"
             onClick={onClose}
@@ -655,7 +1034,7 @@ export function TaskSubmissionModal({
           <Button
             onClick={handleSubmit}
             disabled={loading.submit}
-            className="cursor-pointer"
+            className="cursor-pointer bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
           >
             {loading.submit ? 'Submitting...' : 'Submit Task'}
           </Button>

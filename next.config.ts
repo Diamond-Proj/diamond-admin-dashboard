@@ -1,6 +1,7 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  reactCompiler: true,
   images: {
     remotePatterns: [
       {
@@ -27,10 +28,6 @@ const nextConfig: NextConfig = {
         destination: `${baseUrl}/api/:path*`
       }
     ];
-  },
-  // output: 'standalone',
-  eslint: {
-    ignoreDuringBuilds: true // Disable ESLint during builds for now, will fix later
   }
 };
 

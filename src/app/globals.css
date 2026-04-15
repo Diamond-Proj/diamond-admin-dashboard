@@ -144,11 +144,7 @@
 @utility card {
   @apply text-card-foreground rounded-lg border-0;
   box-shadow: var(--card-shadow);
-  background: linear-gradient(
-    to bottom,
-    hsl(var(--card-gradient-from)),
-    hsl(var(--card-gradient-to))
-  );
+  background-color: hsl(var(--card));
 }
 
 @utility card-muted {
@@ -208,6 +204,10 @@
 
 @layer base {
   :root {
+    --font-display: 'Sora', sans-serif;
+    --font-body: 'Manrope', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+
     /* Base colors */
     --background: 0 0% 97%;
     --foreground: 240 10% 3.9%;
@@ -240,6 +240,13 @@
 
     /* Ring */
     --ring: 346.8 77.2% 49.8%;
+    --dashboard-surface: 0 0% 100%;
+    --dashboard-surface-muted: 222 44% 99%;
+    --dashboard-stroke: 210 22% 90%;
+    --dashboard-glow: 352 74% 55%;
+    --scrollbar-track: 210 22% 93%;
+    --scrollbar-thumb: 215 16% 66%;
+    --scrollbar-thumb-hover: 215 18% 52%;
     --radius: 1rem;
 
     /* Card depth */
@@ -300,6 +307,13 @@
 
     /* Ring */
     --ring: 346.8 77.2% 49.8%;
+    --dashboard-surface: 220 21% 11%;
+    --dashboard-surface-muted: 220 19% 14%;
+    --dashboard-stroke: 216 18% 22%;
+    --dashboard-glow: 351 78% 60%;
+    --scrollbar-track: 220 16% 15%;
+    --scrollbar-thumb: 218 13% 38%;
+    --scrollbar-thumb-hover: 218 15% 52%;
 
     /* Card depth */
     --card-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
@@ -330,8 +344,77 @@
 @layer base {
   * {
     @apply border-border;
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--scrollbar-thumb)) hsl(var(--scrollbar-track));
   }
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: hsl(var(--scrollbar-track));
+  }
+
+  *::-webkit-scrollbar-thumb {
+    border: 2px solid hsl(var(--scrollbar-track));
+    border-radius: 9999px;
+    background: hsl(var(--scrollbar-thumb));
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--scrollbar-thumb-hover));
+  }
+
+  *::-webkit-scrollbar-corner {
+    background: hsl(var(--scrollbar-track));
+  }
+
   body {
     @apply bg-background text-foreground box-border;
+    font-family: var(--font-body);
+    background-image:
+      radial-gradient(
+        circle at 0% 0%,
+        hsl(var(--dashboard-glow) / 0.025) 0%,
+        transparent 38%
+      ),
+      radial-gradient(
+        circle at 100% 0%,
+        hsl(214 88% 52% / 0.02) 0%,
+        transparent 32%
+      );
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+}
+
+@layer utilities {
+  .dashboard-surface {
+    background-color: hsl(var(--dashboard-surface));
+    border: 1px solid hsl(var(--dashboard-stroke));
+  }
+
+  .dashboard-card {
+    border-radius: 1rem;
+    backdrop-filter: blur(4px);
+    background-color: hsl(var(--dashboard-surface));
+    border: 1px solid hsl(var(--dashboard-stroke));
+    box-shadow:
+      0 14px 36px hsl(222 48% 10% / 0.06),
+      inset 0 1px 0 hsl(0 0% 100% / 0.55);
+  }
+
+  .dark .dashboard-card {
+    box-shadow:
+      0 18px 36px hsl(222 60% 2% / 0.55),
+      inset 0 1px 0 hsl(0 0% 100% / 0.03);
   }
 }

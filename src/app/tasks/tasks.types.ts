@@ -1,4 +1,5 @@
 export interface TaskSubmissionData {
+  [key: string]: string | number | undefined;
   endpoint: string;
   taskName: string;
   partition: string;
@@ -9,6 +10,22 @@ export interface TaskSubmissionData {
   num_of_nodes?: number;
   time_duration: string;
   dataset_id?: string;
+  slurm_options?: string;
+  input_path?: string;
+  input_content?: string;
+  output_path?: string;
+  model?: string;
+  engine?: 'vllm' | 'ollama' | '';
+  batch_size?: number;
+  hf_token?: string;
+}
+
+export interface TemplateCustomField {
+  key: string;
+  label?: string;
+  placeholder?: string;
+  required?: boolean;
+  optional?: Array<string | { label: string; value: string }>;
 }
 
 export interface Task {
@@ -16,6 +33,7 @@ export interface Task {
   identity_id: string;
   task_name: string;
   status: 'COMPLETED' | 'PENDING' | 'RUNNING' | 'FAILED';
+  task_type?: 'default' | 'vllm_chat' | string;
   details: {
     endpoint_id: string;
     endpoint_name?: string;
@@ -23,6 +41,11 @@ export interface Task {
   };
   result: string | null;
   error: string | null;
+  artifact_path?: string | null;
+  chat?: {
+    port?: number | null;
+    model?: string | null;
+  } | null;
 }
 
 export interface TasksApiResponse {
@@ -71,4 +94,16 @@ export interface Dataset {
 
 export interface DatasetsApiResponse {
   datasets: Dataset[];
+}
+
+export interface TaskTemplate {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  submissionEndpoint?: '/api/submit_task' | '/api/launch_llmflux';
+  taskTemplate?: string;
+  hiddenFields?: string[];
+  customFields?: TemplateCustomField[];
+  defaults: Partial<TaskSubmissionData>;
 }
