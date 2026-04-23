@@ -9,7 +9,6 @@
     "taskName": "vllm-inference",
     "num_of_nodes": 1,
     "time_duration": "00:20:00",
-    "slurm_options": "#SBATCH --gpus-per-node=1\n#SBATCH --mem=64G",
     "served_model_name": "diamond-assistant",
     "max_model_len": 2048,
     "vllm_extra_args": ""
