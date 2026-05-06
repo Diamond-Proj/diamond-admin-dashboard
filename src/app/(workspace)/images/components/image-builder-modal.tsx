@@ -11,7 +11,7 @@ import {
   BuilderFormData,
   ImageBuilderPayload,
   ImageBuilderResponse
-} from '@/app/images/types';
+} from '@/app/(workspace)/images/types';
 
 interface ImageBuilderModalProps {
   isOpen: boolean;

@@ -2,7 +2,7 @@
 
 import { Container, MapPin, Box } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { BuilderFormData } from '@/app/images/types';
+import { BuilderFormData } from '@/app/(workspace)/images/types';
 
 interface ContainerStepProps {
   formData: Partial<BuilderFormData>;

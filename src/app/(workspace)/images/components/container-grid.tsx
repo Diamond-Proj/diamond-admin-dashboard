@@ -6,7 +6,7 @@ import { useToast } from '@/components/ui/use-toast';
 import {
   ContainersResponse,
   ContainersApiResponse
-} from '@/app/images/types';
+} from '@/app/(workspace)/images/types';
 import ContainerItem from './container/ContainerItem';
 
 interface ContainerGridProps {

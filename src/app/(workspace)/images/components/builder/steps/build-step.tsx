@@ -2,7 +2,7 @@
 
 import { Package, Settings, Terminal } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
-import { BuilderFormData } from '@/app/images/types';
+import { BuilderFormData } from '@/app/(workspace)/images/types';
 
 interface BuildStepProps {
   formData: Partial<BuilderFormData>;
