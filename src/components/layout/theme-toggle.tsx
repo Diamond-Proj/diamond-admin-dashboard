@@ -1,6 +1,7 @@
 'use client';
 import { MoonIcon, SunIcon, DesktopIcon } from '@radix-ui/react-icons';
 import { useTheme } from 'next-themes';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -17,14 +18,23 @@ export default function ThemeToggle({
   triggerClassName?: string;
 }) {
   const { theme, setTheme } = useTheme();
-  const themeIcon =
-    theme === 'light' ? (
-      <SunIcon className="h-4.5 w-4.5" />
-    ) : theme === 'dark' ? (
-      <MoonIcon className="h-4.5 w-4.5" />
-    ) : (
-      <DesktopIcon className="h-4.5 w-4.5" />
-    );
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Avoid hydration mismatch: `theme` is unknown on the server, so render a
+  // stable placeholder for the first paint and swap in the real icon after mount.
+  const themeIcon = !mounted ? (
+    <span className="h-4.5 w-4.5" aria-hidden />
+  ) : theme === 'light' ? (
+    <SunIcon className="h-4.5 w-4.5" />
+  ) : theme === 'dark' ? (
+    <MoonIcon className="h-4.5 w-4.5" />
+  ) : (
+    <DesktopIcon className="h-4.5 w-4.5" />
+  );
 
   return (
     <DropdownMenu modal={false}>
