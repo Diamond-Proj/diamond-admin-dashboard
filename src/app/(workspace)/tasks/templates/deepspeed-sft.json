@@ -1,0 +1,48 @@
+{
+  "id": "deepspeed-sft",
+  "taskTemplate": "deepspeed-sft.j2",
+  "name": "DeepSpeed Finetuning",
+  "description": "Fine-tune a model using DeepSpeed on a dataset using Frontera@TACC.",
+  "category": "Fine-tuning",
+  "hiddenFields": ["dataset_id", "task"],
+  "defaults": {
+    "taskName": "deepspeed-sft",
+    "num_of_nodes": 1,
+    "time_duration": "00:20:00"
+  },
+  "customFields": [
+    {
+      "key": "model_path",
+      "label": "Model",
+      "placeholder": "Select model",
+      "required": true,
+      "optional": [
+        {
+          "label": "Qwen2.5-0.5B",
+          "value": "/scratch2/09912/haotianxie/model/Qwen2.5-0.5B"
+        }
+      ]
+    },
+    {
+      "key": "dataset_path",
+      "label": "Dataset Path",
+      "optional": [
+        {
+          "label": "diamond-knowledge",
+          "value": "/scratch2/09912/haotianxie/datasets/diamond-knowledge"
+        }
+      ]
+    },
+    {
+      "key": "finetuned_model_path",
+      "label": "Output Directory",
+      "placeholder": "$SCRATCH",
+      "required": true
+    },
+    {
+      "key": "finetuned_model_name",
+      "label": "Output Model Name",
+      "required": true
+    }
+  ]
+}
