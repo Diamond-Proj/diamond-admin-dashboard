@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { Cpu, LogOut, UserCircle2 } from 'lucide-react';
 
-import { TokenManager } from '@/lib/auth/tokenManager.client';
 import { toast } from '@/components/ui/use-toast';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -15,28 +14,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import type { UserInfo } from '@/lib/auth/types';
 
-function getCookieValue(name: string): string {
-  if (typeof document === 'undefined') return '';
-
-  const key = `${name}=`;
-  const cookie = document.cookie
-    .split(';')
-    .find((item) => item.trim().startsWith(key));
-
-  if (!cookie) return '';
-
-  const rawValue = cookie.trim().slice(key.length);
-  try {
-    return decodeURIComponent(rawValue);
-  } catch {
-    return rawValue;
-  }
-}
-
-export function UserAvatar() {
-  const [userName] = useState(() => getCookieValue('name') || 'User');
-  const [userEmail] = useState(() => getCookieValue('email'));
+export function UserAvatar({ userInfo }: { userInfo: UserInfo | null }) {
+  const userName = userInfo?.name || 'User';
+  const userEmail = userInfo?.email || '';
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const initials = (() => {
@@ -51,7 +33,6 @@ export function UserAvatar() {
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
-      TokenManager.clearClientCookies();
 
       toast({
         title: 'Logged out successfully',
@@ -59,7 +40,7 @@ export function UserAvatar() {
       });
 
       await new Promise((resolve) => setTimeout(resolve, 350));
-      window.location.href = '/sign-in';
+      window.location.href = '/logout';
     } catch (error) {
       console.error('Logout error:', error);
       setIsLoggingOut(false);

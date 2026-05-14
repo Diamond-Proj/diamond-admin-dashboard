@@ -5,17 +5,16 @@ import { redirect } from 'next/navigation';
 import { Cpu, ShieldCheck, Sparkles } from 'lucide-react';
 
 export default async function SignInPage() {
-  // Check for authentication using new TokenManager
   const tokens = await TokenManagerServer.getTokensFromServerCookies();
-  const isAuthenticated = !!tokens && !TokenManagerServer.isExpired(tokens);
+  const session = TokenManagerServer.buildSession(tokens);
 
-  // If already authenticated, redirect to home page
-  if (isAuthenticated) {
-    redirect('/');
+  // If already authenticated, redirect to the workspace dashboard.
+  if (session.isAuthenticated) {
+    redirect('/dashboard');
   }
 
   return (
-    <div className="relative flex w-full items-center justify-center min-h-[calc(100dvh-6rem)] md:min-h-[calc(100dvh-7rem)]">
+    <div className="relative flex min-h-screen w-full items-center justify-center px-4 py-10">
       <section className="relative w-full max-w-4xl overflow-hidden rounded-3xl border border-slate-200/80 bg-[hsl(var(--dashboard-surface))] shadow-xl dark:border-slate-700/80">
         <div className="grid md:grid-cols-[1.1fr_0.9fr]">
           <div className="border-b border-slate-200/70 p-8 md:border-b-0 md:border-r md:p-10 dark:border-slate-700/70">

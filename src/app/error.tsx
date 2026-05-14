@@ -70,7 +70,7 @@ export default function Error({
             </Button>
 
             <Button asChild variant="outline" className="h-11 gap-2">
-              <Link href="/">
+              <Link href="/dashboard">
                 <Home className="h-4 w-4" />
                 Back to Dashboard
               </Link>

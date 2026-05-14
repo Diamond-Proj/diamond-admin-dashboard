@@ -9,6 +9,8 @@ interface VirtualSelectProps {
   selected?: string;
   onSelect: (value: string) => void;
   placeholder: string;
+  allowCustomInput?: boolean;
+  searchPlaceholder?: string;
   disabled?: boolean;
   loading?: boolean;
   className?: string;
@@ -19,6 +21,8 @@ export function VirtualSelect({
   selected,
   onSelect,
   placeholder,
+  allowCustomInput = false,
+  searchPlaceholder = 'Search options...',
   disabled = false,
   loading = false,
   className = ''
@@ -32,6 +36,14 @@ export function VirtualSelect({
   const filteredOptions = options.filter((option) =>
     option.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  const trimmedSearchTerm = searchTerm.trim();
+  const showCustomInputOption =
+    allowCustomInput &&
+    trimmedSearchTerm.length > 0 &&
+    !options.includes(trimmedSearchTerm);
+  const displayOptions = showCustomInputOption
+    ? [`Use "${trimmedSearchTerm}"`, ...filteredOptions]
+    : filteredOptions;
 
   useEffect(() => {
     if (isOpen && searchRef.current) {
@@ -66,7 +78,7 @@ export function VirtualSelect({
       case 'ArrowDown':
         e.preventDefault();
         setHighlightedIndex((prev) =>
-          prev < filteredOptions.length - 1 ? prev + 1 : prev
+          prev < displayOptions.length - 1 ? prev + 1 : prev
         );
         break;
       case 'ArrowUp':
@@ -75,8 +87,16 @@ export function VirtualSelect({
         break;
       case 'Enter':
         e.preventDefault();
-        if (filteredOptions[highlightedIndex]) {
-          handleSelect(filteredOptions[highlightedIndex]);
+        if (!displayOptions[highlightedIndex]) return;
+        if (showCustomInputOption && highlightedIndex === 0) {
+          handleSelect(trimmedSearchTerm);
+        } else {
+          const optionIndex = showCustomInputOption
+            ? highlightedIndex - 1
+            : highlightedIndex;
+          if (filteredOptions[optionIndex]) {
+            handleSelect(filteredOptions[optionIndex]);
+          }
         }
         break;
       case 'Escape':
@@ -144,7 +164,7 @@ export function VirtualSelect({
                 ref={searchRef}
                 type="text"
                 aria-label="Search options"
-                placeholder="Search options..."
+                placeholder={searchPlaceholder}
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
@@ -157,32 +177,39 @@ export function VirtualSelect({
           </div>
 
           <div className="max-h-60 overflow-y-auto py-1">
-            {filteredOptions.length === 0 ? (
+            {displayOptions.length === 0 ? (
               <div className="px-4 py-7 text-center text-sm text-slate-500 dark:text-slate-400">
                 No options found
               </div>
             ) : (
               <div>
-                {filteredOptions.map((option, index) => (
-                  <button
-                    key={option}
-                    type="button"
-                    onClick={() => handleSelect(option)}
-                    onMouseEnter={() => setHighlightedIndex(index)}
-                    className={`flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-colors ${
-                      index === highlightedIndex
-                        ? 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-100'
-                        : selected === option
-                          ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/20 dark:text-rose-200'
-                          : 'text-slate-700 hover:bg-slate-100/80 dark:text-slate-300 dark:hover:bg-slate-800'
-                    }`}
-                  >
-                    <span className="truncate">{option}</span>
-                    {selected === option && (
-                      <Check className="h-4 w-4 shrink-0 text-rose-600 dark:text-rose-300" />
-                    )}
-                  </button>
-                ))}
+                {displayOptions.map((displayOption, index) => {
+                  const isCustomOption = showCustomInputOption && index === 0;
+                  const option = isCustomOption
+                    ? trimmedSearchTerm
+                    : filteredOptions[showCustomInputOption ? index - 1 : index];
+                  if (!option) return null;
+                  return (
+                    <button
+                      key={isCustomOption ? `custom-${option}` : option}
+                      type="button"
+                      onClick={() => handleSelect(option)}
+                      onMouseEnter={() => setHighlightedIndex(index)}
+                      className={`flex w-full cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-colors ${
+                        index === highlightedIndex
+                          ? 'bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-slate-100'
+                          : selected === option
+                            ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/20 dark:text-rose-200'
+                            : 'text-slate-700 hover:bg-slate-100/80 dark:text-slate-300 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      <span className="truncate">{displayOption}</span>
+                      {!isCustomOption && selected === option && (
+                        <Check className="h-4 w-4 shrink-0 text-rose-600 dark:text-rose-300" />
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>

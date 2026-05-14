@@ -1,16 +1,16 @@
 import type { Metadata } from 'next';
 import { IBM_Plex_Mono, Manrope, Sora } from 'next/font/google';
+import { ThemeProvider } from 'next-themes';
 
 import './globals.css';
 
-import { TokenManagerServer } from '@/lib/auth/tokenManager.server';
-import { ThemeProvider } from 'next-themes';
-import { AppShell } from '@/components/layout/app-shell';
-
 export const metadata: Metadata = {
-  title: 'Diamond Admin Dashboard',
+  title: {
+    default: 'Diamond HPC',
+    template: '%s | Diamond HPC'
+  },
   description:
-    'Diamond admin dashboard configured with Flask server backend, SQLite database, Next.js, Tailwind CSS, TypeScript, and Prettier.'
+    'Diamond HPC unifies endpoint operations, images, datasets, and task execution in a single workspace.'
 };
 
 const displayFont = Sora({
@@ -34,10 +34,6 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Get initial authentication status for server-side rendering
-  const tokens = await TokenManagerServer.getTokensFromServerCookies();
-  const isAuthenticated = !!tokens && !TokenManagerServer.isExpired(tokens);
-
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body
@@ -49,7 +45,7 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AppShell isAuthenticated={isAuthenticated}>{children}</AppShell>
+          {children}
         </ThemeProvider>
       </body>
     </html>
