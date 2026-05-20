@@ -1,6 +1,6 @@
 {
   "id": "deepspeed-sft",
-  "taskTemplate": "deepspeed-sft.j2",
+  "taskTemplate": "deepspeed-sft-delta.j2",
   "name": "DeepSpeed Finetuning",
   "description": "Fine-tune a model using DeepSpeed on a dataset using Delta@NCSA.",
   "category": "Fine-tuning",
