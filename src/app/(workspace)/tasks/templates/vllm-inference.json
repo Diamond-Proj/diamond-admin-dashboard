@@ -1,6 +1,6 @@
 {
   "id": "vllm-inference",
-  "taskTemplate": "vllm-inference.j2",
+  "taskTemplate": "vllm-inference-delta.j2",
   "name": "Launch vLLM Chat Service",
   "description": "Launch an OpenAI-compatible vLLM service on a compute node and keep it available for interactive chat.",
   "category": "Inference",
