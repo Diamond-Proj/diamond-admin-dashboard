@@ -13,7 +13,6 @@ import {
 import { Logo } from '@/components/icons';
 import { LandingHeader } from '@/components/landing/landing-header';
 import { LandingReveal } from '@/components/landing/landing-reveal';
-import { WorkspaceSignal } from '@/components/landing/workspace-signal';
 import { landingPageContent } from '@/content/landing-page-content';
 
 const landingDisplayFont = Lora({
@@ -108,10 +107,6 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
                 >
                   {hero.headline}
                 </h1>
-              </LandingReveal>
-
-              <LandingReveal delay={0.1}>
-                <WorkspaceSignal />
               </LandingReveal>
 
               <LandingReveal delay={0.18}>
