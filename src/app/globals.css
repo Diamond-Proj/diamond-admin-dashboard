@@ -397,6 +397,31 @@
 }
 
 @layer utilities {
+  @keyframes landing-marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  .landing-marquee-track {
+    animation: landing-marquee 28s linear infinite;
+  }
+
+  .landing-marquee-track:hover {
+    animation-play-state: paused;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .landing-marquee-track {
+      width: auto;
+      overflow-x: auto;
+      animation: none;
+    }
+  }
+
   .dashboard-surface {
     background-color: hsl(var(--dashboard-surface));
     border: 1px solid hsl(var(--dashboard-stroke));
