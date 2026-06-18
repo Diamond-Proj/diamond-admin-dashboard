@@ -32,23 +32,11 @@ const highlightIcons = {
   rocket: Rocket
 } as const;
 
-const statCardStyles = [
-  'border-white/75 bg-linear-to-br from-white/95 to-slate-50/95 dark:from-slate-950 dark:to-slate-900',
-  'border-white/75 bg-linear-to-br from-white/95 to-rose-50/70 dark:from-slate-950 dark:to-slate-950',
-  'border-white/75 bg-linear-to-br from-white/95 to-sky-50/80 dark:from-slate-950 dark:to-slate-900'
-] as const;
-
 const highlightCardStyles = [
   'bg-linear-to-b from-white/95 to-slate-50/90 dark:from-slate-950 dark:to-slate-900',
   'bg-linear-to-b from-white/95 to-rose-50/70 dark:from-slate-950 dark:to-slate-950',
   'bg-linear-to-b from-white/95 to-sky-50/80 dark:from-slate-950 dark:to-slate-900',
   'bg-linear-to-b from-white/95 to-stone-50/80 dark:from-slate-950 dark:to-slate-950'
-] as const;
-
-const personaCardStyles = [
-  'bg-linear-to-b from-white/92 to-slate-50/92 dark:from-slate-950 dark:to-slate-900',
-  'bg-linear-to-b from-white/92 to-rose-50/70 dark:from-slate-950 dark:to-slate-950',
-  'bg-linear-to-b from-white/92 to-sky-50/80 dark:from-slate-950 dark:to-slate-900'
 ] as const;
 
 function CtaLink({
@@ -84,7 +72,7 @@ function CtaLink({
 }
 
 export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
-  const { header, hero, stats, hpcSystems, highlights, personas, closing } =
+  const { header, hero, hpcSystems, highlights, closing } =
     landingPageContent;
   const marqueeSystems = [...hpcSystems.items, ...hpcSystems.items];
 
@@ -185,26 +173,6 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
           </div>
         </section>
 
-        {/*<section className="mt-4 grid gap-4 md:grid-cols-3">*/}
-        {/*  {stats.map((stat, index) => (*/}
-        {/*    <LandingReveal*/}
-        {/*      key={`${stat.value}-${stat.label}`}*/}
-        {/*      delay={0.14 + index * 0.08}*/}
-        {/*    >*/}
-        {/*      <article*/}
-        {/*        className={`rounded-[1.9rem] border p-6 shadow-[0_24px_80px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-slate-800/80 dark:shadow-[0_26px_90px_rgba(2,6,23,0.32)] ${statCardStyles[index % statCardStyles.length]}`}*/}
-        {/*      >*/}
-        {/*        <p className="text-3xl font-semibold tracking-[-0.05em] text-slate-950 dark:text-slate-50">*/}
-        {/*          {stat.value}*/}
-        {/*        </p>*/}
-        {/*        <p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-300">*/}
-        {/*          {stat.detail}*/}
-        {/*        </p>*/}
-        {/*      </article>*/}
-        {/*    </LandingReveal>*/}
-        {/*  ))}*/}
-        {/*</section>*/}
-
         <section className="py-8">
           <LandingReveal delay={0.12}>
             <div className="overflow-hidden rounded-[2rem] border border-white/80 bg-white/72 py-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/68 dark:shadow-[0_24px_80px_rgba(2,6,23,0.3)]">
@@ -304,37 +272,6 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
             })}
           </div>
         </section>
-
-        {/*<section className="pt-8 pb-12 lg:pt-8 lg:pb-16">*/}
-        {/*  <LandingReveal delay={0.3}>*/}
-        {/*    <div className="rounded-[2.25rem] border border-white/80 bg-white/62 p-8 shadow-[0_24px_90px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/68 dark:shadow-[0_28px_100px_rgba(2,6,23,0.34)]">*/}
-        {/*      <LandingReveal delay={0.36}>*/}
-        {/*        <h2 className="max-w-2xl text-3xl font-semibold tracking-[-0.04em] text-slate-950 dark:text-slate-50">*/}
-        {/*          {personas.title}*/}
-        {/*        </h2>*/}
-        {/*      </LandingReveal>*/}
-        {/*      <div className="mt-8 grid gap-4 md:grid-cols-3">*/}
-        {/*        {personas.items.map((persona, index) => (*/}
-        {/*          <LandingReveal*/}
-        {/*            key={persona.title}*/}
-        {/*            delay={0.42 + index * 0.08}*/}
-        {/*          >*/}
-        {/*            <article*/}
-        {/*              className={`rounded-[1.8rem] border border-white/80 p-5 shadow-[0_14px_34px_rgba(15,23,42,0.05)] dark:border-slate-800/80 dark:shadow-none ${personaCardStyles[index % personaCardStyles.length]}`}*/}
-        {/*            >*/}
-        {/*              <h3 className="text-lg font-semibold text-slate-950 dark:text-slate-50">*/}
-        {/*                {persona.title}*/}
-        {/*              </h3>*/}
-        {/*              <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-200">*/}
-        {/*                {persona.description}*/}
-        {/*              </p>*/}
-        {/*            </article>*/}
-        {/*          </LandingReveal>*/}
-        {/*        ))}*/}
-        {/*      </div>*/}
-        {/*    </div>*/}
-        {/*  </LandingReveal>*/}
-        {/*</section>*/}
 
         <section className="relative overflow-hidden rounded-[2.5rem] border border-white/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.9),rgba(244,247,251,0.92),rgba(247,244,246,0.9))] px-6 py-8 shadow-[0_30px_100px_rgba(15,23,42,0.1)] md:px-8 md:py-10 dark:border-slate-800/80 dark:bg-[linear-gradient(135deg,rgba(12,18,30,0.94),rgba(37,15,30,0.9),rgba(17,29,43,0.92))] dark:shadow-[0_30px_110px_rgba(2,6,23,0.42)]">
           <div className="pointer-events-none absolute -top-20 -right-20 h-48 w-48 rounded-full bg-[rgba(201,10,55,0.08)] blur-3xl dark:bg-[rgba(201,10,55,0.12)]" />
