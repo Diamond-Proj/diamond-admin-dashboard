@@ -85,8 +85,9 @@ function CtaLink({
 }
 
 export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
-  const { header, hero, stats, highlights, personas, closing } =
+  const { header, hero, stats, hpcSystems, highlights, personas, closing } =
     landingPageContent;
+  const marqueeSystems = [...hpcSystems.items, ...hpcSystems.items];
 
   return (
     <main className="relative overflow-hidden bg-[#f4f6f9] dark:bg-[#0b1018]">
@@ -208,6 +209,50 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
         {/*    </LandingReveal>*/}
         {/*  ))}*/}
         {/*</section>*/}
+
+        <section className="py-8">
+          <LandingReveal delay={0.12}>
+            <div className="overflow-hidden rounded-[2rem] border border-white/80 bg-white/72 py-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/68 dark:shadow-[0_24px_80px_rgba(2,6,23,0.3)]">
+              <div className="px-5 md:px-6">
+                <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                  <div>
+                    <p className="text-xs font-semibold tracking-[0.18em] text-[#c90a37] uppercase">
+                      {hpcSystems.eyebrow}
+                    </p>
+                    <h2 className="mt-3 max-w-2xl text-2xl font-semibold tracking-[-0.04em] text-slate-950 md:text-3xl dark:text-slate-50">
+                      {hpcSystems.title}
+                    </h2>
+                  </div>
+                  <p className="max-w-sm text-sm leading-7 text-slate-600 dark:text-slate-300">
+                    From named systems to managed endpoints, Diamond keeps
+                    compute context visible before jobs are launched.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-7 overflow-hidden bg-white/0 dark:bg-slate-950/0">
+                <div className="landing-marquee-track flex w-max gap-3 px-5 md:px-6">
+                  {marqueeSystems.map((system, index) => (
+                    <article
+                      key={`${system.name}-${system.org}-${index}`}
+                      className="flex min-w-52 items-center justify-between gap-6 rounded-[1.35rem] border border-white/80 bg-white/86 px-5 py-4 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-900/72"
+                    >
+                      <div>
+                        <p className="text-base font-semibold text-slate-950 dark:text-slate-50">
+                          {system.name}
+                        </p>
+                        <p className="mt-1 text-xs font-semibold tracking-[0.14em] text-slate-400 uppercase dark:text-slate-500">
+                          {system.org}
+                        </p>
+                      </div>
+                      <Cpu className="h-5 w-5 text-[#0e79b2]" />
+                    </article>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </LandingReveal>
+        </section>
 
         <section className="grid gap-8 py-12 lg:grid-cols-[0.86fr_minmax(0,1.14fr)] lg:pt-12 lg:pb-8">
           <div className="max-w-xl space-y-6">

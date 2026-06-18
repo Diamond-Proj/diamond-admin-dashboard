@@ -60,6 +60,40 @@ export const landingPageContent = {
         'Submit repeatable jobs with built-in templates such as vLLM and DeepSpeed SFT.'
     }
   ],
+  hpcSystems: {
+    eyebrow: 'Supported compute systems',
+    title: 'Bring Diamond to the HPC environments your team already uses.',
+    items: [
+      {
+        name: 'Delta',
+        org: 'NCSA'
+      },
+      {
+        name: 'Frontera',
+        org: 'TACC'
+      },
+      {
+        name: 'Lonestar6',
+        org: 'TACC'
+      },
+      {
+        name: 'Anvil',
+        org: 'RCAC'
+      },
+      {
+        name: 'Globus Compute',
+        org: 'Endpoints'
+      },
+      {
+        name: 'Slurm',
+        org: 'Clusters'
+      },
+      {
+        name: 'Institutional',
+        org: 'HPC'
+      }
+    ]
+  },
   highlights: {
     title: 'Core workflows in one place',
     description:
