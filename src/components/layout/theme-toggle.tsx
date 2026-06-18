@@ -1,7 +1,7 @@
 'use client';
 import { MoonIcon, SunIcon, DesktopIcon } from '@radix-ui/react-icons';
 import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -12,17 +12,23 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
+function subscribeToMount(onStoreChange: () => void) {
+  const timeoutId = window.setTimeout(onStoreChange, 0);
+
+  return () => window.clearTimeout(timeoutId);
+}
+
 export default function ThemeToggle({
   triggerClassName
 }: {
   triggerClassName?: string;
 }) {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useSyncExternalStore(
+    subscribeToMount,
+    () => true,
+    () => false
+  );
 
   // Avoid hydration mismatch: `theme` is unknown on the server, so render a
   // stable placeholder for the first paint and swap in the real icon after mount.
