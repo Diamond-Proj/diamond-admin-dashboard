@@ -126,47 +126,61 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
             </div>
           </div>
 
-          <div className="relative mx-auto mt-6 max-w-[92rem]">
+          <div className="relative mx-auto mt-12 max-w-[86rem]">
             <div className="pointer-events-none absolute inset-x-10 bottom-0 h-20 bg-[radial-gradient(circle,rgba(15,23,42,0.14),transparent_72%)] blur-3xl dark:bg-[radial-gradient(circle,rgba(2,6,23,0.42),transparent_72%)]" />
             <div className="pointer-events-none absolute -top-10 right-[6%] h-48 w-48 rounded-full bg-sky-500/10 blur-3xl dark:bg-sky-500/10" />
 
             <LandingReveal delay={0.26}>
-              <div className="relative overflow-hidden rounded-[2.5rem] border border-white/80 bg-[linear-gradient(135deg,rgba(245,247,251,0.94),rgba(255,255,255,0.94),rgba(247,244,246,0.94))] p-4 shadow-[0_32px_90px_rgba(15,23,42,0.1)] md:p-5 dark:border-slate-800/80 dark:bg-[linear-gradient(135deg,rgba(12,18,30,0.94),rgba(16,22,34,0.94),rgba(28,14,24,0.94))] dark:shadow-[0_34px_100px_rgba(2,6,23,0.42)]">
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgba(255,255,255,0.4),transparent)] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.03),transparent)]" />
-                <div className="relative grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
+              <div className="mx-auto overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_34px_90px_rgba(15,23,42,0.12)] dark:border-slate-800 dark:bg-slate-950 dark:shadow-[0_34px_100px_rgba(0,0,0,0.42)]">
+                <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2.5 w-2.5 rounded-full bg-[#c90a37]" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-[#f39237]" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-[#0e79b2]" />
+                  </div>
+                  <p className="hidden text-xs font-semibold tracking-[0.14em] text-slate-500 uppercase sm:block dark:text-slate-400">
+                    Diamond Workspace
+                  </p>
+                </div>
+
+                <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_22rem]">
                   <LandingReveal delay={0.06}>
-                    <div className="overflow-hidden rounded-[1.7rem] border border-slate-200/80 bg-white shadow-[0_16px_40px_rgba(15,23,42,0.08)] dark:border-slate-800/80 dark:bg-slate-950 dark:shadow-none">
+                    <div className="h-full overflow-hidden bg-white dark:bg-slate-950">
                       <Image
                         src={hero.screenshot.src}
                         alt={hero.screenshot.alt}
                         width={2516}
                         height={1332}
                         priority
-                        className="h-auto w-full"
+                        sizes="(min-width: 1024px) 980px, 100vw"
+                        className="h-full min-h-[16rem] w-full object-cover object-left-top"
                       />
                     </div>
                   </LandingReveal>
 
-                  <div className="grid gap-3">
+                  <aside className="border-t border-slate-200 bg-slate-50 p-5 lg:border-t-0 lg:border-l dark:border-slate-800 dark:bg-slate-900/70">
                     <LandingReveal delay={0.1}>
-                      <p className="px-1 text-sm font-semibold tracking-[0.18em] text-slate-600 uppercase dark:text-slate-300">
+                      <p className="text-xs font-semibold tracking-[0.16em] text-slate-500 uppercase dark:text-slate-400">
                         {hero.screenshot.sideCardLabel}
                       </p>
                     </LandingReveal>
 
-                    {hero.screenshot.sideCardItems.map((item, index) => (
-                      <LandingReveal key={item} delay={0.14 + index * 0.06}>
-                        <article className="grid grid-cols-[3rem_minmax(0,1fr)] items-start gap-3 rounded-[1.6rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(244,247,251,0.94))] px-4 py-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-[linear-gradient(180deg,rgba(16,22,34,0.9),rgba(13,18,29,0.96))] dark:shadow-[0_18px_44px_rgba(2,6,23,0.22)]">
-                          <p className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/80 bg-[linear-gradient(180deg,#ffffff,#f8fafc)] text-[11px] font-semibold tracking-[0.18em] text-slate-500 uppercase shadow-[0_10px_22px_rgba(15,23,42,0.08)] dark:border-slate-700/80 dark:bg-[linear-gradient(180deg,rgba(30,41,59,0.92),rgba(15,23,42,0.94))] dark:text-slate-300 dark:shadow-none">
-                            0{index + 1}
-                          </p>
-                          <p className="pt-1 text-[0.98rem] leading-7 text-slate-700 dark:text-slate-200">
-                            {item}
-                          </p>
-                        </article>
-                      </LandingReveal>
-                    ))}
-                  </div>
+                    <div className="mt-4 grid gap-3">
+                      {hero.screenshot.sideCardItems.map((item, index) => (
+                        <LandingReveal key={item} delay={0.14 + index * 0.06}>
+                          <article className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+                            <p className="text-xs font-semibold tracking-[0.16em] text-[#c90a37] uppercase">
+                              {['Access', 'Package', 'Launch'][index] ??
+                                `Step ${index + 1}`}
+                            </p>
+                            <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">
+                              {item}
+                            </p>
+                          </article>
+                        </LandingReveal>
+                      ))}
+                    </div>
+                  </aside>
                 </div>
               </div>
             </LandingReveal>
