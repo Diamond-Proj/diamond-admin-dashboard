@@ -7,10 +7,11 @@ import { BuilderSteps } from './builder/builder-steps';
 import { BuilderReview } from './builder/builder-review';
 import { useToast } from '@/components/ui/use-toast';
 import {
+  BuilderFormData,
   FlowBuilderFormData,
   FlowImageBuilderPayload,
   ImageBuilderResponse
-} from '@/app/images/types';
+} from '@/app/(workspace)/images/types';
 
 interface FlowBuilderModalProps {
   isOpen: boolean;
