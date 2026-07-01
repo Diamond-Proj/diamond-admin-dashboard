@@ -4,12 +4,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { Server, Cpu, User, Calendar } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Endpoint, FlowBuilderFormData } from '@/app/images/types';
+import { Endpoint, BuilderFormData } from '@/app/images/types';
 import { VirtualSelect } from '@/components/ui/virtual-select';
 
 interface EndpointStepProps {
-  formData: Partial<FlowBuilderFormData>;
-  onUpdate: (data: Partial<FlowBuilderFormData>) => void;
+  formData: Partial<BuilderFormData>;
+  onUpdate: (data: Partial<BuilderFormData>) => void;
 }
 
 export function EndpointStep({ formData, onUpdate }: EndpointStepProps) {
