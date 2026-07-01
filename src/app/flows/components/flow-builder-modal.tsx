@@ -10,7 +10,7 @@ import {
   FlowBuilderFormData,
   FlowImageBuilderPayload,
   ImageBuilderResponse
-} from '@/app/images/types';
+} from '@/app/(workspace)/images/types';
 
 interface FlowBuilderModalProps {
   isOpen: boolean;

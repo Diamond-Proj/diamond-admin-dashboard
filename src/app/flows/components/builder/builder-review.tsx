@@ -1,7 +1,7 @@
 'use client';
 
 import { Server, Container, Terminal } from 'lucide-react';
-import { BuilderFormData, ReviewSection } from '@/app/images/types';
+import { BuilderFormData, ReviewSection } from '@/app/(workspace)/images/types';
 
 interface BuilderReviewProps {
   formData: BuilderFormData;

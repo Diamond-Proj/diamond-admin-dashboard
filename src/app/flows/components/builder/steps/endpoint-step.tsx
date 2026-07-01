@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Server, Cpu, User, Calendar } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Endpoint, BuilderFormData } from '@/app/images/types';
+import { Endpoint, BuilderFormData } from '@/app/(workspace)/images/types';
 import { VirtualSelect } from '@/components/ui/virtual-select';
 
 interface EndpointStepProps {
