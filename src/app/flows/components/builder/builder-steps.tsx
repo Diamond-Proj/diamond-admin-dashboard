@@ -3,12 +3,12 @@
 import { EndpointStep } from './steps/endpoint-step';
 import { ContainerStep } from './steps/container-step';
 import { BuildStep } from './steps/build-step';
-import { BuilderFormData } from '@/app/images/types';
+import { FlowBuilderFormData } from '@/app/images/types';
 
 interface BuilderStepsProps {
   step: number;
-  formData: Partial<BuilderFormData>;
-  onUpdate: (data: Partial<BuilderFormData>) => void;
+  formData: Partial<FlowBuilderFormData>;
+  onUpdate: (data: Partial<FlowBuilderFormData>) => void;
 }
 
 export function BuilderSteps({ step, formData, onUpdate }: BuilderStepsProps) {
