@@ -1,6 +1,7 @@
 'use client';
 import { MoonIcon, SunIcon, DesktopIcon } from '@radix-ui/react-icons';
 import { useTheme } from 'next-themes';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -9,25 +10,42 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
 
-export default function ThemeToggle() {
+export default function ThemeToggle({
+  triggerClassName
+}: {
+  triggerClassName?: string;
+}) {
   const { theme, setTheme } = useTheme();
-  const themeIcon =
-    theme === 'light' ? (
-      <SunIcon className="h-4.5 w-4.5" />
-    ) : theme === 'dark' ? (
-      <MoonIcon className="h-4.5 w-4.5" />
-    ) : (
-      <DesktopIcon className="h-4.5 w-4.5" />
-    );
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Avoid hydration mismatch: `theme` is unknown on the server, so render a
+  // stable placeholder for the first paint and swap in the real icon after mount.
+  const themeIcon = !mounted ? (
+    <span className="h-4.5 w-4.5" aria-hidden />
+  ) : theme === 'light' ? (
+    <SunIcon className="h-4.5 w-4.5" />
+  ) : theme === 'dark' ? (
+    <MoonIcon className="h-4.5 w-4.5" />
+  ) : (
+    <DesktopIcon className="h-4.5 w-4.5" />
+  );
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
           size="icon"
-          className="h-10 w-10 cursor-pointer rounded-lg border border-slate-300/70 bg-transparent text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+          className={cn(
+            'h-10 w-10 cursor-pointer rounded-lg border border-slate-300/70 bg-transparent text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-slate-100',
+            triggerClassName
+          )}
         >
           {themeIcon}
           <span className="sr-only">Toggle theme</span>

@@ -8,7 +8,7 @@
 
 import { TaskTemplate } from '../tasks.types';
 
-import deepspeedSftDelta from './deepspeed-sft-delta.json';
+import deepspeedSftDelta from './deepspeed-sft.json';
 import vllmInference from './vllm-inference.json';
 
 export const TASK_TEMPLATES: TaskTemplate[] = [

@@ -3,7 +3,7 @@
 import { EndpointStep } from './steps/endpoint-step';
 import { ContainerStep } from './steps/container-step';
 import { BuildStep } from './steps/build-step';
-import { BuilderFormData } from '@/app/images/types';
+import { BuilderFormData } from '@/app/(workspace)/images/types';
 
 interface BuilderStepsProps {
   step: number;

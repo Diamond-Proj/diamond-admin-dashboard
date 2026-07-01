@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
     console.log('✓ User info extracted:', userInfo);
 
     // Create redirect response
-    const dashboardUrl = new URL('/', request.url);
+    const dashboardUrl = new URL('/dashboard', request.url);
     const response = NextResponse.redirect(dashboardUrl);
 
     console.log('Setting cookies...');
