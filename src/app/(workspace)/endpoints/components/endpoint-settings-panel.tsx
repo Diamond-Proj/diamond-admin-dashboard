@@ -8,6 +8,7 @@ import {
   Plus,
   Save,
   Settings2,
+  Trash2,
   Undo2,
   X
 } from 'lucide-react';
@@ -284,6 +285,10 @@ export function EndpointSettingsPanel({
 
   const handleUndoConfig = () => {
     setEntries(cloneEntries(savedEntries));
+  };
+
+  const handleClearConfig = () => {
+    setEntries([]);
   };
 
   const handleSavePath = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -565,6 +570,17 @@ export function EndpointSettingsPanel({
                   >
                     <Undo2 className="h-4 w-4" />
                     Undo
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleClearConfig}
+                    disabled={isBusy || !canEditLoadedConfig || entries.length === 0}
+                    className="h-8 cursor-pointer gap-1.5 rounded-full px-2.5 text-xs text-red-600 hover:border-red-200 hover:bg-red-50 hover:text-red-700 dark:text-red-300 dark:hover:border-red-900/70 dark:hover:bg-red-950/20 dark:hover:text-red-200"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Clear All
                   </Button>
                   <Button
                     type="submit"
