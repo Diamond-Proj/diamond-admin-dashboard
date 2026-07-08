@@ -207,11 +207,12 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
                 </div>
               </div>
 
-              <div className="mt-7 overflow-hidden bg-white/0 dark:bg-slate-950/0">
-                <div className="landing-marquee-track flex w-max gap-3 px-5 md:px-6">
+              <div className="mt-7 overflow-hidden bg-white/0 px-5 md:px-6 dark:bg-slate-950/0">
+                <div className="landing-marquee-track flex w-max gap-3">
                   {marqueeSystems.map((system, index) => (
                     <article
                       key={`${system.name}-${system.org}-${index}`}
+                      aria-hidden={index >= hpcSystems.items.length}
                       className="flex min-w-52 items-center justify-between gap-6 rounded-[1.35rem] border border-white/80 bg-white/86 px-5 py-4 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-900/72"
                     >
                       <div>
