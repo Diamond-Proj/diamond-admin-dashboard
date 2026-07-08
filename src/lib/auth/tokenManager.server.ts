@@ -30,6 +30,8 @@ type OAuthTokenData = {
   scope?: string;
 };
 
+const MAX_ID_TOKEN_IDENTITY_SET_ENTRIES = 3;
+
 export class TokenManagerServer {
   private static normalizeResourceServer(
     resourceServer?: string,
@@ -82,6 +84,46 @@ export class TokenManagerServer {
       console.error('Failed to decode JWT payload:', error);
       return null;
     }
+  }
+
+  private static encodeJwtSegment(value: Record<string, unknown>): string {
+    return Buffer.from(JSON.stringify(value), 'utf8').toString('base64url');
+  }
+
+  private static compactIdTokenForCookie(idToken: string): string {
+    const claims = this.buildIdTokenClaims(idToken);
+
+    if (!claims) {
+      return idToken;
+    }
+
+    const payload: Record<string, unknown> = {
+      sub: claims.sub,
+      name: claims.name,
+      email: claims.email,
+      organization: claims.organization,
+      preferred_username: claims.preferred_username,
+      identity_provider: claims.identity_provider,
+      identity_provider_display_name: claims.identity_provider_display_name,
+      amr: claims.amr,
+      acr: claims.acr,
+      last_authentication: claims.last_authentication,
+      identity_set: claims.identity_set,
+      iss: claims.iss,
+      aud: claims.aud,
+      exp: claims.exp,
+      iat: claims.iat,
+      at_hash: claims.at_hash
+    };
+    const compactPayload = Object.fromEntries(
+      Object.entries(payload).filter(([, value]) => value !== undefined)
+    );
+
+    return [
+      this.encodeJwtSegment({ alg: 'none', typ: 'JWT' }),
+      this.encodeJwtSegment(compactPayload),
+      'local-claims'
+    ].join('.');
   }
 
   private static buildIdTokenClaims(idToken?: string): TokenStore['id_token_claims'] {
@@ -164,8 +206,12 @@ export class TokenManagerServer {
     const identities = identitySet
       .map((identity) => this.parseIdentitySetEntry(identity))
       .filter((identity): identity is IdTokenIdentity => !!identity);
+    const limitedIdentities = identities.slice(
+      0,
+      MAX_ID_TOKEN_IDENTITY_SET_ENTRIES
+    );
 
-    return identities.length > 0 ? identities : undefined;
+    return limitedIdentities.length > 0 ? limitedIdentities : undefined;
   }
 
   private static parseIdentitySetEntry(identity: unknown): IdTokenIdentity | null {
@@ -218,7 +264,7 @@ export class TokenManagerServer {
     };
 
     if (tokens.id_token) {
-      values.id_token = tokens.id_token;
+      values.id_token = this.compactIdTokenForCookie(tokens.id_token);
     }
 
     if (userInfo?.id) {
