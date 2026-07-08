@@ -49,7 +49,15 @@ export const landingPageContent = {
         org: 'NCSA'
       },
       {
+        name: 'Delta AI',
+        org: 'NCSA'
+      },
+      {
         name: 'Frontera',
+        org: 'TACC'
+      },
+      {
+        name: 'Stampede3',
         org: 'TACC'
       },
       {
@@ -61,16 +69,8 @@ export const landingPageContent = {
         org: 'RCAC'
       },
       {
-        name: 'Globus Compute',
-        org: 'Endpoints'
-      },
-      {
-        name: 'Slurm',
-        org: 'Clusters'
-      },
-      {
-        name: 'Institutional',
-        org: 'HPC'
+        name: 'Bridges2',
+        org: 'PSC'
       }
     ]
   },
