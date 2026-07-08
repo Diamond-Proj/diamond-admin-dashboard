@@ -41,7 +41,6 @@ export const landingPageContent = {
     }
   },
   hpcSystems: {
-    eyebrow: 'Supported compute systems',
     title: 'Bring Diamond to the HPC environments your team already uses.',
     items: [
       {
