@@ -26,8 +26,9 @@ Diamond Admin Dashboard is a comprehensive admin interface built with Next.js, f
    pnpm install
    ```
 
-3. **Environment Configuration:**
+   This also points Git at the repo-local hooks in `.githooks/`.
 
+3. **Environment Configuration:**
    - Copy the `.env.example` file to `.env` and adjust the configuration to match your local setup.
    - Ensure the backend API URL is correctly configured in your environment variables.
 
@@ -41,7 +42,53 @@ Diamond Admin Dashboard is a comprehensive admin interface built with Next.js, f
 5. **Access the Application:**
    - Open your web browser and navigate to `http://localhost:3000` to view the dashboard.
 
+## UI Regression Tests
+
+Playwright runs real browser flows with mocked auth and backend API responses,
+so the suite can catch frontend regressions without requiring Globus login or a
+live backend.
+
+```bash
+pnpm test                # headless run
+pnpm test:interactive    # interactive Playwright UI
+pnpm test:report         # open the last HTML report
+```
+
+First-time only, install Chromium:
+
+```bash
+pnpm exec playwright install chromium
+```
+
+The suite is split into public tests in `tests/public.spec.ts` and authenticated
+workspace tests in `tests/authenticated/`. Authenticated tests use
+`tests/auth.setup.ts` to generate a fake local auth state in
+`tests/.auth/user.json`; that file is gitignored and should not be committed.
+API mocks live in `tests/mocks/mock-api.ts`.
+
+## Git Hooks
+
+The repo uses `.githooks/pre-commit` to run:
+
+```bash
+pnpm typecheck
+pnpm test
+```
+
+To install the hook path manually:
+
+```bash
+pnpm prepare
+```
+
+To bypass in an emergency:
+
+```bash
+SKIP_PRECOMMIT=1 git commit
+```
+
 ## Deployment
+
 The application uses automated deployment through Coolify:
 
 1. **Development Deployments:**
