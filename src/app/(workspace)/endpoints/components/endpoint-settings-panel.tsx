@@ -6,9 +6,9 @@ import {
   Folder,
   Loader2,
   Plus,
-  RotateCcw,
   Save,
   Settings2,
+  Undo2,
   X
 } from 'lucide-react';
 
@@ -34,11 +34,6 @@ interface ConfigEntry {
   value: string;
 }
 
-interface PreparedConfig {
-  payload: Record<string, unknown> | null;
-  normalizedEntries: ConfigEntry[];
-}
-
 const UNSAFE_CONFIG_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
 
 let nextEntryId = 0;
@@ -56,28 +51,25 @@ function toEditableWorkPath(path?: string) {
   return (path || '').replace(/\/diamond\/?$/, '');
 }
 
-function stringifyValue(value: unknown): string {
-  if (typeof value === 'string') {
-    return value;
-  }
-
-  if (value === null) {
-    return 'null';
-  }
-
-  return JSON.stringify(value);
-}
-
 function normalizeConfig(value: unknown): ConfigEntry[] {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return [];
   }
 
-  return Object.entries(value).map(([key, entryValue]) => ({
-    id: createEntryId(),
-    key,
-    value: stringifyValue(entryValue)
-  }));
+  return Object.entries(value).map(([key, entryValue]) => {
+    const editableValue =
+      typeof entryValue === 'string'
+        ? entryValue
+        : entryValue === null
+          ? 'null'
+          : JSON.stringify(entryValue);
+
+    return {
+      id: createEntryId(),
+      key,
+      value: editableValue
+    };
+  });
 }
 
 function parseValue(key: string, rawValue: string): unknown {
@@ -139,7 +131,7 @@ function buildPayload(entries: ConfigEntry[]) {
   return {
     payload: finalizedPayload,
     normalizedEntries: normalizeConfig(finalizedPayload)
-  } satisfies PreparedConfig;
+  };
 }
 
 function getSignature(entries: ConfigEntry[]) {
@@ -258,11 +250,9 @@ export function EndpointSettingsPanel({
   const configHasChanges = getSignature(entries) !== getSignature(savedEntries);
   const isBusy = isSavingPath || isSavingConfig;
   const configSummary =
-    !hasLoadedConfig
-      ? 'Load on open'
-      : savedEntries.length === 0
-        ? 'No config'
-        : `${savedEntries.length} ${savedEntries.length === 1 ? 'key' : 'keys'}`;
+    hasLoadedConfig && savedEntries.length > 0
+      ? `${savedEntries.length} ${savedEntries.length === 1 ? 'key' : 'keys'}`
+      : 'No config';
   const canEditLoadedConfig = hasLoadedConfig && !isLoadingConfig;
 
   const addEntry = () => {
@@ -292,7 +282,7 @@ export function EndpointSettingsPanel({
     setEntries((current) => current.filter((entry) => entry.id !== id));
   };
 
-  const handleResetConfig = () => {
+  const handleUndoConfig = () => {
     setEntries(cloneEntries(savedEntries));
   };
 
@@ -357,7 +347,7 @@ export function EndpointSettingsPanel({
       return;
     }
 
-    let preparedConfig: PreparedConfig;
+    let preparedConfig: ReturnType<typeof buildPayload>;
 
     try {
       preparedConfig = buildPayload(entries);
@@ -569,12 +559,12 @@ export function EndpointSettingsPanel({
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={handleResetConfig}
+                    onClick={handleUndoConfig}
                     disabled={isBusy || !configHasChanges || !hasLoadedConfig}
                     className="h-8 cursor-pointer gap-1.5 rounded-full px-2.5 text-xs"
                   >
-                    <RotateCcw className="h-4 w-4" />
-                    Reset
+                    <Undo2 className="h-4 w-4" />
+                    Undo
                   </Button>
                   <Button
                     type="submit"
