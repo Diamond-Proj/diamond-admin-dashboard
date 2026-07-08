@@ -205,7 +205,7 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
               <div className="px-5 md:px-6">
                 <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                   <div>
-                    <h2 className="max-w-2xl text-2xl font-semibold tracking-[-0.04em] text-slate-950 md:text-3xl dark:text-slate-50">
+                    <h2 className="text-2xl font-semibold tracking-[-0.04em] text-slate-950 md:text-3xl dark:text-slate-50">
                       {hpcSystems.title}
                     </h2>
                   </div>
