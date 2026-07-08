@@ -29,7 +29,9 @@ test.describe('Sign-in page', () => {
     });
 
     await page.goto('/sign-in');
-    await page.getByRole('button', { name: /Sign In/i }).click();
+    await page
+      .getByRole('button', { name: /Sign In/i })
+      .click({ noWaitAfter: true });
 
     await expect.poll(() => capturedUrl, { timeout: 5_000 }).not.toBeNull();
 
