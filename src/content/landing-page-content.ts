@@ -40,26 +40,63 @@ export const landingPageContent = {
       authenticatedHref: 'https://docs.diamondhpc.ai'
     }
   },
-  stats: [
-    {
-      value: 'Endpoints',
-      label: 'managed and available views',
-      detail:
-        'Register and monitor your available compute resources on HPC systems.'
-    },
-    {
-      value: 'Images',
-      label: 'container build workflows',
-      detail:
-        'Build runtime images that can be used to execute custom tasks.'
-    },
-    {
-      value: 'Tasks',
-      label: 'template-driven submission',
-      detail:
-        'Submit repeatable jobs with built-in templates such as vLLM and DeepSpeed SFT.'
-    }
-  ],
+  hpcSystems: {
+    title: 'Bring Diamond to the HPC environments your team already uses.',
+    items: [
+      {
+        name: 'Delta',
+        org: 'NCSA',
+        image: {
+          src: '/hpc-systems/delta.jpg',
+          alt: 'NCSA Delta supercomputer'
+        }
+      },
+      {
+        name: 'Delta AI',
+        org: 'NCSA',
+        image: {
+          src: '/hpc-systems/delta-ai.jpg',
+          alt: 'DeltaAI system graphic'
+        }
+      },
+      {
+        name: 'Frontera',
+        org: 'TACC',
+        image: {
+          src: '/hpc-systems/frontera.jpg',
+          alt: 'Frontera supercomputer at TACC'
+        }
+      },
+      {
+        name: 'Stampede3',
+        org: 'TACC',
+        image: {
+          src: '/hpc-systems/stampede3.jpg',
+          alt: 'Stampede3 system graphic'
+        }
+      },
+      {
+        name: 'Lonestar6',
+        org: 'TACC',
+        image: {
+          src: '/hpc-systems/lonestar6.jpg',
+          alt: 'Lonestar6 supercomputer at TACC'
+        }
+      },
+      {
+        name: 'Anvil',
+        org: 'RCAC'
+      },
+      {
+        name: 'Bridges2',
+        org: 'PSC',
+        image: {
+          src: '/hpc-systems/bridges2.jpg',
+          alt: 'Bridges2 machine room at Pittsburgh Supercomputing Center'
+        }
+      }
+    ]
+  },
   highlights: {
     title: 'Core workflows in one place',
     description:
@@ -95,26 +132,6 @@ export const landingPageContent = {
         title: 'Launch tasks',
         description:
           'Submit work against active managed endpoints with reusable task templates.'
-      }
-    ]
-  },
-  personas: {
-    title: 'For shared HPC teams',
-    items: [
-      {
-        title: 'Platform operators',
-        description:
-          'Keep endpoint prep, runtime packaging, and submission flow visible in one place.'
-      },
-      {
-        title: 'Researchers and ML practitioners',
-        description:
-          'Move from access to dataset selection and task submission with fewer handoffs.'
-      },
-      {
-        title: 'Programs supporting repeatable compute workflows',
-        description:
-          'Share a repeatable path from ready infrastructure to containerized job execution.'
       }
     ]
   },
