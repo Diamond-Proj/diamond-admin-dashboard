@@ -39,6 +39,15 @@ const highlightCardStyles = [
   'bg-linear-to-b from-white/95 to-stone-50/80 dark:from-slate-950 dark:to-slate-950'
 ] as const;
 
+type HpcSystem = {
+  name: string;
+  org: string;
+  image?: {
+    src: string;
+    alt: string;
+  };
+};
+
 function CtaLink({
   href,
   label,
@@ -74,7 +83,10 @@ function CtaLink({
 export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
   const { header, hero, hpcSystems, highlights, closing } =
     landingPageContent;
-  const marqueeSystems = [...hpcSystems.items, ...hpcSystems.items];
+  const marqueeSystems: HpcSystem[] = [
+    ...hpcSystems.items,
+    ...hpcSystems.items
+  ];
 
   return (
     <main className="relative overflow-hidden bg-[#f4f6f9] dark:bg-[#0b1018]">
@@ -202,23 +214,56 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
 
               <div className="mt-7 overflow-hidden bg-white/0 px-5 md:px-6 dark:bg-slate-950/0">
                 <div className="landing-marquee-track flex w-max gap-3">
-                  {marqueeSystems.map((system, index) => (
-                    <article
-                      key={`${system.name}-${system.org}-${index}`}
-                      aria-hidden={index >= hpcSystems.items.length}
-                      className="flex min-w-52 items-center justify-between gap-6 rounded-[1.35rem] border border-white/80 bg-white/86 px-5 py-4 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-900/72"
-                    >
-                      <div>
-                        <p className="text-base font-semibold text-slate-950 dark:text-slate-50">
-                          {system.name}
-                        </p>
-                        <p className="mt-1 text-xs font-semibold tracking-[0.14em] text-slate-400 uppercase dark:text-slate-500">
-                          {system.org}
-                        </p>
-                      </div>
-                      <Cpu className="h-5 w-5 text-[#0e79b2]" />
-                    </article>
-                  ))}
+                  {marqueeSystems.map((system, index) => {
+                    const isDuplicate = index >= hpcSystems.items.length;
+                    const image = system.image;
+
+                    return (
+                      <article
+                        key={`${system.name}-${system.org}-${index}`}
+                        aria-hidden={isDuplicate}
+                        className={
+                          image
+                            ? 'relative h-24 min-w-60 overflow-hidden rounded-[1.35rem] border border-white/80 bg-white/86 shadow-[0_12px_30px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-900/72'
+                            : 'flex min-w-52 items-center justify-between gap-6 rounded-[1.35rem] border border-[#0e79b2]/30 bg-slate-950 px-5 py-4 shadow-[0_12px_30px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-[#0e79b2]/45 dark:bg-slate-100'
+                        }
+                      >
+                        {image ? (
+                          <>
+                            <Image
+                              src={image.src}
+                              alt={isDuplicate ? '' : image.alt}
+                              fill
+                              sizes="240px"
+                              className="object-cover"
+                            />
+                            <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-slate-950/88 via-slate-950/56 to-transparent px-4 pt-8 pb-3">
+                              <p className="text-sm leading-none font-semibold text-white drop-shadow-sm">
+                                {system.name}
+                              </p>
+                              <p className="mt-1 text-[0.68rem] leading-none font-semibold tracking-[0.14em] text-white/72 uppercase">
+                                {system.org}
+                              </p>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div>
+                              <p className="text-base font-semibold text-white dark:text-slate-950">
+                                {system.name}
+                              </p>
+                              <p className="mt-1 text-xs font-semibold tracking-[0.14em] text-sky-200 uppercase dark:text-slate-500">
+                                {system.org}
+                              </p>
+                            </div>
+                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-sky-200 dark:bg-slate-950/10 dark:text-[#0e79b2]">
+                              <Cpu className="h-5 w-5" />
+                            </span>
+                          </>
+                        )}
+                      </article>
+                    );
+                  })}
                 </div>
               </div>
             </div>

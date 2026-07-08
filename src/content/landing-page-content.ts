@@ -45,23 +45,43 @@ export const landingPageContent = {
     items: [
       {
         name: 'Delta',
-        org: 'NCSA'
+        org: 'NCSA',
+        image: {
+          src: '/hpc-systems/delta.jpg',
+          alt: 'NCSA Delta supercomputer'
+        }
       },
       {
         name: 'Delta AI',
-        org: 'NCSA'
+        org: 'NCSA',
+        image: {
+          src: '/hpc-systems/delta-ai.jpg',
+          alt: 'DeltaAI system graphic'
+        }
       },
       {
         name: 'Frontera',
-        org: 'TACC'
+        org: 'TACC',
+        image: {
+          src: '/hpc-systems/frontera.jpg',
+          alt: 'Frontera supercomputer at TACC'
+        }
       },
       {
         name: 'Stampede3',
-        org: 'TACC'
+        org: 'TACC',
+        image: {
+          src: '/hpc-systems/stampede3.jpg',
+          alt: 'Stampede3 system graphic'
+        }
       },
       {
         name: 'Lonestar6',
-        org: 'TACC'
+        org: 'TACC',
+        image: {
+          src: '/hpc-systems/lonestar6.jpg',
+          alt: 'Lonestar6 supercomputer at TACC'
+        }
       },
       {
         name: 'Anvil',
@@ -69,7 +89,11 @@ export const landingPageContent = {
       },
       {
         name: 'Bridges2',
-        org: 'PSC'
+        org: 'PSC',
+        image: {
+          src: '/hpc-systems/bridges2.jpg',
+          alt: 'Bridges2 machine room at Pittsburgh Supercomputing Center'
+        }
       }
     ]
   },
