@@ -39,6 +39,8 @@ interface PreparedConfig {
   normalizedEntries: ConfigEntry[];
 }
 
+const UNSAFE_CONFIG_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
+
 let nextEntryId = 0;
 
 function createEntryId() {
@@ -109,7 +111,7 @@ function parseValue(key: string, rawValue: string): unknown {
 }
 
 function buildPayload(entries: ConfigEntry[]) {
-  const payload: Record<string, unknown> = {};
+  const payload = Object.create(null) as Record<string, unknown>;
   const seenKeys = new Set<string>();
 
   for (const entry of entries) {
@@ -117,6 +119,10 @@ function buildPayload(entries: ConfigEntry[]) {
 
     if (!trimmedKey) {
       continue;
+    }
+
+    if (UNSAFE_CONFIG_KEYS.has(trimmedKey)) {
+      throw new Error(`Unsafe key "${trimmedKey}" is not allowed`);
     }
 
     if (seenKeys.has(trimmedKey)) {
@@ -149,6 +155,7 @@ export function EndpointSettingsPanel({
   endpoint
 }: EndpointSettingsPanelProps) {
   const pathInputId = `diamond-work-path-${endpoint.endpoint_uuid}`;
+  const settingsPanelId = `endpoint-settings-panel-${endpoint.endpoint_uuid}`;
   const [isExpanded, setIsExpanded] = useState(false);
   const [savedPath, setSavedPath] = useState(toEditableWorkPath(endpoint.diamond_dir));
   const [path, setPath] = useState(toEditableWorkPath(endpoint.diamond_dir));
@@ -292,6 +299,10 @@ export function EndpointSettingsPanel({
   const handleSavePath = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    if (isBusy) {
+      return;
+    }
+
     if (!normalizedPath) {
       toast({
         title: 'Error',
@@ -341,6 +352,10 @@ export function EndpointSettingsPanel({
 
   const handleSaveConfig = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (isBusy) {
+      return;
+    }
 
     let preparedConfig: PreparedConfig;
 
@@ -438,6 +453,7 @@ export function EndpointSettingsPanel({
           size="sm"
           onClick={() => setIsExpanded((current) => !current)}
           aria-expanded={isExpanded}
+          aria-controls={settingsPanelId}
           className="h-8 cursor-pointer gap-1.5 rounded-full border-slate-200 bg-white/80 px-2.5 text-xs text-slate-700 transition-all duration-200 hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:border-sky-900/70 dark:hover:bg-sky-950/30 dark:hover:text-sky-100"
         >
           <ChevronDown
@@ -451,6 +467,9 @@ export function EndpointSettingsPanel({
       </div>
 
       <div
+        id={settingsPanelId}
+        aria-hidden={!isExpanded}
+        inert={!isExpanded}
         className={cn(
           'grid border-t border-slate-200/80 transition-[grid-template-rows,opacity] duration-300 ease-out dark:border-slate-800',
           isExpanded
@@ -492,13 +511,13 @@ export function EndpointSettingsPanel({
                 value={path}
                 onChange={(event) => setPath(event.target.value)}
                 placeholder="/path/to/diamond/work/directory"
-                disabled={isSavingPath}
+                disabled={isBusy}
                 className="h-9 border-slate-200/80 bg-white/85 text-xs text-slate-900 placeholder:text-slate-400 focus-visible:ring-sky-500/20 dark:border-slate-700/80 dark:bg-slate-900/75 dark:text-slate-100 dark:placeholder:text-slate-500"
               />
 
               <Button
                 type="submit"
-                disabled={isSavingPath || !normalizedPath || !pathHasChanges}
+                disabled={isBusy || !normalizedPath || !pathHasChanges}
                 className="h-9 cursor-pointer gap-1.5 rounded-full bg-slate-900 px-3 text-xs text-white transition-all duration-200 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
               >
                 {isSavingPath ? (
@@ -551,7 +570,7 @@ export function EndpointSettingsPanel({
                     variant="outline"
                     size="sm"
                     onClick={handleResetConfig}
-                    disabled={isSavingConfig || !configHasChanges || !hasLoadedConfig}
+                    disabled={isBusy || !configHasChanges || !hasLoadedConfig}
                     className="h-8 cursor-pointer gap-1.5 rounded-full px-2.5 text-xs"
                   >
                     <RotateCcw className="h-4 w-4" />
@@ -561,7 +580,7 @@ export function EndpointSettingsPanel({
                     type="submit"
                     size="sm"
                     disabled={
-                      isSavingConfig ||
+                      isBusy ||
                       isLoadingConfig ||
                       !configHasChanges ||
                       !hasLoadedConfig
@@ -637,8 +656,9 @@ export function EndpointSettingsPanel({
                             onChange={(event) =>
                               updateEntry(entry.id, 'key', event.target.value)
                             }
+                            aria-label={`Config key ${index + 1}`}
                             placeholder={index === 0 ? 'account' : 'key'}
-                            disabled={isSavingConfig}
+                            disabled={isBusy}
                             className="h-9 border-slate-200/80 bg-white/80 text-xs dark:border-slate-700/80 dark:bg-slate-900/70"
                           />
                           <Input
@@ -646,8 +666,9 @@ export function EndpointSettingsPanel({
                             onChange={(event) =>
                               updateEntry(entry.id, 'value', event.target.value)
                             }
+                            aria-label={`Config value ${index + 1}`}
                             placeholder={index === 0 ? 'bcrc-delta-cpu' : 'value'}
-                            disabled={isSavingConfig}
+                            disabled={isBusy}
                             className="h-9 border-slate-200/80 bg-white/80 text-xs dark:border-slate-700/80 dark:bg-slate-900/70"
                           />
                           <Button
@@ -655,7 +676,7 @@ export function EndpointSettingsPanel({
                             variant="ghost"
                             size="icon"
                             onClick={() => removeEntry(entry.id)}
-                            disabled={isSavingConfig || !canEditLoadedConfig}
+                            disabled={isBusy || !canEditLoadedConfig}
                             aria-label={
                               entry.key.trim()
                                 ? `Remove config entry ${entry.key.trim()}`
