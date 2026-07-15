@@ -12,7 +12,7 @@ import {
   Dataset,
   DatasetsApiResponse
 } from '../datasets.types';
-import { transformDataset } from '../utils';
+import { deduplicateDatasets, transformDataset } from '../utils';
 
 export function DatasetsPageContent() {
   const [datasets, setDatasets] = useState<DisplayDataset[]>([]);
@@ -39,8 +39,8 @@ export function DatasetsPageContent() {
       }
 
       const data: DatasetsApiResponse = await response.json();
-      const transformedDatasets = data.datasets.map((dataset: Dataset) =>
-        transformDataset(dataset)
+      const transformedDatasets = deduplicateDatasets(data.datasets).map(
+        (dataset: Dataset) => transformDataset(dataset)
       );
 
       setDatasets(transformedDatasets);
