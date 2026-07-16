@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 import {
   mockCommonApi,
+  mockArtifactsApi,
   mockDashboardApi,
   mockDatasetsApi,
   mockEndpointInventoryApi,
@@ -71,6 +72,36 @@ test.describe('Authenticated UI regression', () => {
       .click();
     await page.waitForURL('**/images');
     expect(new URL(page.url()).pathname).toBe('/images');
+
+    await mockArtifactsApi(page);
+    await page
+      .getByRole('link', { name: /^Artifacts$/ })
+      .first()
+      .click();
+    await page.waitForURL('**/artifacts');
+    expect(new URL(page.url()).pathname).toBe('/artifacts');
+  });
+
+  test('artifacts page renders, filters, and protects shared artifacts', async ({
+    page
+  }) => {
+    await mockArtifactsApi(page);
+    await page.goto('/artifacts');
+    const main = page.getByRole('main');
+    await expect(
+      main.getByRole('heading', { name: /^Artifacts$/ })
+    ).toBeVisible();
+    await expect(main.getByText('Diamond 7B checkpoint')).toBeVisible();
+    await expect(main.getByText('PyTorch research runtime')).toBeVisible();
+    await expect(
+      main.getByRole('button', { name: 'Edit Diamond 7B checkpoint' })
+    ).toBeVisible();
+    await expect(
+      main.getByRole('button', { name: 'Edit PyTorch research runtime' })
+    ).toHaveCount(0);
+    await main.getByLabel('Search artifacts').fill('checkpoint');
+    await expect(main.getByText('Diamond 7B checkpoint')).toBeVisible();
+    await expect(main.getByText('PyTorch research runtime')).toBeHidden();
   });
 
   test('dashboard quick action cards route to feature pages', async ({

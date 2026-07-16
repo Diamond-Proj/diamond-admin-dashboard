@@ -24,6 +24,7 @@ export function transformDataset(dataset: Dataset): DisplayDataset {
 }
 
 export const VALID_MACHINES = [
+  'DeltaAI@NCSA',
   'Delta@NCSA',
   'Frontera@TACC',
   'Lonestar6@TACC',
