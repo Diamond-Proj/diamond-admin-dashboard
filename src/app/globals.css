@@ -414,6 +414,28 @@
     animation-play-state: paused;
   }
 
+  .landing-hover-card {
+    transform: translateY(0);
+    transition-property: transform, box-shadow, border-color, background-color;
+    transition-duration: 450ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+  }
+
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .landing-hover-card:hover {
+      transform: translateY(-0.25rem);
+    }
+
+    .landing-hover-card--subtle:hover {
+      transform: translateY(-0.125rem);
+    }
+
+    .landing-hover-card--strong:hover {
+      transform: translateY(-0.375rem);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .landing-marquee-track {
       width: auto;
