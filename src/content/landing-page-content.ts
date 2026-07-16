@@ -8,12 +8,9 @@ export const landingPageContent = {
     label: 'Unified operations for research compute',
     docsHref: 'https://docs.diamondhpc.ai',
     docsLabel: 'Docs',
-    signInHref: '/sign-in',
-    signInLabel: 'Sign in',
     primaryCta: {
       href: '/dashboard',
-      label: 'Open workspace',
-      authenticatedLabel: 'Go to workspace'
+      label: 'Open workspace'
     }
   },
   hero: {
@@ -30,14 +27,7 @@ export const landingPageContent = {
     },
     primaryCta: {
       label: 'Open workspace',
-      authenticatedLabel: 'Return to workspace',
       href: '/dashboard'
-    },
-    secondaryCta: {
-      label: 'Sign in',
-      authenticatedLabel: 'Read the docs',
-      href: '/sign-in',
-      authenticatedHref: 'https://docs.diamondhpc.ai'
     }
   },
   hpcSystems: {
@@ -141,7 +131,6 @@ export const landingPageContent = {
       'Bring endpoints online, prepare runtime environments, register datasets, and launch reusable tasks from one interface.',
     primaryCta: {
       label: 'Open workspace',
-      authenticatedLabel: 'Return to workspace',
       href: '/dashboard'
     },
     secondaryCta: {

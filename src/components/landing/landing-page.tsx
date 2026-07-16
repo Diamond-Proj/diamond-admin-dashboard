@@ -80,7 +80,7 @@ function CtaLink({
   );
 }
 
-export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
+export function LandingPage() {
   const { header, hero, hpcSystems, highlights, closing } = landingPageContent;
   const marqueeSystems: HpcSystem[] = [
     ...hpcSystems.items,
@@ -93,7 +93,7 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(100,116,139,0.18)_1px,transparent_1px),linear-gradient(to_bottom,rgba(100,116,139,0.18)_1px,transparent_1px)] [mask-image:linear-gradient(to_bottom,white,transparent_90%)] bg-size-[56px_56px] opacity-60 dark:opacity-35" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[36rem] bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.92),transparent_72%)] dark:bg-[radial-gradient(circle_at_top,rgba(15,23,42,0.82),transparent_72%)]" />
 
-      <LandingHeader header={header} isAuthenticated={isAuthenticated} />
+      <LandingHeader header={header} />
 
       <div className="relative z-10 container pt-28 pb-8 md:pt-32 md:pb-10">
         <section className={`${landingBodyFont.className} px-1 py-6 lg:py-10`}>
@@ -112,25 +112,7 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
                 <div className="mt-8 flex flex-wrap justify-center gap-3">
                   <CtaLink
                     href={hero.primaryCta.href}
-                    label={
-                      isAuthenticated
-                        ? hero.primaryCta.authenticatedLabel
-                        : hero.primaryCta.label
-                    }
-                  />
-                  <CtaLink
-                    href={
-                      isAuthenticated
-                        ? hero.secondaryCta.authenticatedHref
-                        : hero.secondaryCta.href
-                    }
-                    label={
-                      isAuthenticated
-                        ? hero.secondaryCta.authenticatedLabel
-                        : hero.secondaryCta.label
-                    }
-                    variant="secondary"
-                    external={isAuthenticated}
+                    label={hero.primaryCta.label}
                   />
                 </div>
               </LandingReveal>
@@ -343,11 +325,7 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
               <div className="flex flex-wrap gap-3">
                 <CtaLink
                   href={closing.primaryCta.href}
-                  label={
-                    isAuthenticated
-                      ? closing.primaryCta.authenticatedLabel
-                      : closing.primaryCta.label
-                  }
+                  label={closing.primaryCta.label}
                 />
                 <CtaLink
                   href={closing.secondaryCta.href}
@@ -380,21 +358,12 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
               >
                 Docs
               </Link>
-              {isAuthenticated ? (
-                <Link
-                  href="/dashboard"
-                  className="text-sm text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-                >
-                  Workspace
-                </Link>
-              ) : (
-                <Link
-                  href="/sign-in"
-                  className="text-sm text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
-                >
-                  Sign in
-                </Link>
-              )}
+              <Link
+                href="/dashboard"
+                className="text-sm text-slate-500 transition-colors hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+              >
+                Workspace
+              </Link>
             </nav>
 
             <p className="text-xs text-slate-400 dark:text-slate-500">

@@ -40,11 +40,9 @@ function PrimaryHeaderCta({ href, label }: { href: string; label: string }) {
 }
 
 export function LandingHeader({
-  header,
-  isAuthenticated
+  header
 }: {
   header: LandingPageContent['header'];
-  isAuthenticated: boolean;
 }) {
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollY = useRef(0);
@@ -101,20 +99,10 @@ export function LandingHeader({
               label={header.docsLabel}
               external
             />
-            {!isAuthenticated ? (
-              <HeaderActionLink
-                href={header.signInHref}
-                label={header.signInLabel}
-              />
-            ) : null}
             <ThemeToggle triggerClassName="rounded-full border-white/80 bg-white/72 shadow-[0_8px_22px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-slate-700/80 dark:bg-slate-950/68 dark:shadow-[0_14px_30px_rgba(2,6,23,0.24)]" />
             <PrimaryHeaderCta
               href={header.primaryCta.href}
-              label={
-                isAuthenticated
-                  ? header.primaryCta.authenticatedLabel
-                  : header.primaryCta.label
-              }
+              label={header.primaryCta.label}
             />
           </div>
         </div>
