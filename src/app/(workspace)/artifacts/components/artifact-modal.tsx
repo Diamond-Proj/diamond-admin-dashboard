@@ -298,8 +298,8 @@ export function ArtifactModal({
             ) : null}
 
             <section className="border-t border-slate-200/80 pt-4 dark:border-slate-700/80">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <label className="flex h-10 cursor-pointer items-center justify-between rounded-lg border border-slate-200/80 bg-slate-50/70 px-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 sm:col-span-2 dark:border-slate-700/80 dark:bg-slate-800/50 dark:text-slate-300 dark:hover:bg-slate-800">
+              <div className="space-y-3">
+                <label className="flex h-10 w-full cursor-pointer items-center justify-between rounded-lg border border-slate-200/80 bg-slate-50/70 px-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 sm:w-64 dark:border-slate-700/80 dark:bg-slate-800/50 dark:text-slate-300 dark:hover:bg-slate-800">
                   <span>Public</span>
                   <input
                     type="checkbox"
@@ -312,7 +312,7 @@ export function ArtifactModal({
                   </span>
                 </label>
                 {form.artifact_type === 'container' ? (
-                  <>
+                  <div className="grid gap-3 sm:grid-cols-2">
                     <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
                       Base image
                       <Input
@@ -348,10 +348,10 @@ export function ArtifactModal({
                         searchPlaceholder="Search formats..."
                       />
                     </div>
-                  </>
+                  </div>
                 ) : null}
                 {form.artifact_type === 'model' ? (
-                  <>
+                  <div className="grid gap-3 sm:grid-cols-2">
                     <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
                       Parameter size
                       <Input
@@ -374,7 +374,7 @@ export function ArtifactModal({
                         placeholder="Transformer"
                       />
                     </label>
-                  </>
+                  </div>
                 ) : null}
               </div>
             </section>
