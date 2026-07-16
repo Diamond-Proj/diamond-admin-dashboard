@@ -21,6 +21,7 @@ import { QuickActions } from '@/components/dashboard/quick-actions';
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentTasks, setRecentTasks] = useState<RecentTask[]>([]);
+  const [isInitialized, setIsInitialized] = useState<boolean | null>(null);
   const [isPending, startTransition] = useTransition();
   const { session } = useAuthSessionContext();
   const user = {
@@ -64,6 +65,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const checkAndUpdateProfile = async () => {
       if (!user.primaryIdentity) {
+        setIsInitialized(true);
         return;
       }
 
@@ -71,6 +73,8 @@ export default function DashboardPage() {
         const profile = await getUserProfile({
           identity_id: user.primaryIdentity
         });
+
+        setIsInitialized(profile.profile?.is_initialized ?? true);
 
         if (
           !profile.profile ||
@@ -85,6 +89,7 @@ export default function DashboardPage() {
         }
       } catch (error) {
         console.error('Error updating profile:', error);
+        setIsInitialized(true);
       }
     };
 
@@ -99,8 +104,24 @@ export default function DashboardPage() {
 
         <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-              Welcome back, {user.name.split(' ')[0] || 'Researcher'}
+            <h1
+              aria-busy={isInitialized === null}
+              className="text-2xl font-bold text-slate-900 dark:text-slate-100"
+            >
+              {isInitialized === null ? (
+                <>
+                  <span className="sr-only">Loading dashboard</span>
+                  <span
+                    aria-hidden="true"
+                    className="block h-8 w-56 animate-pulse rounded-lg bg-slate-200/80 dark:bg-slate-700/70"
+                  />
+                </>
+              ) : (
+                <>
+                  {isInitialized ? 'Welcome back,' : 'Welcome'}{' '}
+                  {user.name.split(' ')[0] || 'Researcher'}
+                </>
+              )}
             </h1>
           </div>
           <Link
