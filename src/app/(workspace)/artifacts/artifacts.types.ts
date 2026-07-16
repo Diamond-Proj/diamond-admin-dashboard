@@ -30,7 +30,6 @@ export interface ArtifactFormData {
   description: string;
   artifact_metadata: string;
   public: boolean;
-  creation_date: string;
   container_base_image: string;
   container_type: '' | 'apptainer' | 'docker';
   model_param_size: string;

@@ -41,7 +41,6 @@ const emptyForm: ArtifactFormData = {
   description: '',
   artifact_metadata: '',
   public: false,
-  creation_date: '',
   container_base_image: '',
   container_type: '',
   model_param_size: '',
@@ -59,7 +58,6 @@ function formFromArtifact(artifact: Artifact): ArtifactFormData {
     description: artifact.description ?? '',
     artifact_metadata: artifact.artifact_metadata ?? '',
     public: artifact.public,
-    creation_date: artifact.creation_date?.slice(0, 10) ?? '',
     container_base_image: artifact.base_image ?? '',
     container_type: artifact.container_type ?? '',
     model_param_size: artifact.param_size ?? '',
@@ -123,9 +121,6 @@ export function ArtifactModal({
       description: form.description.trim() || null,
       artifact_metadata: form.artifact_metadata.trim() || null,
       public: form.public,
-      creation_date: form.creation_date
-        ? new Date(`${form.creation_date}T00:00:00`).toISOString()
-        : null,
       container_base_image: form.container_base_image.trim() || null,
       container_type: form.container_type || null,
       model_param_size: form.model_param_size.trim() || null,
@@ -304,16 +299,7 @@ export function ArtifactModal({
 
             <section className="border-t border-slate-200/80 pt-4 dark:border-slate-700/80">
               <div className="grid gap-3 sm:grid-cols-2">
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Creation date
-                  <Input
-                    type="date"
-                    className="mt-1"
-                    value={form.creation_date}
-                    onChange={(e) => update('creation_date', e.target.value)}
-                  />
-                </label>
-                <label className="flex h-10 cursor-pointer items-center justify-between self-end rounded-lg border border-slate-200/80 bg-slate-50/70 px-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-700/80 dark:bg-slate-800/50 dark:text-slate-300 dark:hover:bg-slate-800">
+                <label className="flex h-10 cursor-pointer items-center justify-between rounded-lg border border-slate-200/80 bg-slate-50/70 px-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 sm:col-span-2 dark:border-slate-700/80 dark:bg-slate-800/50 dark:text-slate-300 dark:hover:bg-slate-800">
                   <span>Public</span>
                   <input
                     type="checkbox"
