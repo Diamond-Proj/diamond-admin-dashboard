@@ -3,13 +3,12 @@
 import { type CSSProperties, type ReactNode, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  Menu,
-  PanelLeftClose,
-  PanelLeftOpen,
-  X
-} from 'lucide-react';
+import { Menu, PanelLeftClose, PanelLeftOpen, X } from 'lucide-react';
 
+import {
+  ApiErrorMonitor,
+  ApiErrorMonitorTrigger
+} from '@/components/api-error-monitor';
 import { Logo } from '@/components/icons';
 import { AuthStatus } from '@/components/auth-status';
 import { DocsButton } from '@/components/docs-button';
@@ -27,7 +26,10 @@ const routeTitles = [
   { match: (path: string) => path.startsWith('/images'), title: 'Images' },
   { match: (path: string) => path.startsWith('/datasets'), title: 'Datasets' },
   { match: (path: string) => path.startsWith('/tasks'), title: 'Tasks' },
-  { match: (path: string) => path.startsWith('/endpoints'), title: 'Endpoints' },
+  {
+    match: (path: string) => path.startsWith('/endpoints'),
+    title: 'Endpoints'
+  },
   { match: (path: string) => path.startsWith('/profile'), title: 'Profile' }
 ];
 
@@ -74,12 +76,15 @@ export function AppShell({
           <aside className="hidden min-h-0 lg:block">
             <div className="flex h-full min-h-0 flex-col overflow-hidden border-r border-slate-200/70 bg-[hsl(var(--dashboard-surface))] dark:border-slate-700/70">
               <div
-                className={`flex h-16 shrink-0 items-center border-b border-slate-200/60 dark:border-slate-700/60 px-6`}
+                className={`flex h-16 shrink-0 items-center border-b border-slate-200/60 px-6 dark:border-slate-700/60`}
               >
-                <Link className="flex items-center gap-2 font-semibold" href="/dashboard">
+                <Link
+                  className="flex items-center gap-2 font-semibold"
+                  href="/dashboard"
+                >
                   <Logo className="drop-shadow-sm" />
                   <span
-                    className={`text-rose_red dark:text-honolulu_blue overflow-hidden whitespace-nowrap text-lg font-bold tracking-wide transition-[max-width,opacity,margin] duration-300 ease-out ${
+                    className={`text-rose_red dark:text-honolulu_blue overflow-hidden text-lg font-bold tracking-wide whitespace-nowrap transition-[max-width,opacity,margin] duration-300 ease-out ${
                       desktopNavCollapsed
                         ? 'ml-0 max-w-0 opacity-0'
                         : 'ml-1 max-w-35 opacity-100'
@@ -100,8 +105,10 @@ export function AppShell({
               <div className="flex min-w-0 items-center gap-3">
                 <button
                   type="button"
-                  className="hidden h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-slate-300/70 text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800 lg:inline-flex"
-                  onClick={() => setDesktopNavCollapsed((collapsed) => !collapsed)}
+                  className="hidden h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-slate-300/70 text-slate-700 transition-colors hover:bg-slate-100 lg:inline-flex dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
+                  onClick={() =>
+                    setDesktopNavCollapsed((collapsed) => !collapsed)
+                  }
                   aria-label="Toggle sidebar"
                 >
                   {desktopNavCollapsed ? (
@@ -113,7 +120,7 @@ export function AppShell({
 
                 <button
                   type="button"
-                  className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-slate-300/70 text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800 lg:hidden"
+                  className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-slate-300/70 text-slate-700 transition-colors hover:bg-slate-100 lg:hidden dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
                   onClick={() => setMobileNavOpen(true)}
                   aria-label="Open navigation"
                 >
@@ -125,6 +132,7 @@ export function AppShell({
               </div>
 
               <div className="flex items-center gap-3">
+                <ApiErrorMonitorTrigger />
                 <DocsButton />
                 <ThemeToggle />
                 <AuthStatus session={session} isLoading={isLoading} />
@@ -186,6 +194,7 @@ export function AppShell({
         </div>
 
         <Toaster />
+        <ApiErrorMonitor />
         <EndpointOnboarding
           isAuthenticated={session.isAuthenticated}
           primaryIdentity={session.userInfo?.id}

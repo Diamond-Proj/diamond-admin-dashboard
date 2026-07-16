@@ -1,10 +1,12 @@
 'use client';
 
-import { BadgeCheck, Building2, IdCard, Mail, Shield } from 'lucide-react';
+import { BadgeCheck, Bug, Building2, IdCard, Mail, Shield } from 'lucide-react';
 import { useAuthSessionContext } from '@/lib/auth/session-context';
+import { setDeveloperMode, useDeveloperMode } from '@/lib/developer-mode';
 
 export default function ProfilePage() {
   const { session } = useAuthSessionContext();
+  const isDeveloperMode = useDeveloperMode();
   const userInfo = session.userInfo;
 
   const name = userInfo?.name || 'Not available';
@@ -21,8 +23,8 @@ export default function ProfilePage() {
   return (
     <main className="flex flex-1 flex-col gap-6">
       <section className="dashboard-card relative overflow-hidden p-5 md:p-6">
-        <div className="pointer-events-none absolute -right-10 -top-14 h-36 w-36 rounded-full bg-primary/6 blur-2xl" />
-        <div className="pointer-events-none absolute -left-8 -bottom-10 h-32 w-32 rounded-full bg-sky-400/5 blur-2xl" />
+        <div className="bg-primary/6 pointer-events-none absolute -top-14 -right-10 h-36 w-36 rounded-full blur-2xl" />
+        <div className="pointer-events-none absolute -bottom-10 -left-8 h-32 w-32 rounded-full bg-sky-400/5 blur-2xl" />
 
         <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-4">
@@ -90,6 +92,45 @@ export default function ProfilePage() {
             </dd>
           </div>
         </dl>
+      </section>
+
+      <section className="dashboard-card p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <span className="bg-primary/10 text-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
+              <Bug className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <div>
+              <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                Developer Mode
+              </h3>
+              <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+                Show detailed API response errors in this browser. This setting
+                is stored locally and does not affect your account.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            role="switch"
+            aria-checked={isDeveloperMode}
+            onClick={() => setDeveloperMode(!isDeveloperMode)}
+            className={`focus-visible:ring-primary/45 relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none dark:focus-visible:ring-offset-slate-950 ${
+              isDeveloperMode
+                ? 'border-primary bg-primary'
+                : 'border-slate-300 bg-slate-200 dark:border-slate-600 dark:bg-slate-700'
+            }`}
+          >
+            <span className="sr-only">Toggle developer mode</span>
+            <span
+              aria-hidden="true"
+              className={`mt-0.5 block h-5.5 w-5.5 rounded-full bg-white shadow-sm transition-transform ${
+                isDeveloperMode ? 'translate-x-5.5' : 'translate-x-0.5'
+              }`}
+            />
+          </button>
+        </div>
       </section>
 
       <section className="dashboard-card p-6">
