@@ -42,6 +42,33 @@ test.describe('Authenticated UI regression', () => {
     ).toBeVisible();
   });
 
+  test('dashboard welcomes users who have not completed initialization', async ({
+    page
+  }) => {
+    await mockDashboardApi(page);
+    await page.route('**/api/profile**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          profile: {
+            identity_id: 'test-user-identity',
+            name: 'Test Researcher',
+            email: 'test.researcher@example.com',
+            institution: 'Diamond UI Test Lab',
+            is_initialized: false
+          }
+        })
+      });
+    });
+
+    await page.goto('/dashboard');
+
+    await expect(
+      page.getByRole('heading', { name: /^Welcome Test$/i })
+    ).toBeVisible();
+  });
+
   test('sidebar navigation keeps primary workspace routes reachable', async ({
     page
   }) => {
