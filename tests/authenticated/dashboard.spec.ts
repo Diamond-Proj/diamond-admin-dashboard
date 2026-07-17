@@ -42,6 +42,132 @@ test.describe('Authenticated UI regression', () => {
     ).toBeVisible();
   });
 
+  test('API response errors are visible in developer mode', async ({
+    page
+  }) => {
+    await mockDashboardApi(page);
+    await page.addInitScript(() => {
+      localStorage.setItem('diamond:developer-mode', 'true');
+    });
+    await page.route('**/api/diagnostic-test', async (route) => {
+      await route.fulfill({
+        status: 422,
+        contentType: 'application/json',
+        body: JSON.stringify({ detail: 'Invalid diagnostic payload' })
+      });
+    });
+    await page.route('**/api/diagnostic-secondary', async (route) => {
+      await route.fulfill({
+        status: 503,
+        contentType: 'application/json',
+        body: JSON.stringify({ detail: 'Secondary diagnostic failure' })
+      });
+    });
+
+    await page.goto('/dashboard');
+    await expect(
+      page.getByRole('heading', { name: /Welcome back, Test/i })
+    ).toBeVisible();
+    await page
+      .getByRole('button', { name: 'Open developer diagnostics' })
+      .click();
+    const diagnosticsPanel = page.getByRole('region', {
+      name: 'API diagnostics'
+    });
+    await expect(diagnosticsPanel).toBeVisible();
+    await page.evaluate(() =>
+      Promise.all([
+        fetch('/api/diagnostic-test'),
+        fetch('/api/diagnostic-secondary')
+      ])
+    );
+
+    const diagnostics = page.getByRole('alert', {
+      name: 'API response error'
+    });
+    await expect(diagnostics).toHaveCount(2);
+    await expect(
+      diagnosticsPanel.getByRole('heading', { name: 'API Error Monitor' })
+    ).toBeVisible();
+    await expect(diagnosticsPanel).toContainText('422');
+    await expect(diagnosticsPanel).toContainText('Invalid diagnostic payload');
+    await expect(diagnosticsPanel).toContainText('503');
+    await expect(diagnosticsPanel).toContainText(
+      'Secondary diagnostic failure'
+    );
+    await page.reload();
+    await page
+      .getByRole('button', { name: 'Open developer diagnostics' })
+      .click();
+    await expect(diagnostics).toHaveCount(2);
+    await expect(diagnosticsPanel).toContainText('Invalid diagnostic payload');
+    await expect(diagnosticsPanel).toContainText(
+      'Secondary diagnostic failure'
+    );
+    await page
+      .getByRole('button', { name: 'Delete API error' })
+      .first()
+      .click();
+    await expect(diagnostics).toHaveCount(1);
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () =>
+            JSON.parse(localStorage.getItem('diamond:api-errors') ?? '[]')
+              .length
+        )
+      )
+      .toBe(1);
+    const clearAllErrors = page.getByRole('button', {
+      name: 'Clear all API errors'
+    });
+    await clearAllErrors.hover();
+    await expect
+      .soft(page.getByRole('tooltip', { name: 'Clear all errors' }))
+      .toBeVisible();
+    await clearAllErrors.click();
+    await expect(diagnostics).toHaveCount(0);
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () =>
+            JSON.parse(localStorage.getItem('diamond:api-errors') ?? '[]')
+              .length
+        )
+      )
+      .toBe(0);
+  });
+
+  test('API response errors stay hidden outside developer mode', async ({
+    page
+  }) => {
+    await mockDashboardApi(page);
+    await page.addInitScript(() => {
+      localStorage.setItem('diamond:developer-mode', 'false');
+    });
+    await page.route('**/api/diagnostic-test', async (route) => {
+      await route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        body: JSON.stringify({ detail: 'Internal diagnostic detail' })
+      });
+    });
+
+    await page.goto('/dashboard');
+    await expect(
+      page.getByRole('heading', { name: /Welcome back, Test/i })
+    ).toBeVisible();
+    await page.evaluate(() => fetch('/api/diagnostic-test'));
+    await page.waitForTimeout(200);
+
+    await expect(
+      page.getByRole('alert', { name: 'API response error' })
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole('button', { name: 'Open developer diagnostics' })
+    ).toHaveCount(0);
+  });
+
   test('sidebar navigation keeps primary workspace routes reachable', async ({
     page
   }) => {
@@ -321,14 +447,33 @@ test.describe('Authenticated UI regression', () => {
     await page.goto('/profile');
 
     await expect(
-      page.getByRole('heading', { name: 'Test Researcher' })
+      page.getByRole('heading', { name: 'Account Details' })
     ).toBeVisible();
+    await expect(page.getByText('Test Researcher').first()).toBeVisible();
     await expect(
       page.getByText('test.researcher@example.com').first()
     ).toBeVisible();
     await expect(page.getByText('test-researcher').first()).toBeVisible();
     await expect(page.getByText('Diamond UI Test Lab').first()).toBeVisible();
-    await expect(page.getByText('Globus session is active.')).toBeVisible();
+    const developerMode = page.getByRole('switch', {
+      name: 'Toggle developer mode'
+    });
+    await expect(developerMode).not.toBeChecked();
+    await developerMode.click();
+    await expect(developerMode).toBeChecked();
+    const browserStorage = page.getByRole('button', {
+      name: /Browser Storage/
+    });
+    await expect(browserStorage).toBeVisible();
+    await expect(browserStorage).toHaveAttribute('aria-expanded', 'false');
+    await expect(
+      page.getByRole('button', { name: 'Open developer diagnostics' })
+    ).toBeVisible();
+    await expect
+      .poll(() =>
+        page.evaluate(() => localStorage.getItem('diamond:developer-mode'))
+      )
+      .toBe('true');
   });
 
   test('auth cookie keeps linked identities compact after server writes cookies', async ({
