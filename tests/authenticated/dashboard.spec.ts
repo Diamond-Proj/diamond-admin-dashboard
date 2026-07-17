@@ -447,20 +447,25 @@ test.describe('Authenticated UI regression', () => {
     await page.goto('/profile');
 
     await expect(
-      page.getByRole('heading', { name: 'Test Researcher' })
+      page.getByRole('heading', { name: 'Account Details' })
     ).toBeVisible();
+    await expect(page.getByText('Test Researcher').first()).toBeVisible();
     await expect(
       page.getByText('test.researcher@example.com').first()
     ).toBeVisible();
     await expect(page.getByText('test-researcher').first()).toBeVisible();
     await expect(page.getByText('Diamond UI Test Lab').first()).toBeVisible();
-    await expect(page.getByText('Globus session is active.')).toBeVisible();
     const developerMode = page.getByRole('switch', {
       name: 'Toggle developer mode'
     });
     await expect(developerMode).not.toBeChecked();
     await developerMode.click();
     await expect(developerMode).toBeChecked();
+    const browserStorage = page.getByRole('button', {
+      name: /Browser Storage/
+    });
+    await expect(browserStorage).toBeVisible();
+    await expect(browserStorage).toHaveAttribute('aria-expanded', 'false');
     await expect(
       page.getByRole('button', { name: 'Open developer diagnostics' })
     ).toBeVisible();
