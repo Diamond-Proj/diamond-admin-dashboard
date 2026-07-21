@@ -14,7 +14,11 @@
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "prepare": "git config core.hooksPath .githooks",
+    "test": "playwright test",
+    "test:interactive": "playwright test --ui",
+    "test:report": "playwright show-report"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.11",
@@ -34,6 +38,7 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^22",
     "@types/react": "^19",

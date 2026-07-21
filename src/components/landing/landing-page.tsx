@@ -13,7 +13,6 @@ import {
 import { Logo } from '@/components/icons';
 import { LandingHeader } from '@/components/landing/landing-header';
 import { LandingReveal } from '@/components/landing/landing-reveal';
-import { WorkspaceSignal } from '@/components/landing/workspace-signal';
 import { landingPageContent } from '@/content/landing-page-content';
 
 const landingDisplayFont = Lora({
@@ -33,12 +32,6 @@ const highlightIcons = {
   rocket: Rocket
 } as const;
 
-const statCardStyles = [
-  'border-white/75 bg-linear-to-br from-white/95 to-slate-50/95 dark:from-slate-950 dark:to-slate-900',
-  'border-white/75 bg-linear-to-br from-white/95 to-rose-50/70 dark:from-slate-950 dark:to-slate-950',
-  'border-white/75 bg-linear-to-br from-white/95 to-sky-50/80 dark:from-slate-950 dark:to-slate-900'
-] as const;
-
 const highlightCardStyles = [
   'bg-linear-to-b from-white/95 to-slate-50/90 dark:from-slate-950 dark:to-slate-900',
   'bg-linear-to-b from-white/95 to-rose-50/70 dark:from-slate-950 dark:to-slate-950',
@@ -46,11 +39,14 @@ const highlightCardStyles = [
   'bg-linear-to-b from-white/95 to-stone-50/80 dark:from-slate-950 dark:to-slate-950'
 ] as const;
 
-const personaCardStyles = [
-  'bg-linear-to-b from-white/92 to-slate-50/92 dark:from-slate-950 dark:to-slate-900',
-  'bg-linear-to-b from-white/92 to-rose-50/70 dark:from-slate-950 dark:to-slate-950',
-  'bg-linear-to-b from-white/92 to-sky-50/80 dark:from-slate-950 dark:to-slate-900'
-] as const;
+type HpcSystem = {
+  name: string;
+  org: string;
+  image?: {
+    src: string;
+    alt: string;
+  };
+};
 
 function CtaLink({
   href,
@@ -85,8 +81,12 @@ function CtaLink({
 }
 
 export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
-  const { header, hero, stats, highlights, personas, closing } =
+  const { header, hero, hpcSystems, highlights, closing } =
     landingPageContent;
+  const marqueeSystems: HpcSystem[] = [
+    ...hpcSystems.items,
+    ...hpcSystems.items
+  ];
 
   return (
     <main className="relative overflow-hidden bg-[#f4f6f9] dark:bg-[#0b1018]">
@@ -107,10 +107,6 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
                 >
                   {hero.headline}
                 </h1>
-              </LandingReveal>
-
-              <LandingReveal delay={0.1}>
-                <WorkspaceSignal />
               </LandingReveal>
 
               <LandingReveal delay={0.18}>
@@ -142,72 +138,137 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
             </div>
           </div>
 
-          <div className="relative mx-auto mt-6 max-w-[92rem]">
+          <div className="relative mx-auto mt-12 max-w-[86rem]">
             <div className="pointer-events-none absolute inset-x-10 bottom-0 h-20 bg-[radial-gradient(circle,rgba(15,23,42,0.14),transparent_72%)] blur-3xl dark:bg-[radial-gradient(circle,rgba(2,6,23,0.42),transparent_72%)]" />
             <div className="pointer-events-none absolute -top-10 right-[6%] h-48 w-48 rounded-full bg-sky-500/10 blur-3xl dark:bg-sky-500/10" />
 
             <LandingReveal delay={0.26}>
-              <div className="relative overflow-hidden rounded-[2.5rem] border border-white/80 bg-[linear-gradient(135deg,rgba(245,247,251,0.94),rgba(255,255,255,0.94),rgba(247,244,246,0.94))] p-4 shadow-[0_32px_90px_rgba(15,23,42,0.1)] md:p-5 dark:border-slate-800/80 dark:bg-[linear-gradient(135deg,rgba(12,18,30,0.94),rgba(16,22,34,0.94),rgba(28,14,24,0.94))] dark:shadow-[0_34px_100px_rgba(2,6,23,0.42)]">
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgba(255,255,255,0.4),transparent)] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.03),transparent)]" />
-                <div className="relative grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
+              <div className="mx-auto overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_34px_90px_rgba(15,23,42,0.12)] dark:border-slate-800 dark:bg-slate-950 dark:shadow-[0_34px_100px_rgba(0,0,0,0.42)]">
+                <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2.5 w-2.5 rounded-full bg-[#c90a37]" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-[#f39237]" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-[#0e79b2]" />
+                  </div>
+                  <p className="hidden text-xs font-semibold tracking-[0.14em] text-slate-500 uppercase sm:block dark:text-slate-400">
+                    Diamond Workspace
+                  </p>
+                </div>
+
+                <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_22rem]">
                   <LandingReveal delay={0.06}>
-                    <div className="overflow-hidden rounded-[1.7rem] border border-slate-200/80 bg-white shadow-[0_16px_40px_rgba(15,23,42,0.08)] dark:border-slate-800/80 dark:bg-slate-950 dark:shadow-none">
+                    <div className="h-full overflow-hidden bg-white dark:bg-slate-950">
                       <Image
                         src={hero.screenshot.src}
                         alt={hero.screenshot.alt}
                         width={2516}
                         height={1332}
                         priority
-                        className="h-auto w-full"
+                        sizes="(min-width: 1024px) 980px, 100vw"
+                        className="h-full min-h-[16rem] w-full object-cover object-left-top"
                       />
                     </div>
                   </LandingReveal>
 
-                  <div className="grid gap-3">
+                  <aside className="border-t border-slate-200 bg-slate-50 p-5 lg:border-t-0 lg:border-l dark:border-slate-800 dark:bg-slate-900/70">
                     <LandingReveal delay={0.1}>
-                      <p className="px-1 text-sm font-semibold tracking-[0.18em] text-slate-600 uppercase dark:text-slate-300">
+                      <p className="text-xs font-semibold tracking-[0.16em] text-slate-500 uppercase dark:text-slate-400">
                         {hero.screenshot.sideCardLabel}
                       </p>
                     </LandingReveal>
 
-                    {hero.screenshot.sideCardItems.map((item, index) => (
-                      <LandingReveal key={item} delay={0.14 + index * 0.06}>
-                        <article className="grid grid-cols-[3rem_minmax(0,1fr)] items-start gap-3 rounded-[1.6rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(244,247,251,0.94))] px-4 py-4 shadow-[0_18px_44px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-[linear-gradient(180deg,rgba(16,22,34,0.9),rgba(13,18,29,0.96))] dark:shadow-[0_18px_44px_rgba(2,6,23,0.22)]">
-                          <p className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/80 bg-[linear-gradient(180deg,#ffffff,#f8fafc)] text-[11px] font-semibold tracking-[0.18em] text-slate-500 uppercase shadow-[0_10px_22px_rgba(15,23,42,0.08)] dark:border-slate-700/80 dark:bg-[linear-gradient(180deg,rgba(30,41,59,0.92),rgba(15,23,42,0.94))] dark:text-slate-300 dark:shadow-none">
-                            0{index + 1}
-                          </p>
-                          <p className="pt-1 text-[0.98rem] leading-7 text-slate-700 dark:text-slate-200">
-                            {item}
-                          </p>
-                        </article>
-                      </LandingReveal>
-                    ))}
-                  </div>
+                    <div className="mt-4 grid gap-3">
+                      {hero.screenshot.sideCardItems.map((item, index) => (
+                        <LandingReveal key={item} delay={0.14 + index * 0.06}>
+                          <article className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950">
+                            <p className="text-xs font-semibold tracking-[0.16em] text-[#c90a37] uppercase">
+                              {['Access', 'Package', 'Launch'][index] ??
+                                `Step ${index + 1}`}
+                            </p>
+                            <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">
+                              {item}
+                            </p>
+                          </article>
+                        </LandingReveal>
+                      ))}
+                    </div>
+                  </aside>
                 </div>
               </div>
             </LandingReveal>
           </div>
         </section>
 
-        {/*<section className="mt-4 grid gap-4 md:grid-cols-3">*/}
-        {/*  {stats.map((stat, index) => (*/}
-        {/*    <LandingReveal*/}
-        {/*      key={`${stat.value}-${stat.label}`}*/}
-        {/*      delay={0.14 + index * 0.08}*/}
-        {/*    >*/}
-        {/*      <article*/}
-        {/*        className={`rounded-[1.9rem] border p-6 shadow-[0_24px_80px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-slate-800/80 dark:shadow-[0_26px_90px_rgba(2,6,23,0.32)] ${statCardStyles[index % statCardStyles.length]}`}*/}
-        {/*      >*/}
-        {/*        <p className="text-3xl font-semibold tracking-[-0.05em] text-slate-950 dark:text-slate-50">*/}
-        {/*          {stat.value}*/}
-        {/*        </p>*/}
-        {/*        <p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-300">*/}
-        {/*          {stat.detail}*/}
-        {/*        </p>*/}
-        {/*      </article>*/}
-        {/*    </LandingReveal>*/}
-        {/*  ))}*/}
-        {/*</section>*/}
+        <section className="py-8">
+          <LandingReveal delay={0.12}>
+            <div className="overflow-hidden rounded-[2rem] border border-white/80 bg-white/72 py-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/68 dark:shadow-[0_24px_80px_rgba(2,6,23,0.3)]">
+              <div className="px-5 md:px-6">
+                <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                  <div>
+                    <h2 className="text-2xl font-semibold tracking-[-0.04em] text-slate-950 md:text-3xl dark:text-slate-50">
+                      {hpcSystems.title}
+                    </h2>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-7 overflow-hidden bg-white/0 px-5 md:px-6 dark:bg-slate-950/0">
+                <div className="landing-marquee-track flex w-max gap-3">
+                  {marqueeSystems.map((system, index) => {
+                    const isDuplicate = index >= hpcSystems.items.length;
+                    const image = system.image;
+
+                    return (
+                      <article
+                        key={`${system.name}-${system.org}-${index}`}
+                        aria-hidden={isDuplicate}
+                        className={
+                          image
+                            ? 'relative h-24 min-w-60 overflow-hidden rounded-[1.35rem] border border-white/80 bg-white/86 shadow-[0_12px_30px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-900/72'
+                            : 'flex min-w-52 items-center justify-between gap-6 rounded-[1.35rem] border border-[#0e79b2]/30 bg-slate-950 px-5 py-4 shadow-[0_12px_30px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-[#0e79b2]/45 dark:bg-slate-100'
+                        }
+                      >
+                        {image ? (
+                          <>
+                            <Image
+                              src={image.src}
+                              alt={isDuplicate ? '' : image.alt}
+                              fill
+                              sizes="240px"
+                              className="object-cover"
+                            />
+                            <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-slate-950/88 via-slate-950/56 to-transparent px-4 pt-8 pb-3">
+                              <p className="text-sm leading-none font-semibold text-white drop-shadow-sm">
+                                {system.name}
+                              </p>
+                              <p className="mt-1 text-[0.68rem] leading-none font-semibold tracking-[0.14em] text-white/72 uppercase">
+                                {system.org}
+                              </p>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div>
+                              <p className="text-base font-semibold text-white dark:text-slate-950">
+                                {system.name}
+                              </p>
+                              <p className="mt-1 text-xs font-semibold tracking-[0.14em] text-sky-200 uppercase dark:text-slate-500">
+                                {system.org}
+                              </p>
+                            </div>
+                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-sky-200 dark:bg-slate-950/10 dark:text-[#0e79b2]">
+                              <Cpu className="h-5 w-5" />
+                            </span>
+                          </>
+                        )}
+                      </article>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </LandingReveal>
+        </section>
 
         <section className="grid gap-8 py-12 lg:grid-cols-[0.86fr_minmax(0,1.14fr)] lg:pt-12 lg:pb-8">
           <div className="max-w-xl space-y-6">
@@ -264,37 +325,6 @@ export function LandingPage({ isAuthenticated }: { isAuthenticated: boolean }) {
             })}
           </div>
         </section>
-
-        {/*<section className="pt-8 pb-12 lg:pt-8 lg:pb-16">*/}
-        {/*  <LandingReveal delay={0.3}>*/}
-        {/*    <div className="rounded-[2.25rem] border border-white/80 bg-white/62 p-8 shadow-[0_24px_90px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/68 dark:shadow-[0_28px_100px_rgba(2,6,23,0.34)]">*/}
-        {/*      <LandingReveal delay={0.36}>*/}
-        {/*        <h2 className="max-w-2xl text-3xl font-semibold tracking-[-0.04em] text-slate-950 dark:text-slate-50">*/}
-        {/*          {personas.title}*/}
-        {/*        </h2>*/}
-        {/*      </LandingReveal>*/}
-        {/*      <div className="mt-8 grid gap-4 md:grid-cols-3">*/}
-        {/*        {personas.items.map((persona, index) => (*/}
-        {/*          <LandingReveal*/}
-        {/*            key={persona.title}*/}
-        {/*            delay={0.42 + index * 0.08}*/}
-        {/*          >*/}
-        {/*            <article*/}
-        {/*              className={`rounded-[1.8rem] border border-white/80 p-5 shadow-[0_14px_34px_rgba(15,23,42,0.05)] dark:border-slate-800/80 dark:shadow-none ${personaCardStyles[index % personaCardStyles.length]}`}*/}
-        {/*            >*/}
-        {/*              <h3 className="text-lg font-semibold text-slate-950 dark:text-slate-50">*/}
-        {/*                {persona.title}*/}
-        {/*              </h3>*/}
-        {/*              <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-200">*/}
-        {/*                {persona.description}*/}
-        {/*              </p>*/}
-        {/*            </article>*/}
-        {/*          </LandingReveal>*/}
-        {/*        ))}*/}
-        {/*      </div>*/}
-        {/*    </div>*/}
-        {/*  </LandingReveal>*/}
-        {/*</section>*/}
 
         <section className="relative overflow-hidden rounded-[2.5rem] border border-white/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.9),rgba(244,247,251,0.92),rgba(247,244,246,0.9))] px-6 py-8 shadow-[0_30px_100px_rgba(15,23,42,0.1)] md:px-8 md:py-10 dark:border-slate-800/80 dark:bg-[linear-gradient(135deg,rgba(12,18,30,0.94),rgba(37,15,30,0.9),rgba(17,29,43,0.92))] dark:shadow-[0_30px_110px_rgba(2,6,23,0.42)]">
           <div className="pointer-events-none absolute -top-20 -right-20 h-48 w-48 rounded-full bg-[rgba(201,10,55,0.08)] blur-3xl dark:bg-[rgba(201,10,55,0.12)]" />
