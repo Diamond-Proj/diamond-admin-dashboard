@@ -8,10 +8,41 @@ import {
   Loader2,
   Copy,
   Check,
-  MessageSquare
+  MessageSquare,
+  FolderOpen,
+  Download,
+  ExternalLink,
+  RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Task } from '../../tasks.types';
+import {
+  Task,
+  TaskArtifactEntry,
+  TaskArtifactsApiResponse
+} from '../../tasks.types';
+
+const INLINE_IMAGE_EXTENSIONS = /\.(png|jpe?g|gif|webp|bmp)$/i;
+// Mirrors the backend's filename charset check and 5MB read cap; entries
+// failing either can never be served, so their links are disabled up front.
+const DOWNLOADABLE_NAME_PATTERN = /^[A-Za-z0-9._-]+$/;
+const MAX_DOWNLOAD_BYTES = 5 * 1024 * 1024;
+
+function artifactEntryBlocker(entry: TaskArtifactEntry): string | null {
+  if (!DOWNLOADABLE_NAME_PATTERN.test(entry.name)) {
+    return 'name contains unsupported characters';
+  }
+  if (entry.size !== null && entry.size > MAX_DOWNLOAD_BYTES) {
+    return 'exceeds the 5MB download limit';
+  }
+  return null;
+}
+
+function formatBytes(size: number | null): string {
+  if (size === null || Number.isNaN(size)) return '';
+  if (size < 1024) return `${size} B`;
+  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 export default function TaskItem({
   task,
@@ -27,14 +58,113 @@ export default function TaskItem({
   getStatusBadgeColor: (status: string) => string;
 }) {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [logViewer, setLogViewer] = useState<{ type: 'stdout' | 'stderr'; path: string } | null>(null);
+  const [logViewer, setLogViewer] = useState<{
+    type: 'stdout' | 'stderr';
+    path: string;
+  } | null>(null);
   const [logContent, setLogContent] = useState('');
   const [logLoading, setLogLoading] = useState(false);
   const [logError, setLogError] = useState<string | null>(null);
   const [artifactCopied, setArtifactCopied] = useState(false);
+  const [showArtifacts, setShowArtifacts] = useState(false);
+  const [artifacts, setArtifacts] = useState<TaskArtifactEntry[] | null>(null);
+  const [artifactsTruncated, setArtifactsTruncated] = useState(false);
+  const [artifactsLoading, setArtifactsLoading] = useState(false);
+  const [artifactsError, setArtifactsError] = useState<string | null>(null);
+  const [downloadingFile, setDownloadingFile] = useState<string | null>(null);
   const logPollingRef = useRef<NodeJS.Timeout | null>(null);
   const isVllmChatTask = task.task_type === 'vllm_chat';
   const isVllmChatReady = Boolean(isVllmChatTask && task.status === 'RUNNING');
+  const canBrowseArtifacts = Boolean(
+    task.artifact_path && !isVllmChatTask && task.status === 'COMPLETED'
+  );
+
+  const artifactFileUrl = (filename: string, download: boolean) => {
+    const params = new URLSearchParams({
+      task_id: task.task_id,
+      filename
+    });
+    if (download) params.set('download', '1');
+    return `/api/task_artifact_file?${params.toString()}`;
+  };
+
+  const fetchArtifacts = async () => {
+    setArtifactsLoading(true);
+    setArtifactsError(null);
+    try {
+      const params = new URLSearchParams({ task_id: task.task_id });
+      const response = await fetch(`/api/task_artifacts?${params.toString()}`, {
+        credentials: 'include'
+      });
+      let data: TaskArtifactsApiResponse | null = null;
+      try {
+        data = await response.json();
+      } catch {
+        data = null;
+      }
+      if (!response.ok || !data || data.error) {
+        throw new Error(
+          data?.error || `Failed to load output files (HTTP ${response.status})`
+        );
+      }
+      setArtifacts(data.entries ?? []);
+      setArtifactsTruncated(Boolean(data.truncated));
+    } catch (error) {
+      // Keep artifacts null so reopening the panel retries automatically.
+      setArtifacts(null);
+      setArtifactsTruncated(false);
+      setArtifactsError(
+        error instanceof Error ? error.message : 'Failed to load output files'
+      );
+    } finally {
+      setArtifactsLoading(false);
+    }
+  };
+
+  const handleToggleArtifacts = () => {
+    const next = !showArtifacts;
+    setShowArtifacts(next);
+    if (next && artifacts === null && !artifactsLoading) {
+      fetchArtifacts();
+    }
+  };
+
+  const handleDownloadFile = async (entry: TaskArtifactEntry) => {
+    setDownloadingFile(entry.name);
+    setArtifactsError(null);
+    try {
+      const response = await fetch(artifactFileUrl(entry.name, true), {
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        let message = `Failed to download ${entry.name} (HTTP ${response.status})`;
+        try {
+          const data = await response.json();
+          if (data?.error) message = String(data.error);
+        } catch {
+          // keep the HTTP status message
+        }
+        throw new Error(message);
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = entry.name;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      setArtifactsError(
+        error instanceof Error
+          ? error.message
+          : `Failed to download ${entry.name}`
+      );
+    } finally {
+      setDownloadingFile(null);
+    }
+  };
 
   const handleViewLog = (logType: 'stdout' | 'stderr') => {
     const logPath = logType === 'stdout' ? task.result : task.error;
@@ -46,7 +176,6 @@ export default function TaskItem({
     setLogContent('');
     setLogError(null);
     setLogLoading(true);
-
   };
 
   const handleCloseLogViewer = () => {
@@ -198,7 +327,10 @@ export default function TaskItem({
               </div>
             </div>
 
-            {(task.result || task.error || task.artifact_path || isVllmChatTask) && (
+            {(task.result ||
+              task.error ||
+              task.artifact_path ||
+              isVllmChatTask) && (
               <div className="border-t border-slate-200/70 pt-4 dark:border-slate-700/70">
                 <div className="space-y-3">
                   <div className="rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/50">
@@ -208,7 +340,7 @@ export default function TaskItem({
                     {task.result ? (
                       <button
                         onClick={() => handleViewLog('stdout')}
-                        className="mt-1 block w-full cursor-pointer break-all text-left text-sm text-rose-700 underline underline-offset-4 transition-colors hover:text-rose-600 dark:text-rose-200 dark:hover:text-rose-100"
+                        className="mt-1 block w-full cursor-pointer text-left text-sm break-all text-rose-700 underline underline-offset-4 transition-colors hover:text-rose-600 dark:text-rose-200 dark:hover:text-rose-100"
                         style={{ fontFamily: 'var(--font-mono)' }}
                       >
                         {task.result}
@@ -227,7 +359,7 @@ export default function TaskItem({
                     {task.error ? (
                       <button
                         onClick={() => handleViewLog('stderr')}
-                        className="mt-1 block w-full cursor-pointer break-all text-left text-sm text-rose-700 underline underline-offset-4 transition-colors hover:text-rose-600 dark:text-rose-200 dark:hover:text-rose-100"
+                        className="mt-1 block w-full cursor-pointer text-left text-sm break-all text-rose-700 underline underline-offset-4 transition-colors hover:text-rose-600 dark:text-rose-200 dark:hover:text-rose-100"
                         style={{ fontFamily: 'var(--font-mono)' }}
                       >
                         {task.error}
@@ -255,7 +387,9 @@ export default function TaskItem({
                         </span>
                         {isVllmChatReady ? (
                           <Button size="sm" asChild className="cursor-pointer">
-                            <Link href={`/tasks/vllm-chat/${encodeURIComponent(task.task_id)}`}>
+                            <Link
+                              href={`/tasks/vllm-chat/${encodeURIComponent(task.task_id)}`}
+                            >
                               <MessageSquare className="mr-1 h-3.5 w-3.5" />
                               Open Chat
                             </Link>
@@ -277,31 +411,166 @@ export default function TaskItem({
                       </span>
                       <div className="mt-1 flex items-start gap-3">
                         <span
-                          className="flex-1 break-all text-sm font-semibold text-slate-900 dark:text-slate-100"
+                          className="flex-1 text-sm font-semibold break-all text-slate-900 dark:text-slate-100"
                           style={{ fontFamily: 'var(--font-mono)' }}
                         >
                           {task.artifact_path}
                         </span>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          className="cursor-pointer"
-                          onClick={handleCopyArtifactPath}
-                        >
-                          {artifactCopied ? (
-                            <>
-                              <Check className="mr-1 h-3.5 w-3.5" />
-                              Copied
-                            </>
+                        <div className="flex shrink-0 items-center gap-2">
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            className="cursor-pointer"
+                            onClick={handleCopyArtifactPath}
+                          >
+                            {artifactCopied ? (
+                              <>
+                                <Check className="mr-1 h-3.5 w-3.5" />
+                                Copied
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="mr-1 h-3.5 w-3.5" />
+                                Copy
+                              </>
+                            )}
+                          </Button>
+                          {canBrowseArtifacts && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              className="cursor-pointer"
+                              onClick={handleToggleArtifacts}
+                            >
+                              <FolderOpen className="mr-1 h-3.5 w-3.5" />
+                              {showArtifacts ? 'Hide Files' : 'Browse Files'}
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+
+                      {canBrowseArtifacts && showArtifacts && (
+                        <div className="mt-3 rounded-lg border border-slate-200/70 bg-white p-3 dark:border-slate-700/70 dark:bg-slate-900/50">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
+                              Output Files
+                            </span>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              className="cursor-pointer"
+                              onClick={fetchArtifacts}
+                              disabled={artifactsLoading}
+                            >
+                              <RefreshCw
+                                className={`h-3.5 w-3.5 ${artifactsLoading ? 'animate-spin' : ''}`}
+                              />
+                            </Button>
+                          </div>
+                          {artifactsError && (
+                            <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                              {artifactsError}
+                            </p>
+                          )}
+                          {artifactsLoading ? (
+                            <div className="mt-2 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              Loading files from the cluster...
+                            </div>
+                          ) : artifacts === null ? null : artifacts.length ===
+                            0 ? (
+                            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                              No files found in the output directory.
+                            </p>
                           ) : (
                             <>
-                              <Copy className="mr-1 h-3.5 w-3.5" />
-                              Copy
+                              <ul className="mt-2 divide-y divide-slate-200/70 dark:divide-slate-700/70">
+                                {artifacts.map((entry) => {
+                                  const blocker = entry.is_dir
+                                    ? null
+                                    : artifactEntryBlocker(entry);
+                                  return (
+                                    <li
+                                      key={entry.name}
+                                      className="flex items-center justify-between gap-3 py-1.5"
+                                    >
+                                      <span
+                                        className="min-w-0 flex-1 truncate text-sm text-slate-900 dark:text-slate-100"
+                                        style={{
+                                          fontFamily: 'var(--font-mono)'
+                                        }}
+                                        title={entry.name}
+                                      >
+                                        {entry.name}
+                                        {entry.is_dir ? '/' : ''}
+                                      </span>
+                                      {!entry.is_dir && (
+                                        <>
+                                          <span className="shrink-0 text-xs text-slate-500 dark:text-slate-400">
+                                            {formatBytes(entry.size)}
+                                          </span>
+                                          {blocker ? (
+                                            <span className="shrink-0 text-xs text-slate-400 italic dark:text-slate-500">
+                                              {blocker}
+                                            </span>
+                                          ) : (
+                                            <span className="flex shrink-0 items-center gap-2">
+                                              {INLINE_IMAGE_EXTENSIONS.test(
+                                                entry.name
+                                              ) && (
+                                                <a
+                                                  href={artifactFileUrl(
+                                                    entry.name,
+                                                    false
+                                                  )}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  className="flex items-center gap-1 text-xs font-medium text-sky-700 hover:underline dark:text-sky-300"
+                                                >
+                                                  <ExternalLink className="h-3.5 w-3.5" />
+                                                  Open
+                                                </a>
+                                              )}
+                                              <button
+                                                type="button"
+                                                onClick={() =>
+                                                  handleDownloadFile(entry)
+                                                }
+                                                disabled={
+                                                  downloadingFile !== null
+                                                }
+                                                className="flex cursor-pointer items-center gap-1 text-xs font-medium text-slate-700 hover:underline disabled:cursor-default disabled:opacity-50 dark:text-slate-300"
+                                              >
+                                                {downloadingFile ===
+                                                entry.name ? (
+                                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                ) : (
+                                                  <Download className="h-3.5 w-3.5" />
+                                                )}
+                                                Download
+                                              </button>
+                                            </span>
+                                          )}
+                                        </>
+                                      )}
+                                    </li>
+                                  );
+                                })}
+                              </ul>
+                              {artifactsTruncated && (
+                                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                                  Only the first {artifacts.length} entries are
+                                  shown; use the artifact path to access the
+                                  rest.
+                                </p>
+                              )}
                             </>
                           )}
-                        </Button>
-                      </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -328,13 +597,15 @@ export default function TaskItem({
       {logViewer && (
         <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/50 p-4 dark:bg-black/70">
           <div className="w-full max-w-3xl rounded-2xl border border-slate-200/80 bg-[hsl(var(--dashboard-surface))] shadow-xl dark:border-slate-700/80">
-            <div className="p-6 space-y-4">
+            <div className="space-y-4 p-6">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-                    {logViewer.type === 'stdout' ? 'Stdout Log Output' : 'Stderr Log Output'}
+                    {logViewer.type === 'stdout'
+                      ? 'Stdout Log Output'
+                      : 'Stderr Log Output'}
                   </h3>
-                  <p className="mt-1 break-all text-xs text-slate-500 dark:text-slate-400">
+                  <p className="mt-1 text-xs break-all text-slate-500 dark:text-slate-400">
                     Path: {logViewer.path}
                   </p>
                 </div>
@@ -347,16 +618,18 @@ export default function TaskItem({
                   Close
                 </Button>
               </div>
-              <div className="min-h-60 max-h-[60vh] overflow-y-auto rounded-lg border border-slate-200/70 bg-slate-50/70 p-4 dark:border-slate-700/70 dark:bg-slate-800/60">
+              <div className="max-h-[60vh] min-h-60 overflow-y-auto rounded-lg border border-slate-200/70 bg-slate-50/70 p-4 dark:border-slate-700/70 dark:bg-slate-800/60">
                 {logLoading ? (
                   <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Loading log...
                   </div>
                 ) : logError ? (
-                  <p className="text-sm text-red-600 dark:text-red-400">{logError}</p>
+                  <p className="text-sm text-red-600 dark:text-red-400">
+                    {logError}
+                  </p>
                 ) : (
-                  <pre className="wrap-break-word whitespace-pre-wrap font-mono text-xs text-slate-900 dark:text-slate-100">
+                  <pre className="font-mono text-xs wrap-break-word whitespace-pre-wrap text-slate-900 dark:text-slate-100">
                     {logContent || 'Log is empty.'}
                   </pre>
                 )}
@@ -376,7 +649,9 @@ export default function TaskItem({
                 <div className="rounded-full bg-red-100 p-2 dark:bg-red-950/30">
                   <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Delete Task</h3>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                  Delete Task
+                </h3>
               </div>
 
               {/* Content */}
@@ -385,7 +660,9 @@ export default function TaskItem({
                   Are you sure you want to delete this task?
                 </p>
                 <div className="space-y-2 rounded-lg border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-700/70 dark:bg-slate-800/60">
-                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{task.task_name}</p>
+                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                    {task.task_name}
+                  </p>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
                     <span className="font-bold">Task ID:</span>{' '}
                     <span className="font-mono">{task.task_id}</span>

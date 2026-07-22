@@ -25,6 +25,16 @@ export interface TemplateCustomField {
   label?: string;
   placeholder?: string;
   required?: boolean;
+  /** Required only when the referenced field is empty (e.g. image_path unless image_upload). */
+  requiredUnless?: string;
+  /** 'file' renders an upload input; the file is stored base64-encoded under `key`
+   *  and its sanitized name under `${key}_filename`. 'number' renders a numeric
+   *  input validated as a positive integer. Defaults to a text input. */
+  type?: 'text' | 'file' | 'number';
+  /** Accept attribute for file inputs, e.g. "image/*". */
+  accept?: string;
+  /** Hint text rendered under the field. */
+  help?: string;
   optional?: Array<string | { label: string; value: string }>;
 }
 
@@ -50,6 +60,19 @@ export interface Task {
 
 export interface TasksApiResponse {
   [taskId: string]: Task;
+}
+
+export interface TaskArtifactEntry {
+  name: string;
+  is_dir: boolean;
+  size: number | null;
+}
+
+export interface TaskArtifactsApiResponse {
+  artifact_path: string;
+  entries: TaskArtifactEntry[];
+  truncated: boolean;
+  error?: string;
 }
 
 export interface Endpoint {
