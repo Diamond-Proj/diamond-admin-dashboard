@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,6 +17,13 @@ import {
 } from '../tasks.types';
 import { TASK_TEMPLATES } from '../templates';
 import { TemplateSelector } from './template-selector';
+
+// Mirrors the backend's 5MB decoded upload cap (staged over the Globus Compute
+// data plane, which inflates the payload on the wire).
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+// Mirrors the backend's task_name charset check, enforced when a task carries a
+// file upload (task_name becomes a staging-directory component).
+const UPLOAD_TASK_NAME_PATTERN = /^[A-Za-z0-9._-]+$/;
 
 interface TaskSubmissionModalProps {
   isOpen: boolean;
@@ -50,7 +57,8 @@ export function TaskSubmissionModal({
     hf_token: ''
   };
 
-  const [formData, setFormData] = useState<TaskSubmissionData>(INITIAL_FORM_DATA);
+  const [formData, setFormData] =
+    useState<TaskSubmissionData>(INITIAL_FORM_DATA);
 
   const [endpoints, setEndpoints] = useState<Endpoint[]>([]);
   const [partitions, setPartitions] = useState<string[]>([]);
@@ -87,6 +95,87 @@ export function TaskSubmissionModal({
   const activeCustomFields = activeTemplate?.customFields ?? [];
   const hiddenFields = new Set(activeTemplate?.hiddenFields ?? []);
   const isFieldHidden = (fieldKey: string) => hiddenFields.has(fieldKey);
+  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  // Monotonic token per file field. Bumped on every selection, clear, and
+  // template purge so a slow FileReader that resolves after the field was
+  // reset (or the template switched) cannot resurrect a stale upload.
+  const fileReadTokens = useRef<Record<string, number>>({});
+
+  const invalidateFileRead = (key: string) => {
+    fileReadTokens.current[key] = (fileReadTokens.current[key] ?? 0) + 1;
+    return fileReadTokens.current[key];
+  };
+
+  const resetFileFieldData = (field: TemplateCustomField) => {
+    invalidateFileRead(field.key);
+    setFormData((prev) => ({
+      ...prev,
+      [field.key]: '',
+      [`${field.key}_filename`]: ''
+    }));
+    setErrors((prev) => {
+      const next = { ...prev };
+      delete next[field.key];
+      return next;
+    });
+  };
+
+  const clearFileField = (field: TemplateCustomField) => {
+    const inputEl = fileInputRefs.current[field.key];
+    if (inputEl) inputEl.value = '';
+    resetFileFieldData(field);
+  };
+
+  const handleFileFieldChange = (
+    field: TemplateCustomField,
+    file: File | null
+  ) => {
+    // Any new selection invalidates the previously stored file (and any
+    // in-flight read), so a rejected pick can never silently submit the old one.
+    resetFileFieldData(field);
+    if (!file) return;
+    if (file.size === 0 || file.size > MAX_UPLOAD_BYTES) {
+      const inputEl = fileInputRefs.current[field.key];
+      if (inputEl) inputEl.value = '';
+      setErrors((prev) => ({
+        ...prev,
+        [field.key]:
+          file.size === 0 ? 'File is empty' : 'File must be 5MB or smaller'
+      }));
+      return;
+    }
+    const token = invalidateFileRead(field.key);
+    const reader = new FileReader();
+    reader.onload = () => {
+      // Ignore a read that lost the race to a newer selection/clear/switch.
+      if (fileReadTokens.current[field.key] !== token) return;
+      const result = String(reader.result || '');
+      const base64 = result.includes(',')
+        ? result.slice(result.indexOf(',') + 1)
+        : result;
+      const safeName = file.name.replace(/[^A-Za-z0-9._-]/g, '_');
+      setFormData((prev) => ({
+        ...prev,
+        [field.key]: base64,
+        [`${field.key}_filename`]: safeName
+      }));
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[field.key];
+        return next;
+      });
+    };
+    reader.onerror = () => {
+      if (fileReadTokens.current[field.key] !== token) return;
+      clearFileField(field);
+      setErrors((prev) => ({
+        ...prev,
+        [field.key]: 'Failed to read the selected file'
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   const resolveCustomFieldOptions = (field: TemplateCustomField) =>
     (field.optional ?? [])
       .map((option) =>
@@ -96,7 +185,20 @@ export function TaskSubmissionModal({
       )
       .filter((option) => option.value !== '');
 
+  // A file custom field also stores its filename under `${key}_filename`.
+  const customFieldKeysOf = (template?: TaskTemplate | null) =>
+    (template?.customFields ?? []).flatMap((f) =>
+      f.type === 'file' ? [f.key, `${f.key}_filename`] : [f.key]
+    );
+
   const applyTemplate = (template: TaskTemplate) => {
+    const previous = TASK_TEMPLATES.find((t) => t.id === activeTemplateId);
+    // Purge ALL of the previous template's custom-field keys, even ones the new
+    // template also declares (e.g. model_path): a value picked for one template
+    // must not silently carry into another. The new template's defaults re-seed
+    // afterward; shared keys without a default reset to empty for reselection.
+    const staleKeys = customFieldKeysOf(previous);
+    staleKeys.forEach((key) => invalidateFileRead(key));
     setActiveTemplateId(template.id);
     const hiddenFieldDefaults = Object.fromEntries(
       (template.hiddenFields ?? []).map((key) => [
@@ -104,7 +206,13 @@ export function TaskSubmissionModal({
         INITIAL_FORM_DATA[key as keyof TaskSubmissionData]
       ])
     ) as Partial<TaskSubmissionData>;
-    setFormData((prev) => ({ ...prev, ...template.defaults, ...hiddenFieldDefaults }));
+    setFormData((prev) => {
+      const next = { ...prev };
+      staleKeys.forEach((key) => {
+        delete next[key];
+      });
+      return { ...next, ...template.defaults, ...hiddenFieldDefaults };
+    });
   };
 
   const clearTemplate = () => {
@@ -116,7 +224,15 @@ export function TaskSubmissionModal({
           INITIAL_FORM_DATA[key as keyof TaskSubmissionData]
         ])
       ) as Partial<TaskSubmissionData>;
-      setFormData((prev) => ({ ...prev, ...revertedFields }));
+      const customKeys = customFieldKeysOf(active);
+      customKeys.forEach((key) => invalidateFileRead(key));
+      setFormData((prev) => {
+        const next = { ...prev, ...revertedFields };
+        customKeys.forEach((key) => {
+          delete next[key];
+        });
+        return next;
+      });
     }
     setActiveTemplateId(null);
   };
@@ -135,13 +251,15 @@ export function TaskSubmissionModal({
         }
       );
       const data = await response.json();
-      const diamondDirExists = data.diamond_dir !== null && data.diamond_dir !== undefined;
+      const diamondDirExists =
+        data.diamond_dir !== null && data.diamond_dir !== undefined;
       setHasDiamondDir(diamondDirExists);
-      
+
       if (!diamondDirExists) {
         setErrors((prev) => ({
           ...prev,
-          endpoint: 'Diamond directory not configured for this endpoint. Please configure it in settings.'
+          endpoint:
+            'Diamond directory not configured for this endpoint. Please configure it in settings.'
         }));
       } else {
         setErrors((prev) => {
@@ -320,14 +438,27 @@ export function TaskSubmissionModal({
     isLlmfluxTemplate
   ]);
 
+  const templateHasUpload = activeCustomFields.some((f) => f.type === 'file');
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.taskName.trim()) newErrors.taskName = 'Task name is required';
+    if (!formData.taskName.trim()) {
+      newErrors.taskName = 'Task name is required';
+    } else if (
+      templateHasUpload &&
+      !UPLOAD_TASK_NAME_PATTERN.test(formData.taskName.trim())
+    ) {
+      // Matches the backend rule: task_name is a staging-directory component
+      // when the task carries an upload.
+      newErrors.taskName =
+        "For tasks with an uploaded file, the task name can only contain letters, numbers, '.', '-', '_'";
+    }
     if (!formData.endpoint) {
       newErrors.endpoint = 'Endpoint is required';
     } else if (!hasDiamondDir) {
-      newErrors.endpoint = 'Diamond directory not configured for this endpoint. Please configure it in settings.';
+      newErrors.endpoint =
+        'Diamond directory not configured for this endpoint. Please configure it in settings.';
     }
     if (!formData.partition) newErrors.partition = 'Partition is required';
     if (!formData.account.trim()) newErrors.account = 'Account is required';
@@ -349,7 +480,11 @@ export function TaskSubmissionModal({
         newErrors.batch_size = 'Batch size must be at least 1';
       }
     } else {
-      if (!isFieldHidden('container') && !hasCustomSubmitTemplate && !formData.container) {
+      if (
+        !isFieldHidden('container') &&
+        !hasCustomSubmitTemplate &&
+        !formData.container
+      ) {
         newErrors.container = 'Container is required';
       }
       if (!isFieldHidden('time_duration') && !formData.time_duration) {
@@ -358,10 +493,29 @@ export function TaskSubmissionModal({
     }
 
     activeCustomFields.forEach((field) => {
-      if (!field.required) return;
-      const value = formData[field.key];
-      if (!String(value ?? '').trim()) {
+      const value = String(formData[field.key] ?? '').trim();
+      if (field.required && !value) {
         newErrors[field.key] = `${field.label || field.key} is required`;
+        return;
+      }
+      if (field.type === 'number' && value) {
+        const parsed = Number(value);
+        if (!Number.isInteger(parsed) || parsed < 1) {
+          newErrors[field.key] =
+            `${field.label || field.key} must be a whole number of at least 1`;
+          return;
+        }
+      }
+      if (field.requiredUnless && !value) {
+        const other = String(formData[field.requiredUnless] ?? '').trim();
+        if (!other) {
+          const otherField = activeCustomFields.find(
+            (f) => f.key === field.requiredUnless
+          );
+          newErrors[field.key] = `Provide ${field.label || field.key} or ${
+            otherField?.label || field.requiredUnless
+          }`;
+        }
       }
     });
 
@@ -402,7 +556,9 @@ export function TaskSubmissionModal({
               container: isFieldHidden('container')
                 ? undefined
                 : formData.container || undefined,
-              task: isFieldHidden('task') ? undefined : formData.task || undefined,
+              task: isFieldHidden('task')
+                ? undefined
+                : formData.task || undefined,
               num_of_nodes: isFieldHidden('num_of_nodes')
                 ? undefined
                 : formData.num_of_nodes,
@@ -434,10 +590,23 @@ export function TaskSubmissionModal({
         onSuccess();
         resetForm();
       } else {
-        const errorData = await response
-          .json()
-          .catch(() => ({ error: 'Failed to submit task' }));
-        setErrors({ submit: errorData.error || 'Failed to submit task' });
+        let submitError = `Failed to submit task (HTTP ${response.status})`;
+        let backendError: string | null = null;
+        try {
+          const errorData = await response.json();
+          if (errorData?.error) backendError = String(errorData.error);
+        } catch {
+          // Non-JSON body — likely a gateway/proxy error page.
+        }
+        if (backendError) {
+          submitError = backendError;
+        } else if (response.status === 502 || response.status === 504) {
+          submitError =
+            'The gateway timed out while waiting for the submission. The task ' +
+            'may still have been submitted in the background — refresh the ' +
+            'task list before submitting again.';
+        }
+        setErrors({ submit: submitError });
       }
     } catch (error) {
       setErrors({ submit: `Failed to submit task: ${error}` });
@@ -554,7 +723,9 @@ export function TaskSubmissionModal({
                     }}
                     placeholder="Select an online, managed endpoint"
                     loading={loading.endpoints}
-                    className={errors.endpoint || !hasDiamondDir ? 'border-red-500' : ''}
+                    className={
+                      errors.endpoint || !hasDiamondDir ? 'border-red-500' : ''
+                    }
                   />
                 </div>
                 {errors.endpoint && (
@@ -623,7 +794,10 @@ export function TaskSubmissionModal({
                           options={containers}
                           selected={formData.container}
                           onSelect={(value) =>
-                            setFormData((prev) => ({ ...prev, container: value }))
+                            setFormData((prev) => ({
+                              ...prev,
+                              container: value
+                            }))
                           }
                           placeholder="Select container"
                           loading={loading.containers}
@@ -757,7 +931,10 @@ export function TaskSubmissionModal({
                       <Textarea
                         value={formData.task}
                         onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, task: e.target.value }))
+                          setFormData((prev) => ({
+                            ...prev,
+                            task: e.target.value
+                          }))
                         }
                         placeholder="Enter command to run inside the container"
                         className="mt-1"
@@ -768,9 +945,9 @@ export function TaskSubmissionModal({
                 </>
               ) : (
                 <>
-                  <div className="rounded-lg border border-sky-200 bg-sky-50 p-3 text-sm text-sky-900 dark:border-sky-900/60 dark:bg-sky-950/30 dark:text-sky-100 md:col-span-2">
-                    LLMFlux manages its own runtime image and will build a container in
-                    your endpoint `diamond_work_dir` when needed.
+                  <div className="rounded-lg border border-sky-200 bg-sky-50 p-3 text-sm text-sky-900 md:col-span-2 dark:border-sky-900/60 dark:bg-sky-950/30 dark:text-sky-100">
+                    LLMFlux manages its own runtime image and will build a
+                    container in your endpoint `diamond_work_dir` when needed.
                   </div>
 
                   {/* Input Path */}
@@ -866,7 +1043,9 @@ export function TaskSubmissionModal({
                       {`Hint: Model name should be a valid Hugging Face model repo name (e.g. "Qwen2.5-3B-Instruct").`}
                     </p>
                     {errors.model && (
-                      <p className="mt-1 text-sm text-red-600">{errors.model}</p>
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.model}
+                      </p>
                     )}
                   </div>
 
@@ -883,13 +1062,15 @@ export function TaskSubmissionModal({
                           engine: e.target.value as 'vllm' | 'ollama'
                         }))
                       }
-                      className={`mt-1 h-10 w-full rounded-md border bg-background px-3 text-sm ${errors.engine ? 'border-red-500' : 'border-input'}`}
+                      className={`bg-background mt-1 h-10 w-full rounded-md border px-3 text-sm ${errors.engine ? 'border-red-500' : 'border-input'}`}
                     >
                       <option value="vllm">vllm</option>
                       <option value="ollama">ollama</option>
                     </select>
                     {errors.engine && (
-                      <p className="mt-1 text-sm text-red-600">{errors.engine}</p>
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.engine}
+                      </p>
                     )}
                   </div>
 
@@ -943,7 +1124,7 @@ export function TaskSubmissionModal({
               )}
 
               {activeCustomFields.length > 0 && (
-                <div className="md:col-span-2 rounded-xl border border-slate-200 bg-slate-50/70 p-4 dark:border-slate-700 dark:bg-slate-900/40">
+                <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4 md:col-span-2 dark:border-slate-700 dark:bg-slate-900/40">
                   <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
                     Template Custom Fields
                   </p>
@@ -957,34 +1138,82 @@ export function TaskSubmissionModal({
                             {field.label || field.key}
                             {field.required ? ' *' : ''}
                           </label>
-                          {fieldOptions.length > 0 ? (
-                            <select
-                              value={String(formData[field.key] ?? '')}
-                              onChange={(e) =>
-                                setFormData((prev) => ({
-                                  ...prev,
-                                  [field.key]: e.target.value
-                                }))
-                              }
-                              className={`mt-1 h-10 w-full rounded-md border bg-background px-3 text-sm ${
-                                errors[field.key] ? 'border-red-500' : 'border-input'
-                              }`}
-                            >
-                              <option value="">
-                                {field.placeholder || `Select ${field.label || field.key}`}
-                              </option>
-                              {fieldOptions.map((option) => (
-                                <option
-                                  key={`${field.key}-${option.value}`}
-                                  value={option.value}
-                                >
-                                  {option.label}
-                                </option>
-                              ))}
-                            </select>
+                          {field.type === 'file' ? (
+                            <>
+                              <input
+                                ref={(el) => {
+                                  fileInputRefs.current[field.key] = el;
+                                }}
+                                type="file"
+                                accept={field.accept}
+                                onChange={(e) =>
+                                  handleFileFieldChange(
+                                    field,
+                                    e.target.files?.[0] ?? null
+                                  )
+                                }
+                                className="mt-1 block w-full cursor-pointer text-sm text-slate-600 file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-slate-900 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-slate-800 dark:text-slate-300 dark:file:bg-slate-100 dark:file:text-slate-900 dark:hover:file:bg-slate-200"
+                              />
+                              {String(
+                                formData[`${field.key}_filename`] ?? ''
+                              ) && (
+                                <div className="mt-1 flex items-center gap-2">
+                                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                                    Selected:{' '}
+                                    {String(formData[`${field.key}_filename`])}
+                                  </p>
+                                  <button
+                                    type="button"
+                                    onClick={() => clearFileField(field)}
+                                    className="cursor-pointer text-xs font-medium text-red-600 hover:underline dark:text-red-400"
+                                  >
+                                    Remove
+                                  </button>
+                                </div>
+                              )}
+                            </>
+                          ) : fieldOptions.length > 0 ? (
+                            <div className="mt-1">
+                              <VirtualSelect
+                                options={fieldOptions.map(
+                                  (option) => option.label
+                                )}
+                                selected={(() => {
+                                  const current = String(
+                                    formData[field.key] ?? ''
+                                  );
+                                  const match = fieldOptions.find(
+                                    (option) => option.value === current
+                                  );
+                                  return match ? match.label : current;
+                                })()}
+                                onSelect={(selectedLabel) => {
+                                  const match = fieldOptions.find(
+                                    (option) => option.label === selectedLabel
+                                  );
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    [field.key]: match
+                                      ? match.value
+                                      : selectedLabel
+                                  }));
+                                }}
+                                placeholder={
+                                  field.placeholder ||
+                                  `Select ${field.label || field.key}`
+                                }
+                                allowCustomInput
+                                searchPlaceholder="Search or enter a custom value"
+                                className={
+                                  errors[field.key] ? 'border-red-500' : ''
+                                }
+                              />
+                            </div>
                           ) : (
                             <Input
-                              type="text"
+                              type={field.type === 'number' ? 'number' : 'text'}
+                              min={field.type === 'number' ? 1 : undefined}
+                              step={field.type === 'number' ? 1 : undefined}
                               value={String(formData[field.key] ?? '')}
                               onChange={(e) =>
                                 setFormData((prev) => ({
@@ -993,10 +1222,16 @@ export function TaskSubmissionModal({
                                 }))
                               }
                               placeholder={
-                                field.placeholder || `Enter ${field.label || field.key}`
+                                field.placeholder ||
+                                `Enter ${field.label || field.key}`
                               }
                               className={`mt-1 ${errors[field.key] ? 'border-red-500' : ''}`}
                             />
+                          )}
+                          {field.help && (
+                            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                              {field.help}
+                            </p>
                           )}
                           {errors[field.key] && (
                             <p className="mt-1 text-sm text-red-600">
