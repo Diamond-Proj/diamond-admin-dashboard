@@ -67,16 +67,18 @@ export default function TaskItem({
   const [logLoading, setLogLoading] = useState(false);
   const [logError, setLogError] = useState<string | null>(null);
   const [artifactCopied, setArtifactCopied] = useState(false);
-  const [showArtifacts, setShowArtifacts] = useState(false);
-  const [artifacts, setArtifacts] = useState<TaskOutputEntry[] | null>(null);
-  const [artifactsTruncated, setArtifactsTruncated] = useState(false);
-  const [artifactsLoading, setArtifactsLoading] = useState(false);
-  const [artifactsError, setArtifactsError] = useState<string | null>(null);
+  const [showOutputFiles, setShowOutputFiles] = useState(false);
+  const [outputFiles, setOutputFiles] = useState<TaskOutputEntry[] | null>(
+    null
+  );
+  const [outputFilesTruncated, setOutputFilesTruncated] = useState(false);
+  const [outputFilesLoading, setOutputFilesLoading] = useState(false);
+  const [outputFilesError, setOutputFilesError] = useState<string | null>(null);
   const [downloadingFile, setDownloadingFile] = useState<string | null>(null);
   const logPollingRef = useRef<NodeJS.Timeout | null>(null);
   const isVllmChatTask = task.task_type === 'vllm_chat';
   const isVllmChatReady = Boolean(isVllmChatTask && task.status === 'RUNNING');
-  const canBrowseArtifacts = Boolean(
+  const canBrowseOutputFiles = Boolean(
     task.artifact_path && !isVllmChatTask && task.status === 'COMPLETED'
   );
 
@@ -89,9 +91,9 @@ export default function TaskItem({
     return `/api/task_output_file?${params.toString()}`;
   };
 
-  const fetchArtifacts = async () => {
-    setArtifactsLoading(true);
-    setArtifactsError(null);
+  const fetchOutputFiles = async () => {
+    setOutputFilesLoading(true);
+    setOutputFilesError(null);
     try {
       const params = new URLSearchParams({ task_id: task.task_id });
       const response = await fetch(
@@ -111,31 +113,31 @@ export default function TaskItem({
           data?.error || `Failed to load output files (HTTP ${response.status})`
         );
       }
-      setArtifacts(data.entries ?? []);
-      setArtifactsTruncated(Boolean(data.truncated));
+      setOutputFiles(data.entries ?? []);
+      setOutputFilesTruncated(Boolean(data.truncated));
     } catch (error) {
-      // Keep artifacts null so reopening the panel retries automatically.
-      setArtifacts(null);
-      setArtifactsTruncated(false);
-      setArtifactsError(
+      // Keep outputFiles null so reopening the panel retries automatically.
+      setOutputFiles(null);
+      setOutputFilesTruncated(false);
+      setOutputFilesError(
         error instanceof Error ? error.message : 'Failed to load output files'
       );
     } finally {
-      setArtifactsLoading(false);
+      setOutputFilesLoading(false);
     }
   };
 
-  const handleToggleArtifacts = () => {
-    const next = !showArtifacts;
-    setShowArtifacts(next);
-    if (next && artifacts === null && !artifactsLoading) {
-      fetchArtifacts();
+  const handleToggleOutputFiles = () => {
+    const next = !showOutputFiles;
+    setShowOutputFiles(next);
+    if (next && outputFiles === null && !outputFilesLoading) {
+      fetchOutputFiles();
     }
   };
 
   const handleDownloadFile = async (entry: TaskOutputEntry) => {
     setDownloadingFile(entry.name);
-    setArtifactsError(null);
+    setOutputFilesError(null);
     try {
       const response = await fetch(outputFileUrl(entry.name, true), {
         credentials: 'include'
@@ -160,7 +162,7 @@ export default function TaskItem({
       link.remove();
       URL.revokeObjectURL(url);
     } catch (error) {
-      setArtifactsError(
+      setOutputFilesError(
         error instanceof Error
           ? error.message
           : `Failed to download ${entry.name}`
@@ -440,22 +442,22 @@ export default function TaskItem({
                               </>
                             )}
                           </Button>
-                          {canBrowseArtifacts && (
+                          {canBrowseOutputFiles && (
                             <Button
                               type="button"
                               size="sm"
                               variant="outline"
                               className="cursor-pointer"
-                              onClick={handleToggleArtifacts}
+                              onClick={handleToggleOutputFiles}
                             >
                               <FolderOpen className="mr-1 h-3.5 w-3.5" />
-                              {showArtifacts ? 'Hide Files' : 'Browse Files'}
+                              {showOutputFiles ? 'Hide Files' : 'Browse Files'}
                             </Button>
                           )}
                         </div>
                       </div>
 
-                      {canBrowseArtifacts && showArtifacts && (
+                      {canBrowseOutputFiles && showOutputFiles && (
                         <div className="mt-3 rounded-lg border border-slate-200/70 bg-white p-3 dark:border-slate-700/70 dark:bg-slate-900/50">
                           <div className="flex items-center justify-between">
                             <span className="text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
@@ -466,33 +468,33 @@ export default function TaskItem({
                               size="sm"
                               variant="ghost"
                               className="cursor-pointer"
-                              onClick={fetchArtifacts}
-                              disabled={artifactsLoading}
+                              onClick={fetchOutputFiles}
+                              disabled={outputFilesLoading}
                             >
                               <RefreshCw
-                                className={`h-3.5 w-3.5 ${artifactsLoading ? 'animate-spin' : ''}`}
+                                className={`h-3.5 w-3.5 ${outputFilesLoading ? 'animate-spin' : ''}`}
                               />
                             </Button>
                           </div>
-                          {artifactsError && (
+                          {outputFilesError && (
                             <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                              {artifactsError}
+                              {outputFilesError}
                             </p>
                           )}
-                          {artifactsLoading ? (
+                          {outputFilesLoading ? (
                             <div className="mt-2 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
                               <Loader2 className="h-4 w-4 animate-spin" />
                               Loading files from the cluster...
                             </div>
-                          ) : artifacts === null ? null : artifacts.length ===
-                            0 ? (
+                          ) : outputFiles ===
+                            null ? null : outputFiles.length === 0 ? (
                             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
                               No files found in the output directory.
                             </p>
                           ) : (
                             <>
                               <ul className="mt-2 divide-y divide-slate-200/70 dark:divide-slate-700/70">
-                                {artifacts.map((entry) => {
+                                {outputFiles.map((entry) => {
                                   const blocker = entry.is_dir
                                     ? null
                                     : outputEntryBlocker(entry);
@@ -564,10 +566,10 @@ export default function TaskItem({
                                   );
                                 })}
                               </ul>
-                              {artifactsTruncated && (
+                              {outputFilesTruncated && (
                                 <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                                  Only the first {artifacts.length} entries are
-                                  shown; use the artifact path to access the
+                                  Only the first {outputFiles.length} entries
+                                  are shown; use the artifact path to access the
                                   rest.
                                 </p>
                               )}

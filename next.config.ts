@@ -7,7 +7,11 @@ const nextConfig: NextConfig = {
     // file upload performs two sequential Globus Compute round trips (staging
     // + sbatch), which routinely exceeds 30s and made the proxy return a 504
     // while the backend went on to submit the task successfully.
-    proxyTimeout: 180_000
+    //
+    // Capped at 120s to match Vercel's proxied-request timeout ceiling
+    // (https://vercel.com/docs/limits#proxied-request-timeout); a larger value
+    // would be silently truncated to 120s in production, so keep them aligned.
+    proxyTimeout: 120_000
   },
   images: {
     remotePatterns: [
