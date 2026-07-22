@@ -3,10 +3,12 @@ import { Dataset, DatasetMetadata, DisplayDataset } from './datasets.types';
 export function transformDataset(dataset: Dataset): DisplayDataset {
   let metadata: DatasetMetadata = {};
 
-  try {
-    metadata = JSON.parse(dataset.dataset_metadata);
-  } catch (error) {
-    console.warn('Failed to parse dataset metadata:', error);
+  if (dataset.dataset_metadata) {
+    try {
+      metadata = JSON.parse(dataset.dataset_metadata) ?? {};
+    } catch (error) {
+      console.warn('Failed to parse dataset metadata:', error);
+    }
   }
 
   return {
