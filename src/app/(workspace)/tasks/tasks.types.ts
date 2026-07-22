@@ -62,15 +62,15 @@ export interface TasksApiResponse {
   [taskId: string]: Task;
 }
 
-export interface TaskArtifactEntry {
+export interface TaskOutputEntry {
   name: string;
   is_dir: boolean;
   size: number | null;
 }
 
-export interface TaskArtifactsApiResponse {
+export interface TaskOutputFilesApiResponse {
   artifact_path: string;
-  entries: TaskArtifactEntry[];
+  entries: TaskOutputEntry[];
   truncated: boolean;
   error?: string;
 }
