@@ -17,13 +17,11 @@ import {
 } from '../tasks.types';
 import { TASK_TEMPLATES } from '../templates';
 import { TemplateSelector } from './template-selector';
+import { isSafePathComponent, sanitizePathComponent } from '@/lib/utils';
 
 // Mirrors the backend's 5MB decoded upload cap (staged over the Globus Compute
 // data plane, which inflates the payload on the wire).
 const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
-// Mirrors the backend's task_name charset check, enforced when a task carries a
-// file upload (task_name becomes a staging-directory component).
-const UPLOAD_TASK_NAME_PATTERN = /^[A-Za-z0-9._-]+$/;
 
 interface TaskSubmissionModalProps {
   isOpen: boolean;
@@ -153,7 +151,7 @@ export function TaskSubmissionModal({
       const base64 = result.includes(',')
         ? result.slice(result.indexOf(',') + 1)
         : result;
-      const safeName = file.name.replace(/[^A-Za-z0-9._-]/g, '_');
+      const safeName = sanitizePathComponent(file.name);
       setFormData((prev) => ({
         ...prev,
         [field.key]: base64,
@@ -447,7 +445,7 @@ export function TaskSubmissionModal({
       newErrors.taskName = 'Task name is required';
     } else if (
       templateHasUpload &&
-      !UPLOAD_TASK_NAME_PATTERN.test(formData.taskName.trim())
+      !isSafePathComponent(formData.taskName.trim())
     ) {
       // Matches the backend rule: task_name is a staging-directory component
       // when the task carries an upload.

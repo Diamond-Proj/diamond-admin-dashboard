@@ -15,20 +15,21 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { isSafePathComponent } from '@/lib/utils';
 import {
   Task,
-  TaskArtifactEntry,
-  TaskArtifactsApiResponse
+  TaskOutputEntry,
+  TaskOutputFilesApiResponse
 } from '../../tasks.types';
 
 const INLINE_IMAGE_EXTENSIONS = /\.(png|jpe?g|gif|webp|bmp)$/i;
-// Mirrors the backend's filename charset check and 5MB read cap; entries
-// failing either can never be served, so their links are disabled up front.
-const DOWNLOADABLE_NAME_PATTERN = /^[A-Za-z0-9._-]+$/;
+// Mirrors the backend's 5MB read cap; entries whose name fails the shared
+// safe-name check or exceed this size can never be served, so their links are
+// disabled up front.
 const MAX_DOWNLOAD_BYTES = 5 * 1024 * 1024;
 
-function artifactEntryBlocker(entry: TaskArtifactEntry): string | null {
-  if (!DOWNLOADABLE_NAME_PATTERN.test(entry.name)) {
+function outputEntryBlocker(entry: TaskOutputEntry): string | null {
+  if (!isSafePathComponent(entry.name)) {
     return 'name contains unsupported characters';
   }
   if (entry.size !== null && entry.size > MAX_DOWNLOAD_BYTES) {
@@ -67,7 +68,7 @@ export default function TaskItem({
   const [logError, setLogError] = useState<string | null>(null);
   const [artifactCopied, setArtifactCopied] = useState(false);
   const [showArtifacts, setShowArtifacts] = useState(false);
-  const [artifacts, setArtifacts] = useState<TaskArtifactEntry[] | null>(null);
+  const [artifacts, setArtifacts] = useState<TaskOutputEntry[] | null>(null);
   const [artifactsTruncated, setArtifactsTruncated] = useState(false);
   const [artifactsLoading, setArtifactsLoading] = useState(false);
   const [artifactsError, setArtifactsError] = useState<string | null>(null);
@@ -79,13 +80,13 @@ export default function TaskItem({
     task.artifact_path && !isVllmChatTask && task.status === 'COMPLETED'
   );
 
-  const artifactFileUrl = (filename: string, download: boolean) => {
+  const outputFileUrl = (filename: string, download: boolean) => {
     const params = new URLSearchParams({
       task_id: task.task_id,
       filename
     });
     if (download) params.set('download', '1');
-    return `/api/task_artifact_file?${params.toString()}`;
+    return `/api/task_output_file?${params.toString()}`;
   };
 
   const fetchArtifacts = async () => {
@@ -93,10 +94,13 @@ export default function TaskItem({
     setArtifactsError(null);
     try {
       const params = new URLSearchParams({ task_id: task.task_id });
-      const response = await fetch(`/api/task_artifacts?${params.toString()}`, {
-        credentials: 'include'
-      });
-      let data: TaskArtifactsApiResponse | null = null;
+      const response = await fetch(
+        `/api/task_output_files?${params.toString()}`,
+        {
+          credentials: 'include'
+        }
+      );
+      let data: TaskOutputFilesApiResponse | null = null;
       try {
         data = await response.json();
       } catch {
@@ -129,11 +133,11 @@ export default function TaskItem({
     }
   };
 
-  const handleDownloadFile = async (entry: TaskArtifactEntry) => {
+  const handleDownloadFile = async (entry: TaskOutputEntry) => {
     setDownloadingFile(entry.name);
     setArtifactsError(null);
     try {
-      const response = await fetch(artifactFileUrl(entry.name, true), {
+      const response = await fetch(outputFileUrl(entry.name, true), {
         credentials: 'include'
       });
       if (!response.ok) {
@@ -491,7 +495,7 @@ export default function TaskItem({
                                 {artifacts.map((entry) => {
                                   const blocker = entry.is_dir
                                     ? null
-                                    : artifactEntryBlocker(entry);
+                                    : outputEntryBlocker(entry);
                                   return (
                                     <li
                                       key={entry.name}
@@ -522,7 +526,7 @@ export default function TaskItem({
                                                 entry.name
                                               ) && (
                                                 <a
-                                                  href={artifactFileUrl(
+                                                  href={outputFileUrl(
                                                     entry.name,
                                                     false
                                                   )}
