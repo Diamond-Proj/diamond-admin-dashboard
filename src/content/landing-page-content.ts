@@ -93,7 +93,7 @@ export const landingPageContent = {
       'Diamond brings together your HPC allocations, runtime environments, datasets, and task launch in one workspace.',
     supportPanel: {
       points: [
-        'Operators can keep readiness, images, and submissions in view together.',
+        'Operators can track system status, container builds, and job submissions from a single screen.',
         'Researchers get a shorter path from infrastructure to first run.',
         'Shared teams can standardize workflows without losing operational context.'
       ]
