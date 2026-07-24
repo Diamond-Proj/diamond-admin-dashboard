@@ -118,7 +118,7 @@ export default function DashboardPage() {
                 </>
               ) : (
                 <>
-                  {isInitialized ? 'Welcome back,' : 'Welcome'}{' '}
+                  {isInitialized ? 'Welcome back,' : 'Welcome,'}{' '}
                   {user.name.split(' ')[0] || 'Researcher'}
                 </>
               )}
