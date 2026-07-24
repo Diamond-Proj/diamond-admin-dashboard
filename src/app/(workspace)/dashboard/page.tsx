@@ -65,7 +65,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const checkAndUpdateProfile = async () => {
       if (!user.primaryIdentity) {
-        setIsInitialized(true);
+        // Keep heading in loading state until the auth session resolves an identity.
         return;
       }
 
