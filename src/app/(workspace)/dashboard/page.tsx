@@ -74,7 +74,7 @@ export default function DashboardPage() {
           identity_id: user.primaryIdentity
         });
 
-        setIsInitialized(profile.profile?.is_initialized ?? true);
+        setIsInitialized(profile.profile?.is_initialized ?? false);
 
         if (
           !profile.profile ||
