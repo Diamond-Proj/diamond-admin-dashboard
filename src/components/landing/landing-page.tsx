@@ -1,6 +1,5 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Lora, Plus_Jakarta_Sans } from 'next/font/google';
 import {
   ArrowRight,
   Cpu,
@@ -14,16 +13,6 @@ import { Logo } from '@/components/icons';
 import { LandingHeader } from '@/components/landing/landing-header';
 import { LandingReveal } from '@/components/landing/landing-reveal';
 import { landingPageContent } from '@/content/landing-page-content';
-
-const landingDisplayFont = Lora({
-  subsets: ['latin'],
-  display: 'swap'
-});
-
-const landingBodyFont = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  display: 'swap'
-});
 
 const highlightIcons = {
   cpu: Cpu,
@@ -96,14 +85,12 @@ export function LandingPage() {
       <LandingHeader header={header} />
 
       <div className="relative z-10 container pt-28 pb-8 md:pt-32 md:pb-10">
-        <section className={`${landingBodyFont.className} px-1 py-6 lg:py-10`}>
+        <section className="px-1 py-6 lg:py-10">
           <div className="relative mx-auto max-w-4xl px-2 text-center">
             <div className="pointer-events-none absolute -top-12 left-[10%] h-36 w-36 rounded-full bg-[rgba(201,10,55,0.07)] blur-3xl dark:bg-[rgba(201,10,55,0.1)]" />
             <div className="relative">
               <LandingReveal>
-                <h1
-                  className={`${landingDisplayFont.className} text-[2.15rem] leading-[1.14] font-medium tracking-[-0.045em] text-slate-950 md:text-[3.7rem] dark:text-slate-50`}
-                >
+                <h1 className="text-[2.15rem] leading-[1.14] font-medium tracking-[-0.045em] text-slate-950 md:text-[3.7rem] dark:text-slate-50">
                   {hero.headline}
                 </h1>
               </LandingReveal>
