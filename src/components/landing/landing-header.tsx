@@ -40,11 +40,9 @@ function PrimaryHeaderCta({ href, label }: { href: string; label: string }) {
 }
 
 export function LandingHeader({
-  header,
-  isAuthenticated
+  header
 }: {
   header: LandingPageContent['header'];
-  isAuthenticated: boolean;
 }) {
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollY = useRef(0);
@@ -80,9 +78,9 @@ export function LandingHeader({
       }`}
     >
       <div className="container py-4">
-        <div className="mx-auto flex max-w-[1240px] items-center justify-between gap-4 rounded-[1.75rem] border border-white/70 bg-white/64 px-4 py-3 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-2xl md:px-5 dark:border-slate-800/80 dark:bg-slate-950/72 dark:shadow-[0_28px_90px_rgba(2,6,23,0.4)]">
+        <div className="mx-auto flex max-w-[1240px] items-center justify-between gap-4 rounded-xl border border-white/70 bg-white/64 px-4 py-3 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-2xl md:px-5 dark:border-slate-800/80 dark:bg-slate-950/72 dark:shadow-[0_28px_90px_rgba(2,6,23,0.4)]">
           <div className="flex min-w-0 items-center gap-3">
-            <div className="rounded-2xl border border-white/80 bg-white/78 p-1.5 shadow-[0_8px_24px_rgba(15,23,42,0.08)] dark:border-slate-800/80 dark:bg-slate-900/86 dark:shadow-none">
+            <div className="rounded-lg border border-white/80 bg-white/78 p-1.5 shadow-[0_8px_24px_rgba(15,23,42,0.08)] dark:border-slate-800/80 dark:bg-slate-900/86 dark:shadow-none">
               <Logo width={42} height={42} className="shrink-0" />
             </div>
             <div className="min-w-0">
@@ -101,20 +99,10 @@ export function LandingHeader({
               label={header.docsLabel}
               external
             />
-            {!isAuthenticated ? (
-              <HeaderActionLink
-                href={header.signInHref}
-                label={header.signInLabel}
-              />
-            ) : null}
             <ThemeToggle triggerClassName="rounded-full border-white/80 bg-white/72 shadow-[0_8px_22px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:border-slate-700/80 dark:bg-slate-950/68 dark:shadow-[0_14px_30px_rgba(2,6,23,0.24)]" />
             <PrimaryHeaderCta
               href={header.primaryCta.href}
-              label={
-                isAuthenticated
-                  ? header.primaryCta.authenticatedLabel
-                  : header.primaryCta.label
-              }
+              label={header.primaryCta.label}
             />
           </div>
         </div>
