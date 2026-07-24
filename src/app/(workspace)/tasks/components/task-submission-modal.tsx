@@ -89,7 +89,6 @@ export function TaskSubmissionModal({
   const activeTemplate = TASK_TEMPLATES.find((t) => t.id === activeTemplateId);
   const isLlmfluxTemplate =
     activeTemplate?.submissionEndpoint === '/api/launch_llmflux';
-  const hasCustomSubmitTemplate = Boolean(activeTemplate?.taskTemplate);
   const activeCustomFields = activeTemplate?.customFields ?? [];
   const hiddenFields = new Set(activeTemplate?.hiddenFields ?? []);
   const isFieldHidden = (fieldKey: string) => hiddenFields.has(fieldKey);
@@ -478,11 +477,7 @@ export function TaskSubmissionModal({
         newErrors.batch_size = 'Batch size must be at least 1';
       }
     } else {
-      if (
-        !isFieldHidden('container') &&
-        !hasCustomSubmitTemplate &&
-        !formData.container
-      ) {
+      if (!isFieldHidden('container') && !formData.container) {
         newErrors.container = 'Container is required';
       }
       if (!isFieldHidden('time_duration') && !formData.time_duration) {
@@ -785,7 +780,7 @@ export function TaskSubmissionModal({
                   {!isFieldHidden('container') && (
                     <div>
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                        Container{hasCustomSubmitTemplate ? '' : ' *'}
+                        Container *
                       </label>
                       <div className="mt-1">
                         <VirtualSelect
