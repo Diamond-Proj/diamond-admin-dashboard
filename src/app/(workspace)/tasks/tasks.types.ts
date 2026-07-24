@@ -112,7 +112,7 @@ export interface Dataset {
   public: boolean;
   machine_name: string;
   dataset_name: string;
-  dataset_metadata: string;
+  dataset_metadata: string | null;
 }
 
 export interface DatasetsApiResponse {
