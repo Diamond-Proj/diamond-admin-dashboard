@@ -65,7 +65,7 @@ test.describe('Authenticated UI regression', () => {
     await page.goto('/dashboard');
 
     await expect(
-      page.getByRole('heading', { name: /^Welcome Test$/i })
+      page.getByRole('heading', { name: /^Welcome, Test$/i })
     ).toBeVisible();
   });
 
