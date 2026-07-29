@@ -10,6 +10,10 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, PanelLeftClose, PanelLeftOpen, X } from 'lucide-react';
 
+import {
+  ApiErrorMonitor,
+  ApiErrorMonitorTrigger
+} from '@/components/api-error-monitor';
 import { Logo } from '@/components/icons';
 import { AuthStatus } from '@/components/auth-status';
 import { DocsButton } from '@/components/docs-button';
@@ -190,6 +194,7 @@ export function AppShell({
               </div>
 
               <div className="flex items-center gap-3">
+                <ApiErrorMonitorTrigger />
                 <DocsButton />
                 <ThemeToggle />
                 <AuthStatus session={session} isLoading={isLoading} />
@@ -251,6 +256,7 @@ export function AppShell({
         </div>
 
         <Toaster />
+        <ApiErrorMonitor />
         <EndpointOnboarding
           isAuthenticated={session.isAuthenticated}
           primaryIdentity={session.userInfo?.id}
