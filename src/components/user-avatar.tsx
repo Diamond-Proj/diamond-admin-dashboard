@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Cpu, LogOut, UserCircle2 } from 'lucide-react';
+import { Cpu, LogOut, UserCircle2, UserRound } from 'lucide-react';
 
 import { toast } from '@/components/ui/use-toast';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -20,15 +20,6 @@ export function UserAvatar({ userInfo }: { userInfo: UserInfo | null }) {
   const userName = userInfo?.name || 'User';
   const userEmail = userInfo?.email || '';
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-
-  const initials = (() => {
-    if (!userName || userName === 'User') return 'U';
-    const parts = userName.split(' ');
-    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-    return (
-      parts[0].charAt(0) + parts[parts.length - 1].charAt(0)
-    ).toUpperCase();
-  })();
 
   const handleLogout = async () => {
     try {
@@ -62,8 +53,8 @@ export function UserAvatar({ userInfo }: { userInfo: UserInfo | null }) {
           aria-label="Open account menu"
         >
           <Avatar className="h-9 w-9">
-            <AvatarFallback className="bg-primary/15 text-primary text-[11px] font-semibold">
-              {initials}
+            <AvatarFallback className="bg-primary/15 text-primary">
+              <UserRound className="h-4.5 w-4.5" aria-hidden="true" />
             </AvatarFallback>
           </Avatar>
         </button>

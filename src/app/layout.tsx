@@ -29,6 +29,16 @@ const monoFont = IBM_Plex_Mono({
   variable: '--font-mono'
 });
 
+const desktopNavInitScript = `
+  (() => {
+    try {
+      document.documentElement.dataset.desktopNavCollapsed = String(
+        localStorage.getItem('diamond:desktop-nav-collapsed') === 'true'
+      );
+    } catch {}
+  })();
+`;
+
 export default async function RootLayout({
   children
 }: {
@@ -39,6 +49,10 @@ export default async function RootLayout({
       <body
         className={`${displayFont.variable} ${bodyFont.variable} ${monoFont.variable} overflow-x-hidden antialiased`}
       >
+        <script
+          id="desktop-nav-init"
+          dangerouslySetInnerHTML={{ __html: desktopNavInitScript }}
+        />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

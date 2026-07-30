@@ -28,23 +28,27 @@ export function NavItem({
 
   return (
     <Link
+      data-desktop-nav-item
       href={href}
       className={`group relative mx-2 my-1 flex min-h-11 items-center rounded-xl border py-2.5 text-sm font-medium transition-all duration-200 active:scale-[0.99] ${
         compact ? 'justify-center px-0' : 'px-4'
       } ${
         isActive
-          ? 'border-primary/35 bg-primary/10 text-primary shadow-sm ring-1 ring-primary/20 dark:bg-primary/15'
+          ? 'border-primary/35 bg-primary/10 text-primary ring-primary/20 dark:bg-primary/15 shadow-sm ring-1'
           : 'border-transparent text-slate-600 hover:border-slate-300/80 hover:bg-slate-100/90 hover:text-slate-900 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-700/45 dark:hover:text-slate-100'
       }`}
       title={compact ? label : undefined}
     >
       <span
-        className={`absolute left-0 top-2 bottom-2 w-1 rounded-r-full transition-opacity ${
-          isActive ? 'bg-primary opacity-100' : 'opacity-0 group-hover:opacity-55'
+        className={`absolute top-2 bottom-2 left-0 w-1 rounded-r-full transition-opacity ${
+          isActive
+            ? 'bg-primary opacity-100'
+            : 'opacity-0 group-hover:opacity-55'
         }`}
       />
       <span
-        className={`flex items-center  ${
+        data-desktop-nav-item-content
+        className={`flex items-center ${
           compact ? 'justify-center' : 'w-full gap-3'
         }`}
       >
@@ -56,7 +60,8 @@ export function NavItem({
           {icon}
         </span>
         <span
-          className={`overflow-hidden whitespace-nowrap text-sm transition-[max-width,opacity] duration-300 ease-out ${
+          data-desktop-nav-item-label
+          className={`overflow-hidden text-sm whitespace-nowrap transition-[max-width,opacity] duration-300 ease-out ${
             compact ? 'max-w-0 opacity-0' : 'max-w-35 opacity-100'
           }`}
         >

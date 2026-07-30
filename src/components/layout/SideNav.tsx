@@ -24,6 +24,7 @@ export function SideNav({ compact = false }: { compact?: boolean }) {
   return (
     <nav className="flex h-full min-h-0 flex-col px-2 text-sm font-medium">
       <p
+        data-desktop-nav-section-label
         className={`overflow-hidden px-3 text-[11px] font-semibold tracking-[0.12em] whitespace-nowrap text-slate-500 uppercase transition-[max-height,opacity,padding,margin] duration-300 ease-out dark:text-slate-400 ${
           compact
             ? 'mb-0 max-h-0 pb-0 opacity-0'
@@ -56,6 +57,7 @@ export function SideNav({ compact = false }: { compact?: boolean }) {
       <div className="my-4 border-t border-slate-200/70 dark:border-slate-700/70" />
 
       <p
+        data-desktop-nav-section-label
         className={`overflow-hidden px-3 text-[11px] font-semibold tracking-[0.12em] whitespace-nowrap text-slate-500 uppercase transition-[max-height,opacity,padding,margin] duration-300 ease-out dark:text-slate-400 ${
           compact
             ? 'mb-0 max-h-0 pb-0 opacity-0'
