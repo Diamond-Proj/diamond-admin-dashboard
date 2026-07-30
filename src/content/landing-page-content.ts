@@ -8,12 +8,9 @@ export const landingPageContent = {
     label: 'Unified operations for research compute',
     docsHref: 'https://docs.diamondhpc.ai',
     docsLabel: 'Docs',
-    signInHref: '/sign-in',
-    signInLabel: 'Sign in',
     primaryCta: {
       href: '/dashboard',
-      label: 'Open workspace',
-      authenticatedLabel: 'Go to workspace'
+      label: 'Open workspace'
     }
   },
   hero: {
@@ -25,19 +22,12 @@ export const landingPageContent = {
       sideCardItems: [
         'Leverage your HPC allocations (e.g. NSF ACCESS)',
         'Train and fine-tune models for specific applications',
-        'Serve those models on managed endpoints'
+        'Serve those models from your HPC systems'
       ]
     },
     primaryCta: {
       label: 'Open workspace',
-      authenticatedLabel: 'Return to workspace',
       href: '/dashboard'
-    },
-    secondaryCta: {
-      label: 'Sign in',
-      authenticatedLabel: 'Read the docs',
-      href: '/sign-in',
-      authenticatedHref: 'https://docs.diamondhpc.ai'
     }
   },
   hpcSystems: {
@@ -100,10 +90,10 @@ export const landingPageContent = {
   highlights: {
     title: 'Core workflows in one place',
     description:
-      'Diamond keeps endpoint setup, runtime packaging, datasets, and task launch in one workspace.',
+      'Diamond brings together your HPC allocations, runtime environments, datasets, and task launch in one workspace.',
     supportPanel: {
       points: [
-        'Operators can keep readiness, images, and submissions in view together.',
+        'Operators can track system status, container builds, and job submissions from a single screen.',
         'Researchers get a shorter path from infrastructure to first run.',
         'Shared teams can standardize workflows without losing operational context.'
       ]
@@ -119,7 +109,7 @@ export const landingPageContent = {
         icon: 'layers',
         title: 'Build images',
         description:
-          'Launch container builds so runtime environments stay tied to the endpoints and jobs that use them.'
+          'Launch container builds so runtime environments stay tied to the systems and jobs that use them.'
       },
       {
         icon: 'database',
@@ -131,17 +121,16 @@ export const landingPageContent = {
         icon: 'rocket',
         title: 'Launch tasks',
         description:
-          'Submit work against active managed endpoints with reusable task templates.'
+          'Submit work against active HPC systems with reusable task templates.'
       }
     ]
   },
   closing: {
     title: 'Run the workflow in Diamond.',
     description:
-      'Bring endpoints online, prepare runtime environments, register datasets, and launch reusable tasks from one interface.',
+      'Connect your HPC systems, prepare runtime environments, register datasets, and launch reusable tasks from one interface.',
     primaryCta: {
       label: 'Open workspace',
-      authenticatedLabel: 'Return to workspace',
       href: '/dashboard'
     },
     secondaryCta: {

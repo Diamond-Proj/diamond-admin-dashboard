@@ -28,6 +28,7 @@ export function NavItem({
 
   return (
     <Link
+      data-desktop-nav-item
       href={href}
       data-onboarding-target={href === '/endpoints' ? 'endpoints' : undefined}
       className={`group relative mx-2 my-1 flex min-h-11 items-center rounded-xl border py-2.5 text-sm font-medium transition-all duration-200 active:scale-[0.99] ${
@@ -47,6 +48,7 @@ export function NavItem({
         }`}
       />
       <span
+        data-desktop-nav-item-content
         className={`flex items-center ${
           compact ? 'justify-center' : 'w-full gap-3'
         }`}
@@ -59,6 +61,7 @@ export function NavItem({
           {icon}
         </span>
         <span
+          data-desktop-nav-item-label
           className={`overflow-hidden text-sm whitespace-nowrap transition-[max-width,opacity] duration-300 ease-out ${
             compact ? 'max-w-0 opacity-0' : 'max-w-35 opacity-100'
           }`}
