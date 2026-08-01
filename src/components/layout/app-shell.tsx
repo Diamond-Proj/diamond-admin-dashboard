@@ -3,6 +3,7 @@
 import {
   type CSSProperties,
   type ReactNode,
+  useCallback,
   useState,
   useSyncExternalStore
 } from 'react';
@@ -99,6 +100,11 @@ export function AppShell({
   const currentTitle =
     routeTitles.find((item) => item.match(pathname))?.title ||
     getFallbackTitle(pathname);
+  const openNavigationForOnboarding = useCallback(() => {
+    if (window.innerWidth < 1024) {
+      setMobileNavOpen(true);
+    }
+  }, []);
 
   const toggleDesktopNav = () => {
     const nextCollapsed = !desktopNavCollapsed;
@@ -260,6 +266,7 @@ export function AppShell({
         <EndpointOnboarding
           isAuthenticated={session.isAuthenticated}
           primaryIdentity={session.userInfo?.id}
+          onOpenNavigation={openNavigationForOnboarding}
         />
       </div>
     </AuthSessionProvider>

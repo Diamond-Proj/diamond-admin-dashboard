@@ -64,6 +64,7 @@ export function EndpointTabs({ activeTab, onTabChange }: EndpointTabsProps) {
         </button>
         <button
           type="button"
+          data-onboarding-target="available-endpoints"
           onClick={() => onTabChange('available')}
           onKeyDown={(event) => handleTabKeyDown(event, 'available')}
           role="tab"
