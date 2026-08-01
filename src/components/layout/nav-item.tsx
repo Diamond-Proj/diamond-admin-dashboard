@@ -30,6 +30,7 @@ export function NavItem({
     <Link
       data-desktop-nav-item
       href={href}
+      data-onboarding-target={href === '/endpoints' ? 'endpoints' : undefined}
       className={`group relative mx-2 my-1 flex min-h-11 items-center rounded-xl border py-2.5 text-sm font-medium transition-all duration-200 active:scale-[0.99] ${
         compact ? 'justify-center px-0' : 'px-4'
       } ${
