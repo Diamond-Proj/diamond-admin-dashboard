@@ -70,7 +70,8 @@ function CtaLink({
 }
 
 export function LandingPage() {
-  const { header, hero, hpcSystems, highlights, closing } = landingPageContent;
+  const { header, hero, hpcSystems, highlights, closing, funding } =
+    landingPageContent;
   const marqueeSystems: HpcSystem[] = [
     ...hpcSystems.items,
     ...hpcSystems.items
@@ -356,6 +357,37 @@ export function LandingPage() {
             <p className="text-xs text-slate-400 dark:text-slate-500">
               &copy; {new Date().getFullYear()} Diamond HPC
             </p>
+          </div>
+
+          <div className="mt-6 flex flex-col items-center gap-3 border-t border-slate-200/70 pt-5 lg:flex-row lg:justify-between dark:border-slate-800/70">
+            <p className="text-center text-xs leading-5 text-slate-400 lg:text-left dark:text-slate-500">
+              {funding.acknowledgement}
+            </p>
+
+            <ul
+              aria-label="NSF awards"
+              className="flex flex-wrap items-center justify-center gap-2 lg:justify-end"
+            >
+              {funding.awards.map((award) => (
+                <li key={award.number} className="leading-none">
+                  <Link
+                    href={award.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`View NSF Award ${award.number}`}
+                    className="inline-flex rounded-sm opacity-80 transition-[opacity,transform] duration-200 hover:-translate-y-px hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0e79b2]"
+                  >
+                    <Image
+                      src={award.badgeSrc}
+                      alt={`NSF Award ${award.number}`}
+                      width={104}
+                      height={20}
+                      unoptimized
+                    />
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </footer>
