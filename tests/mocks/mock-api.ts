@@ -224,6 +224,60 @@ export async function mockDatasetsApi(page: Page) {
   });
 }
 
+export async function mockArtifactsApi(page: Page) {
+  await mockCommonApi(page);
+  const artifacts = [
+    {
+      id: 'a1111111-1111-4111-8111-111111111111',
+      machine_name: 'Anvil@RCAC',
+      identity_id: 'test-user-identity',
+      public: false,
+      collection_uuid: 'collection-artifact-private',
+      globus_path: '/globus/models/diamond-7b',
+      system_path: '/scratch/models/diamond-7b',
+      artifact_name: 'Diamond 7B checkpoint',
+      artifact_type: 'model',
+      artifact_metadata: '{"format":"safetensors"}',
+      description: 'Fine-tuned checkpoint from the July training run',
+      creation_date: '2026-07-12T00:00:00',
+      param_size: '7B',
+      architecture: 'Transformer'
+    },
+    {
+      id: 'a2222222-2222-4222-8222-222222222222',
+      machine_name: 'Delta@NCSA',
+      identity_id: 'another-user',
+      public: true,
+      collection_uuid: 'collection-artifact-public',
+      globus_path: '/globus/containers/pytorch.sif',
+      system_path: '/scratch/containers/pytorch.sif',
+      artifact_name: 'PyTorch research runtime',
+      artifact_type: 'container',
+      artifact_metadata: null,
+      description: 'Shared GPU runtime for reproducible experiments',
+      creation_date: '2026-07-10T00:00:00',
+      base_image: 'pytorch/pytorch:2.7.1-cuda12.8',
+      container_type: 'apptainer'
+    }
+  ];
+  await page.route('**/api/artifacts', async (route) => {
+    await json(route, { artifacts });
+  });
+  await page.route('**/api/artifact/**', async (route) => {
+    await json(route, {
+      message: 'Artifact updated successfully',
+      artifact: artifacts[0]
+    });
+  });
+  await page.route('**/api/artifact', async (route) => {
+    await json(
+      route,
+      { message: 'Artifact registered successfully', artifact: artifacts[0] },
+      201
+    );
+  });
+}
+
 export async function mockImagesApi(page: Page) {
   await mockCommonApi(page);
   await mockEndpointInventoryApi(page);

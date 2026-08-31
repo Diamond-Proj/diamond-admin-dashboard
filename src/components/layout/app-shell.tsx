@@ -31,6 +31,10 @@ const routeTitles = [
   { match: (path: string) => path.startsWith('/sign-in'), title: 'Sign In' },
   { match: (path: string) => path.startsWith('/images'), title: 'Images' },
   { match: (path: string) => path.startsWith('/datasets'), title: 'Datasets' },
+  {
+    match: (path: string) => path.startsWith('/artifacts'),
+    title: 'Artifacts'
+  },
   { match: (path: string) => path.startsWith('/tasks'), title: 'Tasks' },
   {
     match: (path: string) => path.startsWith('/endpoints'),

@@ -1,7 +1,7 @@
 'use client';
 
 import { DashboardIcon, PersonIcon } from '@radix-ui/react-icons';
-import { Container, Cpu, Database } from 'lucide-react';
+import { Box, Container, Cpu, Database } from 'lucide-react';
 
 import { TaskIcon } from '@/components/icons';
 
@@ -11,6 +11,7 @@ const workspaceLinks = [
   { href: '/dashboard', label: 'Dashboard', Icon: DashboardIcon },
   { href: '/images', label: 'Images', Icon: Container },
   { href: '/datasets', label: 'Datasets', Icon: Database },
+  { href: '/artifacts', label: 'Artifacts', Icon: Box },
   { href: '/tasks', label: 'Tasks', Icon: TaskIcon }
 ];
 
